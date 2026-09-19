@@ -59,7 +59,11 @@ done
 [[ "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" == 35 ]]
 [[ "$(adb shell getprop ro.product.cpu.abi | tr -d '\r')" == x86_64 ]]
 echo 'Engineering evidence target: API 35 / x86_64 / debug / Google APIs emulator'
-./gradlew --no-daemon :app:connectedDebugAndroidTest
+test_status=0
+./gradlew --no-daemon :app:connectedDebugAndroidTest || test_status=$?
+# Only the test's allowlisted booleans/categories and process IDs are emitted.
+adb logcat -d -v raw PD_PR4:I '*:S'
+[[ "$test_status" == 0 ]] || exit "$test_status"
 # Fail if runner/task wiring silently stops discovering tests.
 python3 - <<'PY'
 import pathlib

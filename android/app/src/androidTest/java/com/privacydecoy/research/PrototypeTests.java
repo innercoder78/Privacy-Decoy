@@ -151,13 +151,13 @@ public final class PrototypeTests {
             }
             check(Arrays.asList("same-uid", "denied-or-failed", "timeout").contains(result.getString("subprocess")), "subprocess UID escaped");
             // Only explicitly allowlisted, sanitized observations enter test reports.
-            Bundle evidence = new Bundle();
-            evidence.putString("stream", "OBSERVATION GAP buildEqualsHost=" + result.getBoolean("buildEqualsHost")
+            String evidence = "OBSERVATION GAP managerPid=" + Process.myPid() + " managerUid=" + Process.myUid()
+                + " buildEqualsHost=" + result.getBoolean("buildEqualsHost")
                 + " contextExposesManagement=" + result.getBoolean("contextExposesManagement")
                 + " settings=" + result.getString("settings") + " settingsEqualsHost=" + result.getBoolean("settingsEqualsHost")
                 + " platformPackage=" + result.getString("platformPackage") + " activityService=" + result.getString("activityService")
-                + " subprocess=" + result.getString("subprocess") + " nativeStatus=" + Arrays.toString(result.getIntArray("native")) + "\n");
-            instrumentation.sendStatus(2, evidence);
+                + " subprocess=" + result.getString("subprocess") + " nativeStatus=" + Arrays.toString(result.getIntArray("native"));
+            android.util.Log.i("PD_PR4", evidence);
         });
     }
     private interface Check { void run(ResearchSession session, Bundle result) throws Exception; }
