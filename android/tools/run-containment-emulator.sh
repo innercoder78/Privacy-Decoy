@@ -28,9 +28,11 @@ for _ in $(seq 1 120); do
     # Startup diagnostics only; never dump raw emulator logs/host metadata.
     python3 - <<'PY'
 import pathlib
-log = pathlib.Path('app/build/reports/containment/emulator.log').read_text(errors='replace').lower()
+import re
+raw = pathlib.Path('app/build/reports/containment/emulator.log').read_text(errors='replace')
+log = raw.lower()
 categories = {
-    'insufficient-disk-space': ['not enough disk space', 'insufficient disk', 'no space left'],
+    'insufficient-disk-space': ['not enough disk space', 'not enough space', 'insufficient disk', 'no space left'],
     'missing-library': ['error while loading shared libraries', 'cannot open shared object'],
     'gpu-startup-failed': ['failed to initialize opengl', 'invalid gpu', 'vulkan initialization failed'],
     'acceleration-unavailable': ['kvm is not installed', 'kvm permission denied', 'requires hardware acceleration'],
@@ -39,6 +41,14 @@ categories = {
 }
 found = [name for name, patterns in categories.items() if any(p in log for p in patterns)]
 print('Emulator exited before boot: ' + ', '.join(found or ['unclassified-startup-failure']))
+for line in raw.splitlines():
+    if not re.search(r'\b(ERROR|FATAL|PANIC)\b|error:', line, re.I):
+        continue
+    if re.search(r'fingerprint|serial|uuid|token|secret|android_id|property', line, re.I):
+        continue
+    line = re.sub(r'/[^\s,;)]*', '<path>', line)
+    line = re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b|\b[0-9a-fA-F]{8,}\b', '<redacted>', line)
+    print('Sanitized startup error: ' + line[:400])
 PY
     exit 1
   fi
