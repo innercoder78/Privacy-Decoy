@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "PrivacyDecoy"
 include(":app")
+include(":probe-app", ":research-native")

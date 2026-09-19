@@ -8,13 +8,21 @@ roadmap's **PR 6 feasibility gate**. Privacy takes precedence over compatibility
 ## Current status
 
 This repository contains the PR 1 development foundation, PR 2 clean Android
-project layout, and PR 3 security/design evidence. **Privacy containment and
+project layout, PR 3 security/design evidence, and the PR 4 adversarial research
+harness. **Privacy containment and
 spoofing are not implemented or verified.** There is no protected-app execution,
 virtualization, Decoy Persona, VPN enforcement, or verified privacy/security
 boundary. Version `0.1.0-dev` (version code 1) is a development identifier; this
 work does not represent a public or production release. PR 3's analysis is not
 protection and selects no production containment engine. PR 6 remains the
 mandatory feasibility/STOP gate.
+
+PR 4 builds a controlled, uninstalled probe APK and a debug-only isolated-service
+experiment. Artifact-derived DEX execution is not full Android app execution.
+The harness investigates UID/storage isolation, Binder authority, native syscalls,
+host-state leakage and missing lifecycle semantics; it is not a functioning
+privacy container. See the [scoped evidence and validation status](docs/evidence/pr4-containment-prototype.md).
+Never use this prototype with ordinary protected apps, private data, or accounts.
 
 The production design goal requires no root, Magisk, Xposed, LSPosed, custom ROM,
 or ordinary dependence on ADB. Privacy Decoy itself must not use Android
@@ -30,6 +38,8 @@ Prerequisites:
 - `ANDROID_HOME` pointing to the SDK, or an untracked `android/local.properties`
   containing `sdk.dir=/path/to/android-sdk`.
 - Network access for the initial build-tool/dependency downloads.
+- Official Android NDK `27.2.12479018` and CMake `3.22.1` for research probes.
+  CI installs these exact SDK packages; no compiled native library is committed.
 
 The committed wrapper uses Gradle 9.6.0. Android Gradle Plugin 9.4.0 supplies
 built-in Kotlin support. Both `compileSdk` and `targetSdk` are 37.
@@ -49,18 +59,23 @@ cd android
 
 On Windows PowerShell, first run `Set-Location android`, then use
 `.\gradlew.bat` in place of `./gradlew`.
-The unit-test task and JUnit infrastructure are available; there are currently
-no pure-Kotlin components warranting tests, so the task may report `NO-SOURCE`.
-This does not constitute security testing. Lint errors fail the build without
+The debug unit tests exercise the research session state machine. Device tests
+run with `./gradlew :app:connectedDebugAndroidTest` on a controlled emulator;
+`bash tools/run-containment-emulator.sh` creates a disposable API 35 x86_64 AVD
+after its official system image is installed. The generated probe APK is a test
+asset and must **not** be installed. Lint errors fail the build without
 a baseline. The debug APK is generated under `app/build/outputs/apk/debug/`
 and must not be committed. Debug builds use ordinary development signing;
 there is no production signing configuration.
 
 ## Foundation defaults and limits
 
-The application requests no permissions and declares only its launcher Activity.
+The release/main application requests no permissions and declares only its launcher Activity.
 It has no networking, telemetry, services, receivers, providers, or privacy
 runtime. Cleartext application traffic and application backup are disabled.
+The debug manifest adds a non-exported isolated research service and one fixed
+probe-package visibility query. Research native code is a debug-only dependency.
+MainActivity and the release manifest do not expose the prototype.
 API 31+ data-extraction rules explicitly exclude every documented app storage
 domain from cloud backup and device transfer. Legacy full backup is also
 disabled; the current minimum SDK does not support Android 11 or earlier.
