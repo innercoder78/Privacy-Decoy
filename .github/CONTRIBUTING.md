@@ -1,7 +1,8 @@
 # Development guidance
 
 Keep pull requests cohesive, small enough to review, and limited to their roadmap
-scope. PR 1 establishes the Android foundation only.
+scope. PR 1 established the Android foundation; PR 2 established the clean-root
+layout; PR 3 records requirements and research but implements no protection.
 
 - Never commit credentials, tokens, signing keys, keystores, passwords, or other
   secrets. Keep local SDK configuration and environment files untracked.
@@ -15,8 +16,12 @@ scope. PR 1 establishes the Android foundation only.
 - Run the README build, lint, and unit-test commands. Add focused tests with
   relevant behavior changes; do not manufacture production abstractions for tests.
   Do not hide lint errors in a baseline.
-- Maintain the [requirements scaffold](../docs/requirements.md) as requirements
-  evolve. PR 3 owns the comprehensive register, threat model, and engine assessment.
+- Maintain stable IDs in the [requirements register](../docs/requirements.md) and
+  trace changes to the [threat model](../docs/threat-model.md), tests, and evidence.
+  The [engine assessment](../docs/engine-assessment.md), [platform
+  matrix](../docs/platform-support.md), and [ADR](../docs/decisions/ADR-0001-engine-prototype-direction.md)
+  define the research handoff. PR 4 and PR 5 produce containment and networking
+  evidence; PR 6 is the mandatory feasibility STOP decision.
 
 ## Repository layout
 
