@@ -121,9 +121,13 @@ coverage, and a coherent spoofed surface do not prove containment.
 - **License/source availability:** public source is visible. **SOURCE CLAIM:** the
   README says MIT; **CODE/REPOSITORY OBSERVATION:** there is no root LICENSE file,
   so the grant and coverage must be resolved before reuse.
-- **Capabilities:** **SOURCE CLAIM:** Android 9–16, root not required with limited
-  functionality, PackageManager/ActivityManager/service interception, native C/C++
-  PLT/GOT hooking, device spoofing, and a `QUERY_ALL_PACKAGES` requirement.
+- **Capabilities:** **SOURCE CLAIM:** the README headline claims Android 9–16 but
+  labels that range SDK 28–35, while its detailed list ends at Android 15/API 35.
+  Android 16 is API 36, so Android 16/API 36 support is internally inconsistent
+  and **UNKNOWN / REQUIRES PROTOTYPE**. The README also claims root-free operation
+  with limited functionality, PackageManager/ActivityManager/service interception,
+  native C/C++ PLT/GOT hooking, device spoofing, and a `QUERY_ALL_PACKAGES`
+  requirement.
 - **Maintenance/maturity:** the recent ref establishes activity, not maturity. Its
   small/new public footprint increases provenance, review-depth, bus-factor and
   test-evidence risk, but does not alone reject it.
@@ -150,11 +154,12 @@ separately from any current Play-distributed product behavior or closed changes.
 
 **Insular.** Owner secure-system; the canonical project is
 [GitLab secure-system/Insular](https://gitlab.com/secure-system/Insular), not a
-GitHub mirror. **SOURCE CLAIM:** it is based on/forked from Island.
-**CODE/REPOSITORY OBSERVATION:** canonical history was visible through 2025,
-including a 2025-07-31 commit and v6.4.2-era tags. Exact current head and license
-at the assessment cutoff require recording before code reuse. GitHub mirrors such
-as `proletarius101/Insular` are noncanonical and stale relative to GitLab.
+GitHub mirror. Its default branch is `dev-ci`; the latest visible commit is
+`d46911c9`, dated 2025-07-31, with v6.4.2-era releases/tags. The canonical source
+is available and its root LICENSE is Apache-2.0. **SOURCE CLAIM:** the project is
+based on/forked from Island. GitHub mirrors such as `proletarius101/Insular` are
+noncanonical and stale relative to GitLab. The license and recent activity do not
+establish Privacy Decoy suitability or close the work-profile mediation gaps.
 
 **Family analysis:** Android documents managed-profile isolation and policy APIs.
 These projects offer valuable OS-enforced storage/account/package separation and
