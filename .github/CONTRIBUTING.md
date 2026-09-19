@@ -18,6 +18,28 @@ scope. PR 1 establishes the Android foundation only.
 - Maintain the [requirements scaffold](../docs/requirements.md) as requirements
   evolve. PR 3 owns the comprehensive register, threat model, and engine assessment.
 
+## Repository layout
+
+Keep the repository root deliberately clean:
+
+```text
+Privacy-Decoy/
+├── .github/
+├── android/
+├── docs/
+├── .editorconfig
+├── .gitattributes
+├── .gitignore
+└── README.md
+```
+
+Android-specific source, Gradle files, wrappers, configuration, and tooling belong
+under `android/`. Project documentation belongs under the root-level `docs/`
+directory. Repository-wide files such as `README.md`, `.gitignore`,
+`.gitattributes`, and `.editorconfig` may remain at the root. Future pull requests
+must not add root-level files unless they genuinely apply to the repository as a
+whole.
+
 Use JDK 17 and run the committed wrapper from `android/`. To regenerate it
 with trusted Gradle 9.6.0, run the following from `android/`:
 
