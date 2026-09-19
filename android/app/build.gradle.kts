@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.privacydecoy.app"
-        // Initial build baseline only; PR 2 will investigate supported platforms.
+        // Initial build baseline only; PR 3 will investigate supported platforms.
         minSdk = 31
         targetSdk = 37
         versionCode = 1

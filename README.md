@@ -3,7 +3,7 @@
 Privacy Decoy is a planned **Android-only, root-free privacy container/mediation
 project**. The intended product would mediate applications' access to sensitive
 device information. Technical feasibility remains subject to the canonical
-roadmap's **PR 5 feasibility gate**. Privacy takes precedence over compatibility.
+roadmap's **PR 6 feasibility gate**. Privacy takes precedence over compatibility.
 
 ## Current status
 
@@ -25,26 +25,28 @@ Prerequisites:
 - JDK 17, with `JAVA_HOME` set.
 - Android SDK command-line tools and SDK Platform 37 (package
   `platforms;android-37.0`), plus Build Tools 36.0.0.
-- `ANDROID_HOME` pointing to the SDK, or an untracked `local.properties`
+- `ANDROID_HOME` pointing to the SDK, or an untracked `android/local.properties`
   containing `sdk.dir=/path/to/android-sdk`.
 - Network access for the initial build-tool/dependency downloads.
 
 The committed wrapper uses Gradle 9.6.0. Android Gradle Plugin 9.4.0 supplies
 built-in Kotlin support. Both `compileSdk` and `targetSdk` are 37.
 **`minSdk = 31` is a provisional initial build baseline, not a final supported
-platform commitment.** PR 2 owns the Android/OEM/ABI feasibility investigation
+platform commitment.** PR 3 owns the Android/OEM/ABI feasibility investigation
 and may change it based on evidence.
 
-From the repository root:
+The Android project lives in `android/`. From the repository root:
 
 ```sh
+cd android
 ./gradlew --version
 ./gradlew lintDebug
 ./gradlew testDebugUnitTest
 ./gradlew assembleDebug
 ```
 
-On Windows PowerShell, use `.\gradlew.bat` in place of `./gradlew`.
+On Windows PowerShell, first run `Set-Location android`, then use
+`.\gradlew.bat` in place of `./gradlew`.
 The unit-test task and JUnit infrastructure are available; there are currently
 no pure-Kotlin components warranting tests, so the task may report `NO-SOURCE`.
 This does not constitute security testing. Lint errors fail the build without
@@ -70,5 +72,5 @@ cross-platform transfer counterpart is configured for this Android-only app.
 
 See [Android backup semantics](https://developer.android.com/identity/data/autobackup),
 [AGP compatibility](https://developer.android.com/build/releases/agp-9-4-0-release-notes),
-[development guidance](CONTRIBUTING.md), and the minimal
+[development guidance](.github/CONTRIBUTING.md), and the minimal
 [requirements-register scaffold](docs/requirements.md).
