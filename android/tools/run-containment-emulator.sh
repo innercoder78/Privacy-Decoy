@@ -8,15 +8,33 @@ echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --force
   --name "$avd" --package 'system-images;android-35;google_apis;x86_64' --device pixel_2
 mkdir -p app/build/reports/containment
 "$ANDROID_HOME/emulator/emulator" -avd "$avd" -port 5554 -no-window -no-audio \
-  -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect \
+  -no-boot-anim -no-snapshot -wipe-data -gpu software -memory 2048 -cores 2 -partition-size 2048 \
   >app/build/reports/containment/emulator.log 2>&1 &
 emulator_pid=$!
 trap 'adb -s emulator-5554 emu kill >/dev/null 2>&1 || true; kill "$emulator_pid" 2>/dev/null || true' EXIT
 export ANDROID_SERIAL=emulator-5554
-timeout 180 adb wait-for-device
+adb start-server
 booted=false
 for _ in $(seq 1 120); do
-  if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then booted=true; break; fi
+  if ! kill -0 "$emulator_pid" 2>/dev/null; then
+    # Startup diagnostics only; never dump raw emulator logs/host metadata.
+    python3 - <<'PY'
+import pathlib
+log = pathlib.Path('app/build/reports/containment/emulator.log').read_text(errors='replace').lower()
+categories = {
+    'insufficient-disk-space': ['not enough disk space', 'insufficient disk', 'no space left'],
+    'missing-library': ['error while loading shared libraries', 'cannot open shared object'],
+    'gpu-startup-failed': ['failed to initialize opengl', 'invalid gpu', 'vulkan initialization failed'],
+    'acceleration-unavailable': ['kvm is not installed', 'kvm permission denied', 'requires hardware acceleration'],
+    'avd-or-image-missing': ['unknown avd name', 'cannot find avd', 'broken avd system path'],
+    'avd-path-conflict': ['running multiple emulators with the same avd'],
+}
+found = [name for name, patterns in categories.items() if any(p in log for p in patterns)]
+print('Emulator exited before boot: ' + ', '.join(found or ['unclassified-startup-failure']))
+PY
+    exit 1
+  fi
+  if [[ "$(timeout 3 adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)" == 1 ]]; then booted=true; break; fi
   sleep 2
 done
 [[ "$booted" == true ]] || { echo 'Emulator boot timed out'; exit 1; }
