@@ -51,6 +51,9 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
           "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+      - name: Free space for the disposable Android userdata image
+        # Hosted runners include a large unused .NET SDK. Android tests need its disk space.
+        run: sudo rm -rf -- /usr/share/dotnet
       - name: Enable KVM for the runner
         run: sudo chmod a+rw /dev/kvm
       - name: Run controlled containment instrumentation
