@@ -19,5 +19,12 @@ final class Wire {
             return reply.readBundle(Wire.class.getClassLoader());
         } finally { data.recycle(); reply.recycle(); }
     }
+    static void simulateUnexpectedDeath(IBinder binder) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(TOKEN); data.writeBundle(new Bundle());
+            if (!binder.transact(KILL, data, null, IBinder.FLAG_ONEWAY)) throw new RemoteException("Death injection failed");
+        } finally { data.recycle(); }
+    }
     private Wire() {}
 }

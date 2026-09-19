@@ -73,6 +73,7 @@ public final class PrototypeTests {
     public void testIsolatedSessionDeathDoesNotRestoreAuthority() throws Exception {
         try (ResearchSession old = session()) {
             int oldPid = old.policy.pid(); old.killAndAwaitDeath();
+            check(old.policy.state() == SessionPolicy.State.DEAD, "unexpected death did not invalidate authority");
             try (ResearchSession replacement = session()) {
                 check(replacement.policy.pid() != oldPid, "fresh process not observed");
                 check(!replacement.request(old.id, old.epoch, "ping"), "old claim regained authority");

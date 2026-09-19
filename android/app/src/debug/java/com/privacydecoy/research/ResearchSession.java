@@ -114,9 +114,8 @@ public final class ResearchSession implements ResearchBoundary {
     }
     public int invocationCount() throws Exception { return call(Wire.COUNT, new Bundle()).getInt("count"); }
     public void killAndAwaitDeath() throws Exception {
-        // Revoke before the deliberate death; notification provides additional invalidation.
-        revoke();
-        try { call(Wire.KILL, new Bundle()); } catch (android.os.RemoteException expected) { }
+        // Fault injection: no prior revoke and no synchronous call failure masking death handling.
+        Wire.simulateUnexpectedDeath(remote);
         if (!death.await(10, TimeUnit.SECONDS)) throw new IllegalStateException("Death not observed");
     }
     @Override public synchronized void revoke() { policy.revoke(); }

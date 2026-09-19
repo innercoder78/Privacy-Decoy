@@ -3,9 +3,17 @@ set -euo pipefail
 # Dedicated disposable CI AVD; never install the probe APK itself.
 : "${ANDROID_HOME:?Android SDK required}"
 export PATH="$ANDROID_HOME/platform-tools:$PATH"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export ANDROID_USER_HOME="$PWD/app/build/android-user"
+export ANDROID_EMULATOR_HOME="$ANDROID_USER_HOME"
+export ANDROID_AVD_HOME="$PWD/app/build/avd"
+mkdir -p "$ANDROID_USER_HOME" "$ANDROID_AVD_HOME"
 avd="privacy-decoy-pr4"
 echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --force \
-  --name "$avd" --package 'system-images;android-35;google_apis;x86_64' --device pixel_2
+  --name "$avd" --path "$ANDROID_AVD_HOME/$avd.avd" \
+  --package 'system-images;android-35;google_apis;x86_64' --device pixel_2
+[[ -f "$ANDROID_AVD_HOME/$avd.ini" ]]
+[[ -f "$ANDROID_HOME/system-images/android-35/google_apis/x86_64/system.img" ]]
 mkdir -p app/build/reports/containment
 "$ANDROID_HOME/emulator/emulator" -avd "$avd" -port 5554 -no-window -no-audio \
   -no-boot-anim -no-snapshot -wipe-data -gpu software -memory 2048 -cores 2 -partition-size 2048 \
