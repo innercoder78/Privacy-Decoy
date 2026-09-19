@@ -74,7 +74,7 @@ cross-platform transfer counterpart is configured for this Android-only app.
 
 See [Android backup semantics](https://developer.android.com/identity/data/autobackup),
 [AGP compatibility](https://developer.android.com/build/releases/agp-9-4-0-release-notes),
-[development guidance](.github/CONTRIBUTING.md), and the minimal
+[development guidance](.github/CONTRIBUTING.md), and the comprehensive
 [requirements register](docs/requirements.md), [threat model](docs/threat-model.md),
 [engine assessment](docs/engine-assessment.md), [platform investigation
 matrix](docs/platform-support.md), and [prototype-direction

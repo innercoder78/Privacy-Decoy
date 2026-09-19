@@ -30,9 +30,9 @@ third-party code enters the repository.
    API 31–37 evidence are unresolved.
 2. Adopt DroidPlugin: inspectable historical design, but its documented native
    limitation and modernity gap conflict with the adversarial model.
-3. Adopt BlackBox/FSpace/new VirtualSpace fork: potentially modern, but exact
-   ancestry, license, native dependencies, maintenance and test evidence require
-   individual audit.
+3. Adopt original BlackBox, closed SpaceCore, or chiyuan5/VirtualSpace: corrected
+   current evidence respectively shows dissolved/degraded source, an opaque SDK,
+   and a small/new project with an unresolved README/license-file discrepancy.
 4. Use Shelter/Island/Insular-style managed profiles: strong platform isolation
    comparator, but not the synthetic-persona/service mediation required.
 5. Run a full Android VM: potentially stronger isolation, but device availability,
@@ -45,6 +45,8 @@ third-party code enters the repository.
 Evidence is the primary-source inventory and explicitly unknown matrix in the
 assessment, Android's documented UID sandbox/profile/non-SDK constraints, and the
 [threat model](../threat-model.md). No candidate has complete accepted evidence.
+The 2026-09-19 source/provenance corrections were re-evaluated and strengthen,
+rather than invalidate, the prototype-only direction below.
 
 ## Provisional decision
 
@@ -64,7 +66,12 @@ user decision gate.
 
 - Production selection of every named engine is deferred.
 - DroidPlugin is rejected as the lead prototype while the native limitation stands.
-- BlackBox-family import is rejected until provenance and licensing are resolved.
+- Original BlackBox is rejected in its dissolved/source-degraded state; fork use
+  remains rejected until ancestry, provenance and licensing are resolved.
+- SpaceCore is rejected for production while its engine SDK is closed and cannot
+  support complete provenance, native audit, SBOM and independent review.
+- chiyuan5/VirtualSpace remains a research comparator pending license resolution
+  and adversarial evidence; current activity alone does not select it.
 - Managed profile redesign is deferred but retained if persona goals can be
   reconciled with its documented boundary.
 - Full VM is deferred unless evidence shows it is necessary, deployable, and

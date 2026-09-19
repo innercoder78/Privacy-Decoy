@@ -2,141 +2,243 @@
 
 **Assessment date:** 2026-09-19
 
-**Outcome:** no production engine selected; prototype a narrow, replaceable
-containment boundary and use third-party projects only as research comparators.
+**Outcome:** no production engine is selected. PR 4 should prototype a narrow,
+replaceable containment boundary and use third-party projects as research
+comparators only.
 
 ## Method and evidence labels
 
-This assessment prefers canonical repositories, their source/README/LICENSE and
-official Android documentation. URLs and the ref available for examination are
-recorded below. The assessment environment could not retrieve live GitHub content
-(outbound requests returned HTTP 403), so commit hashes and activity after the
-previously known public project state are deliberately `Unknown`, not invented.
-Reviewers must refresh every default-branch ref, license, release, dependency and
-policy fact before PR 4 admits code. This limitation makes a production choice
-impossible and is itself supply-chain evidence.
+This assessment uses canonical repositories, their current README and LICENSE
+files, immutable commit identifiers, and official Android documentation. A recent
+commit or compatibility claim is not containment evidence. The following labels
+are used throughout:
 
-Labels are strict:
+- **SOURCE CLAIM** — an upstream README or project page says it; Privacy Decoy has
+  not independently established it.
+- **CODE/REPOSITORY OBSERVATION** — repository metadata or contents observable at
+  the recorded ref; this is still not device evidence.
+- **PRIVACY DECOY ANALYSIS** — implication under this project's threat model.
+- **UNKNOWN / REQUIRES PROTOTYPE** — adequate reproducible evidence does not yet
+  exist.
 
-- **SOURCE CLAIM** — the linked owner documentation says it; not independently
-  established for Privacy Decoy.
-- **CODE/REPOSITORY OBSERVATION** — directly observable repository structure or
-  metadata; still not proof on a supported device.
-- **PRIVACY DECOY ANALYSIS** — implication against this project's threat model.
-- **UNKNOWN / REQUIRES PROTOTYPE** — no adequate reproducible evidence yet.
+No candidate was vendored, built, or executed for this PR. “Runs apps,” hook
+coverage, and a coherent spoofed surface do not prove containment.
 
-No repository was vendored, built, or executed. “Runs apps” is not containment.
-Commercial product claims are not evidence about historical public source.
+## Candidate provenance and current source state
 
-## Candidate provenance snapshot
+### VirtualApp: historical public tree versus commercial claims
 
-| Candidate | Owner / canonical primary source | Ref examined; source/license | Maintenance, claims, dependencies, distribution observations |
-|---|---|---|---|
-| VirtualApp | asLody, [canonical historical repository](https://github.com/asLody/VirtualApp) | Public default branch metadata; exact commit **Unknown**. Historically published GPL-3.0 repository; license and present availability require live confirmation. | **SOURCE CLAIM:** historical framework virtualizes Android apps. **OBSERVATION:** old public tree and separately maintained/commercial VirtualApp offerings must be treated as different products. **ANALYSIS:** commercial compatibility statements cannot establish source behavior, licensing, or security. Current activity, API 31–37, ABI/native/split evidence and commercial terms: **UNKNOWN**. |
-| DroidPlugin | DroidPluginTeam/Qihoo 360, [canonical repository](https://github.com/DroidPluginTeam/DroidPlugin) | Public default branch; exact commit **Unknown**; historically Apache-2.0 (reverify). | **SOURCE CLAIM:** README limitations include incomplete native-layer support and an old Android compatibility target. **ANALYSIS:** that gap is fundamental against JNI/direct-syscall adversaries and modern APIs. Current maintenance and API 31–37 evidence: **UNKNOWN**. |
-| BlackBox | FBlackBox, [original repository URL](https://github.com/FBlackBox/BlackBox) | Current availability/ref/license **Unknown** because the source could not be fetched. | **OBSERVATION/ANALYSIS:** many similarly named mirrors/forks make identity, ancestry, license continuity and security-fix provenance high risk. No fork inherits credibility merely by retaining the name. Original status, native binaries/dependencies, API/ABI tests and maintenance require reconstruction from immutable history. |
-| BlackBox forks | Individually audit candidates such as [ToryYang/BlackBox](https://github.com/ToryYang/BlackBox) | Default branch/commit/license/ancestry **Unknown**; not accepted as upstream. | **ANALYSIS:** surviving fork must map every imported commit and binary to provenance/license, show active tests and disclose divergence. Until then supply-chain risk is disqualifying for adoption, though source can inform probes. |
-| FSpace / newer “VirtualSpace” family | FSpaceCore, [FSpace repository](https://github.com/FSpaceCore/FSpace) | Default branch/commit/license **Unknown**; source availability requires refresh. | **SOURCE CLAIM:** project presentation may describe application virtualization. **ANALYSIS:** name, recency or stars do not prove lineage, maturity or containment. Native payload provenance, hidden APIs, copied VirtualApp/BlackBox ancestry, splits, API 31–37 and test quality all require audit. |
-| Shelter | PeterCxy, [canonical repository](https://github.com/PeterCxy/Shelter) | Default branch/commit **Unknown**; GPL-family license historically published (reverify exact SPDX). Source available historically. | **SOURCE CLAIM:** uses Android work profile/device-policy facilities to isolate apps. Depends on platform managed-profile APIs rather than an app-virtualization engine. Maintenance and current releases require refresh. Distribution is subject to device-admin/profile and store policy. |
-| Island | Oasis Feng, [canonical repository](https://github.com/oasisfeng/island) | Default branch/commit and complete license posture **Unknown**. Public source/product availability must be rechecked. | **SOURCE CLAIM:** uses Android managed profiles. **ANALYSIS:** useful isolation comparator; commercial/source boundaries and dependencies require explicit review. |
-| Insular | secure-system, [canonical repository](https://github.com/secure-system/Insular) | Default branch/commit/license/ancestry **Unknown**; historically an Island-derived open-source project (verify). | **ANALYSIS:** audit fork ancestry and independent maintenance. Platform profile support gives OS UID/storage separation but not arbitrary synthetic service responses. |
-| Full Android VM/emulator | Android platform, e.g. [AVF overview](https://source.android.com/docs/core/virtualization) | Official architecture documentation; product/device availability varies. | **SOURCE CLAIM:** Android virtualization can isolate workloads on supported devices. **ANALYSIS:** a full guest could strengthen boundaries but greatly expands images, boot/runtime cost, TCB, ABI/device availability, lifecycle/UI and distribution constraints. AVF is not evidence ordinary apps can host a general Android guest. |
-| Bespoke Privacy Decoy runtime | This project | No implementation; no license selected. | Maximum control and replacement-boundary fit, but highest engineering/audit burden. Framework emulation, Binder, native/syscall and OEM coverage are **UNKNOWN**. A narrow prototype can falsify feasibility without importing an untrusted engine. |
+- **Owner/source:** asLody, [public repository](https://github.com/asLody/VirtualApp).
+- **Ref/date examined:** `master` at
+  [`85768db8e29b5c840f1ba795d09a9d510fb5d068`](https://github.com/asLody/VirtualApp/tree/85768db8e29b5c840f1ba795d09a9d510fb5d068),
+  2026-09-15.
+- **License/source availability:** **CODE/REPOSITORY OBSERVATION:** the current
+  repository has no root LICENSE file. The README says public GitHub code stopped
+  updating in December 2017, separately maintained current source requires a
+  business license, and users should purchase commercial access. Without an
+  immutable historical canonical license artifact, the public tree's complete
+  license posture is unresolved; a fork's license cannot establish it.
+- **Maintenance:** repository HEAD is current, but recent changes chiefly maintain
+  documentation/commercial-version information, not the historical public engine.
+- **Capabilities:** **SOURCE CLAIM (commercial version only):** Android 17,
+  Binder interception, Seccomp-BPF, 64-bit apps, ARM32/ARM64, Java/native hooks,
+  Google Services, built-in Xposed Hook, and device/location modification. These
+  claims are not evidence about the 2017 public code or Privacy Decoy.
+- **Analysis:** closed commercial source limits provenance, SBOM and independent
+  native review. Built-in Xposed is in tension with the no-Xposed requirement;
+  evidence must show it is optional and absent in any qualifying configuration.
+  Split support, early initialization, syscall leakage, OEM behavior, artifact
+  identity and broker security remain **UNKNOWN / REQUIRES PROTOTYPE**.
 
-Android primary references that constrain all candidates include
-[application sandbox/UID isolation](https://source.android.com/docs/security/app-sandbox),
+### DroidPlugin
+
+- **Owner/source:** DroidPluginTeam/Qihoo 360,
+  [canonical repository](https://github.com/DroidPluginTeam/DroidPlugin).
+- **Ref/date examined:** `master` at
+  [`c6ebf652e0f73aa0e5746766e117e51efaf41dbd`](https://github.com/DroidPluginTeam/DroidPlugin/tree/c6ebf652e0f73aa0e5746766e117e51efaf41dbd),
+  2019-12-14.
+- **License/source availability:** root LICENSE is GNU LGPL-3.0; public source is
+  available at the recorded ref.
+- **Maintenance:** the last recorded canonical commit is stale relative to modern
+  Android releases.
+- **Capabilities:** **SOURCE CLAIM:** the README describes Android 2.3+ support,
+  explicitly lacks Native-layer Hook, and warns APKs containing native code may
+  fail to load as plugins.
+- **Analysis:** lack of native-layer mediation is a major gap for an adversary that
+  can use JNI, libc and direct syscalls. API 31–37, 64-bit, modern split packages,
+  OEM behavior, multiprocess and early-init coverage remain **UNKNOWN / REQUIRES
+  PROTOTYPE**; it is not the lead prototype candidate.
+
+### Original FBlackBox/BlackBox
+
+- **Owner/source:** FBlackBox,
+  [original repository](https://github.com/FBlackBox/BlackBox).
+- **Ref/date examined:** `master` at
+  [`a13734339f85a85b4400926f7142557cb6f97dd9`](https://github.com/FBlackBox/BlackBox/tree/a13734339f85a85b4400926f7142557cb6f97dd9),
+  2024-04-12.
+- **License/source availability:** **CODE/REPOSITORY OBSERVATION:** the repository
+  remains reachable but now presents a project dissolution/deletion notice and no
+  longer exposes the prior complete engine tree. It has no root LICENSE file.
+- **Maintenance/provenance:** the dissolution state prevents ordinary maintenance
+  assessment and materially degrades source availability. License continuity and
+  the provenance of removed history/native artifacts are unresolved.
+- **Analysis:** this original repository is disqualifying as an adoptable engine in
+  its current state. Any surviving fork must independently prove resolvable source,
+  ancestry, license continuity, imported binaries and security-fix history. A
+  fork-provided license does not cleanse the original history. No unverified fork
+  is promoted here.
+
+### SpaceCore
+
+- **Owner/source:** FSpaceCore,
+  [SpaceCore demo/integration repository](https://github.com/FSpaceCore/SpaceCore).
+- **Ref/date examined:** `main` at
+  [`3826a2fa1ac492fbbe7435ccb52074c1e2b702de`](https://github.com/FSpaceCore/SpaceCore/tree/3826a2fa1ac492fbbe7435ccb52074c1e2b702de),
+  2024-02-01.
+- **License/source availability:** **CODE/REPOSITORY OBSERVATION:** no root LICENSE
+  exists. **SOURCE CLAIM:** the SDK is free but not open-source; the public
+  repository is a demo/integration project, not engine source.
+- **Capabilities/dependencies:** **SOURCE CLAIM:** Android 6.0–14.0,
+  `armeabi-v7a` and `arm64-v8a`; listed dependencies include MMKV, Gson and Kotlin
+  stdlib.
+- **Maintenance:** the recorded demo ref has no later commit established here; it
+  is not evidence of SDK internals or ongoing security maintenance.
+- **Analysis:** closed engine/native binaries prevent complete provenance review,
+  native audit, independent security review and code-derived SBOM/dependency
+  verification. A wrapper replacement boundary cannot remove trust in opaque code
+  while it executes protected apps. API 35–37 and all containment properties are
+  unknown. This is disqualifying for production absent substantially stronger
+  review access and evidence.
+
+### chiyuan5/VirtualSpace (Android project)
+
+- **Owner/source:** chiyuan5,
+  [Android VirtualSpace repository](https://github.com/chiyuan5/VirtualSpace)
+  (not an unrelated project with the same name).
+- **Ref/date examined:** `main` at
+  [`b1ff7988ac598b00b45c22003390ff43396c1c01`](https://github.com/chiyuan5/VirtualSpace/tree/b1ff7988ac598b00b45c22003390ff43396c1c01),
+  2026-05-14.
+- **License/source availability:** public source is visible. **SOURCE CLAIM:** the
+  README says MIT; **CODE/REPOSITORY OBSERVATION:** there is no root LICENSE file,
+  so the grant and coverage must be resolved before reuse.
+- **Capabilities:** **SOURCE CLAIM:** Android 9–16, root not required with limited
+  functionality, PackageManager/ActivityManager/service interception, native C/C++
+  PLT/GOT hooking, device spoofing, and a `QUERY_ALL_PACKAGES` requirement.
+- **Maintenance/maturity:** the recent ref establishes activity, not maturity. Its
+  small/new public footprint increases provenance, review-depth, bus-factor and
+  test-evidence risk, but does not alone reject it.
+- **Analysis:** Android 17/API 37, split packages, UID/process isolation, syscall
+  bypass, early/multiprocess behavior, broker security, tests and OEM coverage are
+  **UNKNOWN / REQUIRES PROTOTYPE**. `QUERY_ALL_PACKAGES` has privacy and Google
+  Play distribution implications. README claims are not accepted capability proof.
+
+### Work-profile projects
+
+**Shelter.** Owner PeterCxy; canonical source is the author's
+[Gitea repository](https://gitea.angry.im/PeterCxy/Shelter), with a qualified
+[GitHub mirror](https://github.com/PeterCxy/Shelter). The mirror ref examined is
+[`672560f551772b5cd829b2947bae830d78f20edf`](https://github.com/PeterCxy/Shelter/tree/672560f551772b5cd829b2947bae830d78f20edf),
+2026-06-02; its LICENSE is GPL-3.0. **SOURCE CLAIM:** Shelter uses Android Work
+Profile APIs and is in effective maintenance mode while continuing adaptation to
+new Android versions. Public source remains available.
+
+**Island.** Owner Oasis Feng; [public repository](https://github.com/oasisfeng/island),
+`master` at
+[`d63538212a9f417c180bdb9258c0f5461de53c27`](https://github.com/oasisfeng/island/tree/d63538212a9f417c180bdb9258c0f5461de53c27),
+2021-09-02; root LICENSE is Apache-2.0. The stale public-source ref must be assessed
+separately from any current Play-distributed product behavior or closed changes.
+
+**Insular.** Owner secure-system; the canonical project is
+[GitLab secure-system/Insular](https://gitlab.com/secure-system/Insular), not a
+GitHub mirror. **SOURCE CLAIM:** it is based on/forked from Island.
+**CODE/REPOSITORY OBSERVATION:** canonical history was visible through 2025,
+including a 2025-07-31 commit and v6.4.2-era tags. Exact current head and license
+at the assessment cutoff require recording before code reuse. GitHub mirrors such
+as `proletarius101/Insular` are noncanonical and stale relative to GitLab.
+
+**Family analysis:** Android documents managed-profile isolation and policy APIs.
+These projects offer valuable OS-enforced storage/account/package separation and
+are stronger comparators than pretending hooks form a kernel boundary. They do
+not inherently provide arbitrary coherent personas, synthesize every service,
+hide all device-wide kernel observations, or prove external-VPN routing. Profile
+provisioning, device/OEM policy and distribution constraints also apply.
+
+### Full Android VM and bespoke runtime
+
+**Full VM.** Android's [Virtualization Framework overview](https://source.android.com/docs/core/virtualization)
+is the primary platform source. **SOURCE CLAIM:** supported Android devices can
+isolate workloads using virtualization. **ANALYSIS:** this does not prove an
+ordinary app can distribute and host a general Android guest. A full guest may
+strengthen isolation but expands images, TCB, boot/runtime cost, ABI/device
+availability, lifecycle/UI and distribution constraints; it must not be selected
+merely for convenience.
+
+**Bespoke narrow prototype.** Owner/source: Privacy Decoy; no implementation and
+no project license. It offers direct control and a clean replacement boundary but
+the greatest engineering/audit burden. Framework emulation, Binder, native/syscall
+and OEM coverage are all **UNKNOWN / REQUIRES PROTOTYPE**.
+
+Relevant platform sources are Android's [application sandbox](https://source.android.com/docs/security/app-sandbox),
 [package visibility](https://developer.android.com/training/package-visibility),
 [non-SDK restrictions](https://developer.android.com/guide/app-compatibility/restrictions-non-sdk-interfaces),
 [managed profiles](https://developer.android.com/work/managed-profiles), and
 [APK signing](https://source.android.com/docs/security/features/apksigning).
 
-## What work profiles do—and do not—establish
-
-**SOURCE CLAIM:** Android assigns profile apps separate profile-scoped data and
-applies device-policy controls. **PRIVACY DECOY ANALYSIS:** Shelter, Island, and
-Insular can demonstrate valuable OS-provided storage/account/package separation
-and are preferable to pretending hooks are a kernel boundary. They do not, by
-themselves, supply arbitrary coherent decoy identifiers, intercept every service
-response, synthesize sensors/location, hide all device-wide kernel observations,
-or prove external-VPN routing. The profile owner also has constrained policy
-authority and OEM/user provisioning limitations. Thus this family is a useful
-baseline or redesign option, not a drop-in realization of the stated persona and
-mediation requirements.
-
 ## Qualitative criteria matrix
 
-States mean: **Meets** only with adequate primary evidence; **Potentially meets**
-where architecture plausibly permits validation; **Gap** for a known mismatch;
-**Unknown** for absent evidence; and **Disqualifying** where the current known
-design conflicts with a mandatory prototype premise. Compact cells apply to the
-named family and are not production verdicts.
+States are only **Meets**, **Potentially meets**, **Gap**, **Unknown**, or
+**Disqualifying**. “Meets” reflects a documented architectural fact, not a complete
+Privacy Decoy endorsement. VA-public is the historical public VirtualApp tree;
+VA-commercial is the separately maintained line described by its README; VS is
+chiyuan5/VirtualSpace; and Work profiles covers Shelter/Island/Insular where their
+shared platform boundary is decisive. Project-specific maintenance/license
+differences remain recorded above.
 
-| Criterion | VirtualApp | DroidPlugin | BlackBox / FSpace family | Work profile family | Full VM | Bespoke narrow prototype |
-|---|---|---|---|---|---|---|
-| Ordinary root-free; no Magisk/Xposed/LSPosed | Potentially meets | Potentially meets | Unknown | Meets | Unknown | Potentially meets |
-| No Decoy VpnService | Potentially meets | Potentially meets | Unknown | Potentially meets | Potentially meets | Potentially meets |
-| No APK rewrite/re-sign | Unknown | Potentially meets | Unknown | Meets (installed in profile) | Potentially meets | Unknown |
-| Split/APKS | Unknown | Gap | Unknown | Meets via platform installer, subject to policy | Potentially meets | Unknown |
-| ARM64 and 64-bit protected apps | Unknown | Gap | Unknown | Potentially meets | Unknown | Unknown |
-| API 31–37 and OEM robustness | Unknown | Disqualifying absent modernization | Unknown | Potentially meets | Unknown | Unknown |
-| Java/framework mediation | Potentially meets | Potentially meets | Potentially meets | Gap for synthetic mediation | Potentially meets | Unknown |
-| Binder/service/provider mediation | Unknown | Unknown | Unknown | Gap for synthetic mediation | Potentially meets | Unknown |
-| Native/JNI and libc/direct syscall | Unknown | Disqualifying known limitation | Unknown | Gap for synthetic mediation | Potentially meets | Unknown |
-| `/proc`, `/sys`, filesystem/process leakage | Unknown | Gap | Unknown | Partially mediated | Potentially meets | Unknown |
-| Process/UID isolation | Unknown | Unknown | Unknown | Meets for profile-vs-host UID/data model; intra-profile limits remain | Potentially meets | Unknown |
-| Management-state isolation | Unknown | Unknown | Unknown | Potentially meets | Potentially meets | Potentially meets |
-| Broker authentication/stale capabilities | Unknown | Unknown | Unknown | N/A to synthetic broker goal | Unknown | Unknown |
-| Multiprocess and early initialization | Unknown | Unknown | Unknown | Platform launch works; mediation gap remains | Potentially meets | Unknown |
-| Dynamic loading | Unknown | Unknown | Unknown | Meets ordinary platform semantics, not mediation | Potentially meets | Unknown |
-| Package visibility / host-service leakage | Unknown | Unknown | Unknown | Partially mediated; profile/device services remain | Potentially meets | Unknown |
-| Play Services behavior | Unknown | Unknown | Unknown | External/profile-dependent | Unknown | Unknown |
-| Hidden/private API dependence | Gap | Gap | Unknown | Potentially meets (public policy APIs) | Unknown | Potentially meets |
-| Maintenance/test quality | Unknown | Gap (historical modernity) | Unknown | Unknown per project | Platform-specific/Unknown | Not yet present |
-| Source/license suitability | Gap until current public/commercial boundary resolves | Potentially meets, reverify | Disqualifying until provenance/license resolved | Unknown per project | Gap/Unknown | Potentially meets |
-| Dependency/supply-chain risk | Unknown/high | Unknown | Unknown/high | Moderate, platform plus project | High/large TCB | Potentially lower initially; self-authored TCB risk high |
-| Replaceable engine boundary | Potentially meets only via adapter | Potentially meets | Potentially meets | Potentially meets | Gap due broad coupling | Meets as design constraint |
+| Criterion | VA-public | VA-commercial | DroidPlugin | FBlackBox original | SpaceCore | VS | Work profiles | Full VM | Bespoke prototype |
+|---|---|---|---|---|---|---|---|---|---|
+| Root-free; no Magisk/Xposed/LSPosed | Potentially meets | Unknown | Potentially meets | Disqualifying | Potentially meets | Potentially meets | Meets | Unknown | Potentially meets |
+| No Privacy Decoy `VpnService` | Potentially meets | Unknown | Potentially meets | Disqualifying | Potentially meets | Potentially meets | Potentially meets | Potentially meets | Potentially meets |
+| No APK rewriting/re-signing | Unknown | Unknown | Potentially meets | Disqualifying | Unknown | Unknown | Meets | Potentially meets | Unknown |
+| Split APK/APKS | Unknown | Unknown | Gap | Disqualifying | Unknown | Unknown | Meets | Potentially meets | Unknown |
+| ARM64 / 64-bit protected apps | Unknown | Potentially meets | Unknown | Disqualifying | Potentially meets | Potentially meets | Meets | Unknown | Unknown |
+| API 31–37 / OEM robustness | Gap | Unknown | Gap | Disqualifying | Gap | Unknown | Potentially meets | Unknown | Unknown |
+| Java/framework mediation | Potentially meets | Potentially meets | Potentially meets | Disqualifying | Unknown | Potentially meets | Gap | Potentially meets | Unknown |
+| Binder/service/provider mediation | Unknown | Potentially meets | Unknown | Disqualifying | Unknown | Potentially meets | Gap | Potentially meets | Unknown |
+| JNI/native mediation | Unknown | Potentially meets | Gap | Disqualifying | Unknown | Potentially meets | Gap | Potentially meets | Unknown |
+| Direct syscall, `/proc`, `/sys` containment | Unknown | Potentially meets | Gap | Disqualifying | Unknown | Unknown | Gap | Potentially meets | Unknown |
+| Process/UID and management isolation | Unknown | Unknown | Unknown | Disqualifying | Unknown | Unknown | Potentially meets | Potentially meets | Unknown |
+| Broker authentication / stale capability safety | Unknown | Unknown | Unknown | Disqualifying | Unknown | Unknown | Gap | Unknown | Unknown |
+| Multiprocess / early initialization | Unknown | Unknown | Unknown | Disqualifying | Unknown | Unknown | Potentially meets | Potentially meets | Unknown |
+| Dynamic loading | Unknown | Unknown | Unknown | Disqualifying | Unknown | Unknown | Meets | Potentially meets | Unknown |
+| Package visibility / host-service leakage | Unknown | Unknown | Unknown | Disqualifying | Unknown | Potentially meets | Gap | Potentially meets | Unknown |
+| Google Play Services behavior | Unknown | Potentially meets | Unknown | Disqualifying | Unknown | Unknown | Potentially meets | Unknown | Unknown |
+| No hidden/private API dependency | Gap | Unknown | Gap | Disqualifying | Unknown | Unknown | Potentially meets | Unknown | Potentially meets |
+| Maintenance/test evidence | Gap | Unknown | Gap | Disqualifying | Gap | Unknown | Potentially meets | Unknown | Gap |
+| Source/license suitability | Gap | Disqualifying | Potentially meets | Disqualifying | Disqualifying | Gap | Potentially meets | Unknown | Potentially meets |
+| Provenance / dependency / supply-chain auditability | Gap | Disqualifying | Potentially meets | Disqualifying | Disqualifying | Unknown | Potentially meets | Unknown | Potentially meets |
+| Reviewable TCB / replacement boundary | Unknown | Gap | Unknown | Disqualifying | Gap | Unknown | Potentially meets | Gap | Potentially meets |
 
-### Additional criteria conclusions
-
-- **Process/UID/resource isolation:** user-space “virtualization” must demonstrate
-  the real Linux credentials and kernel-visible resources, not internal virtual
-  identifiers. Work profiles provide a stronger documented platform primitive,
-  but not the required synthetic surface.
-- **Authentication and stale capabilities:** no candidate has accepted evidence
-  for caller-bound, epoch-bound broker handles, revocation, or restart behavior.
-- **Native and early code:** these are decisive unknowns for VirtualApp-like and
-  BlackBox-like systems. DroidPlugin's documented native limitation is a gap, not
-  a backlog detail.
-- **Maintenance/test quality:** a recent commit, stars, demo APK, or compatibility
-  list would not substitute for adversarial, native, lifecycle, OEM and release
-  tests. Low-star/new projects remain eligible for investigation but enter no TCB
-  without stronger provenance and evidence.
-- **Distribution:** GPL/copyleft obligations, unavailable commercial source,
-  embedded native blobs, dynamic loading, device-admin/profile provisioning, and
-  full-VM images each create different feasibility issues. Exact current licenses
-  and Google Play rules must be refreshed before code selection.
+The matrix contains no production winner. Commercial VirtualApp and SpaceCore may
+claim broad compatibility, but opaque source cannot presently satisfy independent
+review and supply-chain requirements. VirtualSpace is current enough to study but
+its license discrepancy, maturity and containment evidence remain unresolved.
+Work profiles have the best documented OS isolation primitive but a functional gap
+against synthetic-persona mediation.
 
 ## Prototype handoff and STOP gate
 
-PR 4 should implement only enough controlled probe infrastructure to answer:
+PR 4 must determine whether app code can execute without installation/re-signing;
+the actual process/UID and management-state boundaries; Binder, service, provider,
+package and host-service leakage; JNI/syscall, `/proc`, `/sys`, filesystem and
+property bypasses; early initialization and multiprocess behavior; stale capability
+survival; and whether Unknown mandatory coverage blocks all protected code.
 
-1. Can app code execute without installation or re-signing, and what actual
-   process/UID boundaries result?
-2. Can it reach management state; which Binder/services/providers, package queries,
-   properties, host services, files, `/proc`, and `/sys` leak?
-3. Which JNI/libc/direct-syscall, dynamic-load, subprocess, multiprocess, early
-   provider and native-initializer paths bypass control?
-4. Can authenticated capabilities be revoked across races, death and restart?
-5. Can Unsupported or Unknown mandatory coverage prevent *all* protected code
-   from starting?
+PR 5 must enumerate every traffic-producing process/helper; establish attribution
+and control; test external-VPN verification and route changes; prove physical
+fallback is blocked; and independently observe IPv4/IPv6, DNS, TCP/UDP, QUIC,
+Java/native, background and helper traffic. No `VpnService` is authorized.
 
-PR 5 must separately enumerate traffic-producing processes/helpers; attribute and
-control every route; test external-VPN verification and route changes; prove
-physical fallback is blocked; and independently observe IPv4/IPv6, DNS, TCP/UDP,
-QUIC, Java/native, background/helper traffic. No `VpnService` is authorized.
-
-PR 6 is a mandatory user STOP decision. Evidence may select further prototypes,
-redesign around documented work-profile guarantees, declare capabilities
-unsupported, or end the project. Until that boundary is sufficiently validated,
-only controlled probe apps and safe fixtures may be used—no ordinary protected
-apps or real private accounts/data.
+PR 6 is the mandatory user STOP decision. Evidence may justify another prototype,
+a managed-profile redesign, explicit unsupported status, or ending the project.
+Until the boundary is sufficiently validated, use only controlled probe apps and
+safe fixtures—never ordinary protected apps or real private accounts/data.
