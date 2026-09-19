@@ -5,8 +5,8 @@ scope. PR 1 establishes the Android foundation only.
 
 - Never commit credentials, tokens, signing keys, keystores, passwords, or other
   secrets. Keep local SDK configuration and environment files untracked.
-- Never commit generated APKs, AABs, build outputs, caches, or IDE state. The
-  standard binary `gradle/wrapper/gradle-wrapper.jar` is intentionally committed.
+- Never commit generated APKs, AABs, build outputs, caches, or IDE state. The standard
+  binary `android/gradle/wrapper/gradle-wrapper.jar` is intentionally committed.
 - Prefer platform APIs. Justify every additional dependency and permission.
 - Avoid unrelated formatting, cleanup, and refactors. Do not modify synced
   `sources/` material as part of unrelated development.
@@ -15,10 +15,11 @@ scope. PR 1 establishes the Android foundation only.
 - Run the README build, lint, and unit-test commands. Add focused tests with
   relevant behavior changes; do not manufacture production abstractions for tests.
   Do not hide lint errors in a baseline.
-- Maintain the [requirements scaffold](docs/requirements.md) as requirements
-  evolve. PR 2 owns the comprehensive register, threat model, and engine assessment.
+- Maintain the [requirements scaffold](../docs/requirements.md) as requirements
+  evolve. PR 3 owns the comprehensive register, threat model, and engine assessment.
 
-Use JDK 17 and the committed wrapper. To regenerate it with trusted Gradle 9.6.0:
+Use JDK 17 and run the committed wrapper from `android/`. To regenerate it
+with trusted Gradle 9.6.0, run the following from `android/`:
 
 ```sh
 gradle wrapper --gradle-version 9.6.0 --distribution-type bin --gradle-distribution-sha256-sum bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01
