@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Privacy Decoy</string>
+    <string name="build_status">Foundation / development build</string>
+    <string name="protection_status">Privacy protection is not yet implemented. This app does not run or protect other applications. No privacy or security boundary has been verified.</string>
+</resources>
