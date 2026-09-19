@@ -7,12 +7,14 @@ roadmap's **PR 6 feasibility gate**. Privacy takes precedence over compatibility
 
 ## Current status
 
-This repository contains only the PR 1 development foundation: a minimal Kotlin
-Android application shell and build/CI configuration. **Privacy containment and
+This repository contains the PR 1 development foundation, PR 2 clean Android
+project layout, and PR 3 security/design evidence. **Privacy containment and
 spoofing are not implemented or verified.** There is no protected-app execution,
 virtualization, Decoy Persona, VPN enforcement, or verified privacy/security
 boundary. Version `0.1.0-dev` (version code 1) is a development identifier; this
-PR does not represent a public or production release.
+work does not represent a public or production release. PR 3's analysis is not
+protection and selects no production containment engine. PR 6 remains the
+mandatory feasibility/STOP gate.
 
 The production design goal requires no root, Magisk, Xposed, LSPosed, custom ROM,
 or ordinary dependence on ADB. Privacy Decoy itself must not use Android
@@ -32,8 +34,8 @@ Prerequisites:
 The committed wrapper uses Gradle 9.6.0. Android Gradle Plugin 9.4.0 supplies
 built-in Kotlin support. Both `compileSdk` and `targetSdk` are 37.
 **`minSdk = 31` is a provisional initial build baseline, not a final supported
-platform commitment.** PR 3 owns the Android/OEM/ABI feasibility investigation
-and may change it based on evidence.
+platform commitment.** The provisional investigation matrix records the evidence
+still required; this documentation PR does not change any SDK value.
 
 The Android project lives in `android/`. From the repository root:
 
@@ -73,4 +75,7 @@ cross-platform transfer counterpart is configured for this Android-only app.
 See [Android backup semantics](https://developer.android.com/identity/data/autobackup),
 [AGP compatibility](https://developer.android.com/build/releases/agp-9-4-0-release-notes),
 [development guidance](.github/CONTRIBUTING.md), and the minimal
-[requirements-register scaffold](docs/requirements.md).
+[requirements register](docs/requirements.md), [threat model](docs/threat-model.md),
+[engine assessment](docs/engine-assessment.md), [platform investigation
+matrix](docs/platform-support.md), and [prototype-direction
+ADR](docs/decisions/ADR-0001-engine-prototype-direction.md).
