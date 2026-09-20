@@ -138,7 +138,10 @@ public final class PrototypeTests {
             int[] n = result.getIntArray("native");
             check(n != null && n.length == 9, "native probe missing");
             check(n[0] == s.policy.uid() && n[2] == s.policy.pid(), "native UID/PID mismatch");
-            check(n[3] == 1 && n[4] == 1, "direct open not permission-denied");
+            // The manager independently verifies its existing sentinel. An isolated
+            // namespace may report ENOENT instead of EACCES/EPERM for that path.
+            check((n[3] == 1 || n[3] == 2) && (n[4] == 1 || n[4] == 2),
+                "direct open accessed sentinel or returned ambiguous error");
             check(n[6] == 1 || n[6] == 2, "manager proc maps accessible or ambiguous");
         });
     }
