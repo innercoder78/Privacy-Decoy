@@ -21,7 +21,7 @@ echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --force
 [[ -f "$ANDROID_HOME/system-images/android-35/google_apis/x86_64/system.img" ]]
 mkdir -p app/build/reports/network
 "$ANDROID_HOME/emulator/emulator" -avd "$avd" -port 5554 -no-window -no-audio \
-  -tcpdump "$PWD/app/build/reports/network/physical.pcap" -no-boot-anim -no-snapshot -wipe-data -gpu software -memory 2048 -cores 2 -partition-size 2048 \
+  -feature -WiFiPacketStream -tcpdump "$PWD/app/build/reports/network/physical.pcap" -no-boot-anim -no-snapshot -wipe-data -gpu software -memory 2048 -cores 2 -partition-size 2048 \
   >app/build/reports/network/emulator.log 2>&1 &
 emulator_pid=$!
 trap 'adb -s emulator-5554 emu kill >/dev/null 2>&1 || true; kill "$emulator_pid" 2>/dev/null || true; rm -f app/build/reports/network/physical.pcap' EXIT
@@ -65,8 +65,16 @@ done
 [[ "$(adb shell getprop ro.product.cpu.abi | tr -d '\r')" == x86_64 ]]
 echo 'Engineering evidence target: API 35 / x86_64 / debug / Google APIs emulator'
 
-# Use the emulator's cellular path, which is observed by -tcpdump even with newer netsim Wi-Fi.
-adb shell svc wifi disable
+# Force the official legacy Wi-Fi backend above so -tcpdump covers its slirp path.
+# The experiment requires captured physical positive controls; empty capture cannot pass.
+adb shell svc wifi enable
+adb shell svc data enable
+physical_ready=false
+for _ in $(seq 1 60); do
+  if timeout 3 adb shell 'ip route get 10.0.2.2 >/dev/null 2>&1'; then physical_ready=true; break; fi
+  sleep 1
+done
+[[ "$physical_ready" == true ]] || { echo 'Controlled emulator host route unavailable'; exit 1; }
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb install -r app/build/reports/network/fixture-a.apk

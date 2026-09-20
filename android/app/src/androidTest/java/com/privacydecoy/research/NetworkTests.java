@@ -143,6 +143,7 @@ public final class NetworkTests {
         }
     }
     private void fixture(String pkg,String mode)throws Exception{
+        if(!"STOP".equals(mode))shell("appops set "+pkg+" ACTIVATE_VPN allow");
         shell("am start -W -n "+pkg+"/com.privacydecoy.externalvpnfixture.FixtureController --es mode "+mode);
     }
     private static final String A="com.privacydecoy.externalvpnfixture",B=A+".replacement";

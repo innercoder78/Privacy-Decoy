@@ -11,8 +11,9 @@ public final class FixtureController extends Activity {
         super.onCreate(state);
         String mode=getIntent().getStringExtra("mode");
         if("STOP".equals(mode)) {
-            stopService(new Intent(this,FixtureVpnService.class));
-            Log.i("PD_PR5_VPN","STATE stopped");finish();return;
+            // Android itself binds VpnService. stopService alone does not close a bound TUN.
+            startService(new Intent(this,FixtureVpnService.class).putExtra("mode","STOP"));
+            finish();return;
         }
         try {FixtureVpnService.Mode.valueOf(mode);}catch(RuntimeException e){finish();return;}
         if(VpnService.prepare(this)!=null) {

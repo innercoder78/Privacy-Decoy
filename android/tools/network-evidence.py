@@ -33,6 +33,7 @@ def adb(*args,timeout=30,check=True):
     if check and p.returncode: raise AssertionError('ADB operation failed: '+args[0])
     return p.stdout
 def control(pkg,mode):
+    if mode!='STOP':adb('shell','appops','set',pkg,'ACTIVATE_VPN','allow')
     adb('shell','am','start','-W','-n',pkg+'/com.privacydecoy.externalvpnfixture.FixtureController','--es','mode',mode)
 def logs():return adb('logcat','-d','-v','raw','PD_PR5:I','PD_PR5_VPN:I','*:S')
 def start(mode,pkg=A):
@@ -43,6 +44,7 @@ def start(mode,pkg=A):
     raise AssertionError('Fixture TUN not established: '+mode)
 def reset():
     control(A,'STOP');control(B,'STOP')
+    adb('shell','am','force-stop',A);adb('shell','am','force-stop',B)
     adb('shell','am','force-stop','com.privacydecoy.app')
     time.sleep(.4);adb('logcat','-c')
 def run_case(name,mode):

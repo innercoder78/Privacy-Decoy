@@ -14,6 +14,10 @@ public final class FixtureVpnService extends VpnService {
     private ParcelFileDescriptor tun;
     private volatile int generation;
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
+        if(intent!=null && "STOP".equals(intent.getStringExtra("mode"))) {
+            closeTun();stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();
+            Log.i("PD_PR5_VPN","STATE stopped");return START_NOT_STICKY;
+        }
         if(prepare(this)!=null){Log.i("PD_PR5_VPN","STATE consent-required");stopSelf();return START_NOT_STICKY;}
         Mode mode;
         try{mode=Mode.valueOf(intent==null?"":intent.getStringExtra("mode"));}
@@ -24,7 +28,7 @@ public final class FixtureVpnService extends VpnService {
     }
     private synchronized void establish(Mode mode) throws Exception {
         closeTun();
-        Builder b=new Builder().setSession("PR5 external fixture").setMtu(1500).setBlocking(true)
+        Builder b=new Builder().setSession("PR5 external fixture").setMtu(1500).setBlocking(false)
             .addAddress("192.0.2.1",32).addAddress("2001:db8::1",128).addDnsServer("198.51.100.53");
         switch(mode) {
             case FULL_TUNNEL:case FULL_TUNNEL_BYPASS:
@@ -44,9 +48,15 @@ public final class FixtureVpnService extends VpnService {
     }
     private void observe(ParcelFileDescriptor descriptor,Mode mode,int token) {
         byte[] packet=new byte[2048];int count=0;
-        try(FileInputStream input=new FileInputStream(descriptor.getFileDescriptor())) {
+        try {
             while(token==generation) {
-                int length=input.read(packet);if(length<1)break;
+                int length;
+                try { length=android.system.Os.read(descriptor.getFileDescriptor(),packet,0,packet.length); }
+                catch(android.system.ErrnoException e) {
+                    if(e.errno==android.system.OsConstants.EAGAIN) { Thread.sleep(20);continue; }
+                    break;
+                }
+                if(length<1)break;
                 int family=(packet[0]&255)>>>4;
                 int offset=family==4?(packet[0]&15)*4:40;
                 if((family!=4&&family!=6)||length<offset+4||offset<20){Arrays.fill(packet,(byte)0);continue;}
@@ -69,7 +79,7 @@ public final class FixtureVpnService extends VpnService {
                 }
                 Arrays.fill(packet,(byte)0);
             }
-        } catch(IOException ignored){}finally{Arrays.fill(packet,(byte)0);}
+        } catch(InterruptedException | InterruptedIOException ignored){Thread.currentThread().interrupt();}finally{Arrays.fill(packet,(byte)0);}
     }
     private static boolean eq(byte[] p,int offset,int[] value) {
         for(int i=0;i<value.length;i++)if((p[offset+i]&255)!=value[i])return false;return true;

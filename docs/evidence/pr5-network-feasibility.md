@@ -45,8 +45,9 @@ Optional lockdown is Unknown unless both `VpnService.isAlwaysOn()` and
 `isLockdownEnabled()` report true after disposable secure-settings setup/reboot.
 
 The official emulator `-tcpdump` facility writes only to ignored build output.
-The emulator is terminated before parsing so the capture writer flushes. Cellular
-networking is used to avoid a newer emulator's separately implemented Wi-Fi path.
+The emulator is terminated before parsing so the capture writer flushes. The
+official `-feature -WiFiPacketStream` flag selects legacy Wi-Fi/slirp rather than
+the separate netsim Wi-Fi backend; positive physical capture controls are mandatory.
 The parser reads at most 128 header bytes per record, skips payload, and retains
 only fixed destination/port/protocol/family/count/timing information. It discards
 unrelated traffic. Raw captures are never printed/uploaded and are deleted by the
