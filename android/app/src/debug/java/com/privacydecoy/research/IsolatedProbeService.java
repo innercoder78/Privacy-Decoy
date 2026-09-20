@@ -19,10 +19,12 @@ public final class IsolatedProbeService extends Service {
     private long epoch;
     private int managerUid = -1;
     private int invocations;
+    private String phase = "protocol";
     private final Binder endpoint = new Binder() {
         @Override protected synchronized boolean onTransact(int code, Parcel data, Parcel reply, int flags) {
             if (code < Wire.INIT || code > Wire.COUNT) return false;
             Bundle result = new Bundle();
+            phase = "protocol";
             try {
                 data.enforceInterface(Wire.TOKEN);
                 Bundle input = data.readBundle(getClass().getClassLoader());
@@ -49,8 +51,18 @@ public final class IsolatedProbeService extends Service {
                         default: throw new IllegalArgumentException();
                     }
                 }
-            } catch (Exception | LinkageError ignored) {
+            } catch (Exception | LinkageError failure) {
                 result = new Bundle(); result.putString("error", "initialization-or-probe-failed");
+                Throwable cause = failure instanceof java.lang.reflect.InvocationTargetException
+                    ? failure.getCause() : failure;
+                // Fixed phase and exception category only; no exception messages or stack traces.
+                String category = cause instanceof SecurityException ? "security"
+                    : cause instanceof LinkageError ? "linkage"
+                    : cause instanceof ClassNotFoundException ? "class-not-found"
+                    : cause instanceof android.system.ErrnoException ? "memory-or-os"
+                    : cause instanceof NullPointerException ? "null"
+                    : cause instanceof IllegalArgumentException ? "invalid-argument" : "other";
+                android.util.Log.i("PD_PR4", "EXECUTION phase=" + phase + " failure=" + category);
             }
             reply.writeNoException(); reply.writeBundle(result); return true;
         }
@@ -58,18 +70,22 @@ public final class IsolatedProbeService extends Service {
     @Override public IBinder onBind(Intent intent) { return endpoint; }
     private Bundle runFixture(Bundle input) throws Exception {
         // Native library initialization is also behind the manager coverage gate.
+        phase = "harness-native";
         int[] nativeResult = NativeProbe.observe(input.getString("sentinel"), input.getInt("managerPid"));
+        phase = "shared-memory";
         SharedMemory memory = input.getParcelable("dex");
         if (memory == null || memory.getSize() > 4 * 1024 * 1024) throw new IllegalArgumentException();
         try (memory) {
             ByteBuffer dex = memory.mapReadOnly();
             try {
                 // Bootstrap parent exposes platform types, not app implementation classes.
+                phase = "dex-loader";
                 ClassLoader loader = new InMemoryDexClassLoader(dex, ClassLoader.getSystemClassLoader().getParent());
                 Class<?> entry = loader.loadClass("com.privacydecoy.probe.ProbeEntry");
                 Bundle fixtureInput = new Bundle(input); fixtureInput.remove("dex");
                 fixtureInput.putBinder("broker", broker); fixtureInput.putString("session", session); fixtureInput.putLong("epoch", epoch);
                 invocations++;
+                phase = "fixture-entry";
                 Bundle result = (Bundle) entry.getMethod("run", android.content.Context.class, Bundle.class)
                     .invoke(null, IsolatedProbeService.this, fixtureInput);
                 result.putIntArray("native", nativeResult);
