@@ -60,6 +60,16 @@ to immutable SHAs with their release tags in comments; update them deliberately.
 
 No open-source license has been selected by this PR.
 
+## PR 5 controlled network research
+
+Run `./gradlew testDebugUnitTest :test-apps:external-vpn-fixture:assembleDebug`
+from `android/` for the fail-closed gate and separate fixture build. Device route
+claims require the disposable API 35 x86_64 environment plus independent filtered
+packet capture; never infer them from broker or fixture self-report. APKs, native
+libraries, captures, reports, AVDs, and logs stay untracked. The fixture is an
+external test application, not a Privacy Decoy VPN. Passing a `KnownGap` device
+test means the adverse behavior was reproduced, not that protection succeeded.
+
 ## PR 4 controlled containment research
 
 Install official SDK packages `ndk;27.2.12479018` and `cmake;3.22.1` in addition

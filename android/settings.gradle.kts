@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "PrivacyDecoy"
 include(":app")
 include(":probe-app", ":research-native")
+include(":test-apps:external-vpn-fixture")

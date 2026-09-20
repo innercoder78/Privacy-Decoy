@@ -27,8 +27,17 @@ jobs:
       - name: Install Android SDK packages
         run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"'
       - name: Lint, unit-test task, and debug build
-        run: ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug
+        run: ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug :test-apps:external-vpn-fixture:assembleDebug
         working-directory: android
+      - name: Verify release manifest remains network-free
+        working-directory: android
+        run: |
+          ./gradlew --no-daemon :app:processReleaseMainManifest
+          manifest=app/build/intermediates/merged_manifests/release/processReleaseMainManifest/AndroidManifest.xml
+          test -f "$manifest"
+          ! grep -Eq 'android.permission.(INTERNET|ACCESS_NETWORK_STATE)|VpnService|NetworkResearchBroker' "$manifest"
+          test "$(stat -c '%a' gradlew)" = 755
+          echo 'Release manifest has no networking research capability'
 
   containment-prototype:
     runs-on: ubuntu-24.04

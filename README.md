@@ -9,7 +9,11 @@ roadmap's **PR 6 feasibility gate**. Privacy takes precedence over compatibility
 
 This repository contains the PR 1 development foundation, PR 2 clean Android
 project layout, PR 3 security/design evidence, and the PR 4 adversarial research
-harness. **Privacy containment and
+harness. PR 5 adds a controlled networking feasibility harness: a debug-only
+trusted broker, fail-closed gate model, and a separate external-VPN test fixture.
+It does **not** provide production protected networking. The fixture's
+`VpnService` belongs to `com.privacydecoy.externalvpnfixture`, is not included in
+Privacy Decoy, and never forwards traffic. **Privacy containment and
 spoofing are not implemented or verified.** There is no protected-app execution,
 virtualization, Decoy Persona, VPN enforcement, or verified privacy/security
 boundary. Version `0.1.0-dev` (version code 1) is a development identifier; this
@@ -23,6 +27,9 @@ The harness investigates UID/storage isolation, Binder authority, native syscall
 host-state leakage and missing lifecycle semantics; it is not a functioning
 privacy container. See the [scoped evidence and validation status](docs/evidence/pr4-containment-prototype.md).
 Never use this prototype with ordinary protected apps, private data, or accounts.
+The same restriction applies to the PR 5 networking harness. Route experiments
+without independent device/pcap evidence remain Unknown; green unit tests are not
+route evidence.
 
 The production design goal requires no root, Magisk, Xposed, LSPosed, custom ROM,
 or ordinary dependence on ADB. Privacy Decoy itself must not use Android
@@ -67,6 +74,11 @@ asset and must **not** be installed. Lint errors fail the build without
 a baseline. The debug APK is generated under `app/build/outputs/apk/debug/`
 and must not be committed. Debug builds use ordinary development signing;
 there is no production signing configuration.
+
+PR 5 pure gate tests run as part of `testDebugUnitTest`. The separate fixture can
+be generated with `./gradlew :test-apps:external-vpn-fixture:assembleDebug`; its
+APK is generated output and must not be committed or treated as a built-in VPN.
+See [PR 5 evidence](docs/evidence/pr5-network-feasibility.md).
 
 ## Foundation defaults and limits
 

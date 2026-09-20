@@ -1,8 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Research permissions exist only in this debug overlay. The isolated process is
+         explicitly denied INTERNET; the dedicated trusted broker is the sole originator. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Fixed queries avoid confusing package visibility filtering with non-installation. -->
     <queries><package android:name="com.privacydecoy.probe" /></queries>
     <application>
+        <processes>
+            <process android:process=":networkresearch">
+                <allow-permission android:name="android.permission.INTERNET" />
+            </process>
+            <process android:process=":isolated">
+                <deny-permission android:name="android.permission.INTERNET" />
+            </process>
+            <deny-permission android:name="android.permission.INTERNET" />
+        </processes>
         <service android:name="com.privacydecoy.research.IsolatedProbeService"
-            android:exported="false" android:isolatedProcess="true" />
+            android:exported="false" android:isolatedProcess="true" android:process=":isolated" />
+        <service android:name="com.privacydecoy.research.NetworkResearchBrokerService"
+            android:exported="false" android:process=":networkresearch" />
     </application>
 </manifest>
