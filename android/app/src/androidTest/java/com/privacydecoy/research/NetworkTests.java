@@ -221,6 +221,10 @@ public final class NetworkTests {
             fixture(A,"STOP");
             String result=b.control(NetworkWire.CALIBRATE,input).getString("result");
             evidence("LOCKDOWN_LOSS result="+result);check(!"success".equals(result),"SEVERE lockdown physical fallback");
+            awaitVpn(b,false);
+            String down=b.control(NetworkWire.CALIBRATE,input).getString("result");
+            evidence("LOCKDOWN_DOWN vpn=false result="+down);
+            check(!"success".equals(down),"SEVERE verified-down lockdown physical fallback");
         }
     }
 }

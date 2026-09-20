@@ -64,7 +64,7 @@ def run_case(name,mode):
     assert 'Tests run: 1, Failures:' in output, 'Missing device execution: '+name
     assert 'INSTRUMENTATION_FAILED' not in output, 'Instrumentation failed: '+name
     safe=[]
-    allowed=re.compile(r'^(?:PASS test[A-Za-z0-9]+|(?:DIRECT|BOUNDARY|ROUTE|BEGIN|END|PHYSICAL|OLD_SOCKET_SEND_BEGIN|OLD_SOCKET_SEND|REGISTRY|LOSS|LOSS_OS_FALLBACK|RECONNECT|REPLACEMENT|LOCKDOWN_ACTIVE|LOCKDOWN_LOSS|STATE|PACKET) [A-Za-z0-9_= .-]+)$')
+    allowed=re.compile(r'^(?:PASS test[A-Za-z0-9]+|(?:DIRECT|BOUNDARY|ROUTE|BEGIN|END|PHYSICAL|OLD_SOCKET_SEND_BEGIN|OLD_SOCKET_SEND|REGISTRY|LOSS|LOSS_OS_FALLBACK|RECONNECT|REPLACEMENT|LOCKDOWN_ACTIVE|LOCKDOWN_LOSS|LOCKDOWN_DOWN|STATE|PACKET) [A-Za-z0-9_= .-]+)$')
     for line in observations.splitlines():
         if allowed.fullmatch(line):safe.append(line)
     for line in safe: print(name+' '+line,flush=True)
@@ -100,7 +100,10 @@ def exercise():
             if adb('shell','getprop','sys.boot_completed',timeout=5,check=False).strip()=='1':boot=True;break
         assert boot,'Lockdown setup reboot timed out'
         adb('logcat','-c');control(A,'FULL_TUNNEL_BYPASS');time.sleep(2)
-        if 'alwaysOn=true lockdown=true' in logs():
+        setup=logs()
+        for line in setup.splitlines():
+            if line.startswith('STATE ') and re.fullmatch(r'[A-Za-z0-9_= .-]+',line):print('LOCKDOWN_SETUP '+line,flush=True)
+        if 'alwaysOn=true lockdown=true' in setup:
             records.append(run_case('testLockdownLoss','FULL_TUNNEL_BYPASS'))
             lockdown='verified-platform-state'
         else:
@@ -188,6 +191,7 @@ def analyze():
             assert 'STATE revoked' in obs and 'STATE established mode=FULL_TUNNEL' in obs,'Real provider replacement evidence missing'
         if name=='testLockdownLoss':
             assert 'alwaysOn=true lockdown=true' in obs,'Unverified lockdown'
+            assert 'LOCKDOWN_DOWN vpn=false' in obs,'VPN loss not confirmed during lockdown'
             assert not rows,'SEVERE: fixed traffic escaped verified lockdown'
         case['physicalCounts']={str(k):v for k,v in collections.Counter((r['family'],r['protocol'],r['category'],r['port']) for r in rows).items()}
         print('PCAP '+name+' '+json.dumps(case['physicalCounts']),flush=True)
