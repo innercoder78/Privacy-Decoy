@@ -94,6 +94,7 @@ public final class PrototypeTests {
     public void testMalformedDexFailsInitializationWithoutEntrypoint() throws Exception {
         withFixture(new byte[]{0, 1, 2}, (s, result) -> {
             check(result.containsKey("error"), "malformed DEX accepted");
+            check("dex-loader".equals(result.getString("errorPhase")), "failure occurred before malformed DEX was tested");
             check(s.entered.get() == 0 && s.invocationCount() == 0, "malformed DEX invoked entry");
             check(s.policy.state() == SessionPolicy.State.REVOKED, "initialization failure retained authority");
         });
@@ -183,13 +184,17 @@ public final class PrototypeTests {
         }
     }
     private static byte[] dex(byte[] apk) throws Exception {
+        byte[] result = null;
+        int dexCount = 0;
         try (ZipInputStream zip = new ZipInputStream(new java.io.ByteArrayInputStream(apk))) {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
-                if ("classes.dex".equals(entry.getName())) return readBounded(zip, 4 * 1024 * 1024);
+                if (entry.getName().matches("classes[0-9]*\\.dex")) dexCount++;
+                if ("classes.dex".equals(entry.getName())) result = readBounded(zip, 4 * 1024 * 1024);
             }
         }
-        throw new AssertionError("generated fixture has no DEX");
+        check(dexCount == 1 && result != null, "research fixture must contain exactly classes.dex");
+        return result;
     }
     private void checkUninstalled() throws Exception {
         try { context.getPackageManager().getApplicationInfo("com.privacydecoy.probe", 0); }

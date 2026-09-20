@@ -53,6 +53,7 @@ public final class IsolatedProbeService extends Service {
                 }
             } catch (Exception | LinkageError failure) {
                 result = new Bundle(); result.putString("error", "initialization-or-probe-failed");
+                result.putString("errorPhase", phase);
                 Throwable cause = failure instanceof java.lang.reflect.InvocationTargetException
                     ? failure.getCause() : failure;
                 // Fixed phase and exception category only; no exception messages or stack traces.

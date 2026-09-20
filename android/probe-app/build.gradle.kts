@@ -10,6 +10,8 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "research-only"
+        // This deliberately small experiment transfers only classes.dex.
+        multiDexEnabled = false
         ndk { abiFilters += listOf("x86_64", "arm64-v8a") }
     }
     externalNativeBuild { cmake { path = file("src/main/cpp/CMakeLists.txt"); version = "3.22.1" } }
