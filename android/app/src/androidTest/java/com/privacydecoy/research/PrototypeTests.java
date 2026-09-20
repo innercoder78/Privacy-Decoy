@@ -32,7 +32,7 @@ public final class PrototypeTests {
         return values;
     }
     private ResearchSession session() throws Exception {
-        ResearchSession s = new ResearchSession(context, UUID.randomUUID().toString(), 1, coverage(), true);
+        ResearchSession s = new ResearchSession(context, UUID.randomUUID().toString().replace("-", ""), 1, coverage(), true);
         s.connect(); return s;
     }
     public void testUnknownCoverageBlocksBeforeProbeExecution() throws Exception {
@@ -41,6 +41,7 @@ public final class PrototypeTests {
             assertBlocked(new ResearchSession(context, "blocked", 1, values, true));
         }
         assertBlocked(new ResearchSession(context, "bad/session", 1, coverage(), true));
+        assertBlocked(new ResearchSession(context, "bad-instance", 1, coverage(), true));
         assertBlocked(new ResearchSession(context, "failed", 1, coverage(), false));
     }
     private static void assertBlocked(ResearchSession s) throws Exception {

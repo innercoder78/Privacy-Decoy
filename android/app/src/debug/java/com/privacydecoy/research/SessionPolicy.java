@@ -18,7 +18,8 @@ public final class SessionPolicy {
     public SessionPolicy(String id, long epoch) { this.id = id; this.epoch = epoch; }
     public synchronized boolean prepare(Map<String, Coverage> coverage, boolean initialized) {
         if (state != State.NEW) return false;
-        boolean valid = id != null && id.matches("[a-zA-Z0-9-]{1,64}") && epoch > 0 && initialized;
+        // Match bindIsolatedService's public instance-name contract before binding.
+        boolean valid = id != null && id.matches("[a-zA-Z0-9_.]{1,64}") && epoch > 0 && initialized;
         valid &= coverage != null && MANDATORY.stream().allMatch(k -> coverage.get(k) == Coverage.VerifiedForPrototype);
         state = valid ? State.READY : State.BLOCKED;
         return valid;

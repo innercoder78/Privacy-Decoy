@@ -19,14 +19,19 @@ public final class PrototypeTestRunner extends Instrumentation {
             Bundle status = new Bundle(); status.putString("id", "PrivacyDecoyPrototype");
             status.putString("class", PrototypeTests.class.getName()); status.putString("test", tests[i].getName());
             status.putInt("numtests", tests.length); status.putInt("current", i + 1); sendStatus(1, status);
-            try { tests[i].invoke(new PrototypeTests(this)); status.putString("stream", "."); sendStatus(0, status); }
+            try {
+                tests[i].invoke(new PrototypeTests(this)); status.putString("stream", "."); sendStatus(0, status);
+                android.util.Log.i("PD_PR4", "PASS " + tests[i].getName());
+            }
             catch (Exception e) {
                 failures++;
                 Throwable cause = e.getCause();
                 // Our assertions contain fixed messages only. Never report arbitrary platform exception payloads.
-                String detail = cause instanceof AssertionError ? cause.getMessage() : "platform-or-harness-exception";
+                String detail = cause instanceof AssertionError ? cause.getMessage()
+                    : "platform-or-harness-exception:" + (cause == null ? "unknown" : cause.getClass().getSimpleName());
                 status.putString("stack", tests[i].getName() + ": " + detail);
                 status.putString("stream", "FAIL " + tests[i].getName() + ": " + detail + "\n"); sendStatus(-2, status);
+                android.util.Log.i("PD_PR4", "FAIL " + tests[i].getName() + ": " + detail);
             }
         }
         Bundle result = new Bundle();

@@ -21,6 +21,8 @@ public final class SessionPolicyTest {
     }
     @Test public void malformedSessionAndFailedInitializationBlock() {
         assertFalse(new SessionPolicy("", 1).prepare(coverage(), true));
+        assertFalse(new SessionPolicy("bad-instance", 1).prepare(coverage(), true));
+        assertTrue(new SessionPolicy("valid_instance.1", 1).prepare(coverage(), true));
         assertFalse(new SessionPolicy("a", 0).prepare(coverage(), true));
         assertFalse(new SessionPolicy("a", 1).prepare(coverage(), false));
         assertFalse(new SessionPolicy("a", 1).prepare(null, true));
