@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Fixed queries avoid confusing package visibility filtering with non-installation. -->
+    <queries><package android:name="com.privacydecoy.probe" /></queries>
+    <application>
+        <service android:name="com.privacydecoy.research.IsolatedProbeService"
+            android:exported="false" android:isolatedProcess="true" />
+    </application>
+</manifest>

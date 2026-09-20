@@ -59,3 +59,24 @@ Do not reconstruct or encode the JAR as text. CI pins official GitHub actions
 to immutable SHAs with their release tags in comments; update them deliberately.
 
 No open-source license has been selected by this PR.
+
+## PR 4 controlled containment research
+
+Install official SDK packages `ndk;27.2.12479018` and `cmake;3.22.1` in addition
+to the foundation toolchain. For the CI emulator also install `emulator`,
+`platform-tools`, and `system-images;android-35;google_apis;x86_64`.
+
+From `android/`, run the normal validation plus
+`./gradlew :app:assembleDebugAndroidTest :app:connectedDebugAndroidTest` against
+a controlled device. On Linux, `bash tools/run-containment-emulator.sh` creates
+and wipes the dedicated `privacy-decoy-pr4` AVD, bounds boot waiting, verifies
+API/ABI and test discovery, and shuts down the emulator on exit. Do not use that
+AVD name for personal work. Do not install `probe-app-debug.apk`: Gradle copies
+the unchanged generated artifact under `app/build/generated/probeAssets`.
+
+The custom platform Instrumentation runner avoids a new Maven dependency and
+emits the standard per-test status protocol consumed by connectedAndroidTest.
+Passing `testKnownGap...` tests means an adverse observation was reproduced.
+Record actual results in [PR 4 evidence](../docs/evidence/pr4-containment-prototype.md);
+do not treat a green observational test as a privacy guarantee. Both CI jobs
+must pass before merge readiness. PR 5 remains separate; PR 6 remains mandatory.
