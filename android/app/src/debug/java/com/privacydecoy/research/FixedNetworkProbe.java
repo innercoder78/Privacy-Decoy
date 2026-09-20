@@ -48,7 +48,14 @@ public final class FixedNetworkProbe {
     }
     public static String category(Throwable failure) {
         for (Throwable e=failure; e!=null; e=e.getCause()) {
+
             if (e instanceof SecurityException) return "denied";
+            if (e instanceof SocketException) {
+                // Some libcore paths flatten ErrnoException into a SocketException message.
+                // Recognize only fixed errno tokens; never return or log that message.
+                String message=e.getMessage();
+                if(message!=null && (message.contains("EACCES") || message.contains("EPERM") || message.contains("Permission denied"))) return "denied";
+            }
             if (e instanceof ErrnoException) {
                 int n=((ErrnoException)e).errno;
                 if (n==OsConstants.EACCES || n==OsConstants.EPERM) return "denied";

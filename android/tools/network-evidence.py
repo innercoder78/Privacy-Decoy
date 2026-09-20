@@ -53,18 +53,20 @@ def run_case(name,mode):
         'com.privacydecoy.app.test/com.privacydecoy.research.PrototypeTestRunner',timeout=150)
     end=time.time();observations=logs()
     # Both the runner summary and a fixed PASS record are mandatory (no skip/zero-test escape).
-    if 'Tests run: 1, Failures: 0' not in output or 'PASS '+name not in observations:
+    passed='Tests run: 1, Failures: 0' in output and 'PASS '+name in observations
+    if not passed:
         for line in observations.splitlines():
             if line.startswith(('FAIL '+name+':', 'DIRECT ', 'BEGIN ', 'END ', 'STATE ')) and len(line)<400:
                 print(line,flush=True)
-        raise AssertionError('Network test failed: '+name)
+        print('DEVICE_CASE_FAILED '+name,flush=True)
+    assert 'Tests run: 1, Failures:' in output, 'Missing device execution: '+name
     assert 'INSTRUMENTATION_FAILED' not in output, 'Instrumentation failed: '+name
     safe=[]
     allowed=re.compile(r'^(?:PASS test[A-Za-z0-9]+|(?:DIRECT|BOUNDARY|ROUTE|BEGIN|END|PHYSICAL|OLD_SOCKET_SEND_BEGIN|OLD_SOCKET_SEND|REGISTRY|LOSS|LOSS_OS_FALLBACK|RECONNECT|REPLACEMENT|LOCKDOWN_ACTIVE|LOCKDOWN_LOSS|STATE|PACKET) [A-Za-z0-9_= .-]+)$')
     for line in observations.splitlines():
         if allowed.fullmatch(line):safe.append(line)
     for line in safe: print(name+' '+line,flush=True)
-    return dict(name=name,start=begin,end=end,observations=safe)
+    return dict(name=name,start=begin,end=end,observations=safe,passed=passed)
 
 class TCP(socketserver.BaseRequestHandler):
     def handle(self):
@@ -79,7 +81,7 @@ class TCPServer(socketserver.ThreadingTCPServer):
     daemon_threads=True
 def exercise():
     OUT.mkdir(parents=True,exist_ok=True)
-    servers=[TCPServer(('127.0.0.1',46151),TCP),socketserver.ThreadingUDPServer(('127.0.0.1',46152),UDP)]
+    servers=[TCPServer(('127.0.0.1',46151),TCP),TCPServer(('127.0.0.1',46153),TCP),socketserver.ThreadingUDPServer(('127.0.0.1',46152),UDP)]
     try:
         for server in servers:threading.Thread(target=server.serve_forever,daemon=True).start()
         for pkg in (A,B):adb('shell','appops','set',pkg,'ACTIVATE_VPN','allow')
@@ -112,6 +114,7 @@ TARGETS={ipaddress.ip_address(s).packed:c for s,c in [
 def packets(path):
     # Decode only link/IP/transport headers. Never inspect or retain payload bytes.
     with path.open('rb') as f:
+        file_size=path.stat().st_size
         header=f.read(24);assert len(header)==24,'Capture missing header'
         assert header[:4] in (b'\xd4\xc3\xb2\xa1',b'\xa1\xb2\xc3\xd4'),'Unsupported capture format'
         endian='<' if header[:4]==b'\xd4\xc3\xb2\xa1' else '>'
@@ -122,7 +125,7 @@ def packets(path):
             if not h:break
             assert len(h)==16,'Truncated capture record'
             sec,usec,size,_=struct.unpack(endian+'IIII',h)
-            assert size<=262144,'Invalid capture record size'
+            assert size<=262144 and f.tell()+size<=file_size,'Invalid or truncated capture record'
             # Read at most 128 header bytes; skip all remaining captured bytes.
             p=f.read(min(size,128));f.seek(max(0,size-128),1)
             offset=14 if link==1 else 0
@@ -142,7 +145,7 @@ def packets(path):
             category=TARGETS.get(dest)
             if category is None or protocol not in (6,17) or len(p)<transport+4:continue
             port=struct.unpack('!H',p[transport+2:transport+4])[0]
-            if port not in (46151,46152,53):continue
+            if port not in (46151,46152,46153,46154,53):continue
             data=False
             if protocol==6 and len(p)>=transport+20:
                 data=iplen-ihl-((p[transport+12]>>4)*4)>0
@@ -161,7 +164,8 @@ def analyze():
             assert not rows,'Fixed target escaped full VPN route'
             for op in ('JAVA_TCP4','JAVA_UDP4','NATIVE_TCP4','NATIVE_UDP4','DNS_LOOKUP_TEST'):
                 window=obs.split('BEGIN op='+op+'\n')[-1].split('END op='+op)[0]
-                assert 'PACKET ' in window,'Missing per-operation TUN evidence: '+op
+                port={'JAVA_TCP4':46151,'JAVA_UDP4':46152,'NATIVE_TCP4':46153,'NATIVE_UDP4':46154,'DNS_LOOKUP_TEST':53}[op]
+                assert re.search(r'PACKET .* port='+str(port)+r' ',window),'Missing per-operation TUN evidence: '+op
             assert 'category=synthetic-dns port=53' in obs,'Missing controlled DNS TUN evidence'
             case['ipv6']='Preliminary evidence' if 'category=documentation-v6' in obs else 'Unknown'
         if name in ('testKnownGapPerAppExclude','testKnownGapPhysicalSelectionAllowed'):
@@ -185,6 +189,7 @@ def analyze():
             assert not rows,'SEVERE: fixed traffic escaped verified lockdown'
         case['physicalCounts']={str(k):v for k,v in collections.Counter((r['family'],r['protocol'],r['category'],r['port']) for r in rows).items()}
         print('PCAP '+name+' '+json.dumps(case['physicalCounts']),flush=True)
+    assert all(c['passed'] for c in report['cases']), 'One or more network device cases failed'
     OUT.joinpath('summary.json').write_text(json.dumps(report,indent=2))
     print('NETWORK_EVIDENCE tests='+str(len(report['cases']))+' requiredEvidence=passed lockdown='+report['lockdown'])
 

@@ -28,7 +28,7 @@ after the default INTERNET denial; the broker alone explicitly allows INTERNET.
 | Trusted background broker | `com.privacydecoy.app:networkresearch`, same application UID/package as management; debug INTERNET allowed |
 | VPN A | separate `com.privacydecoy.externalvpnfixture` package/UID; dropping TUN, no forwarding |
 | VPN B | generated `.replacement` application ID from the same source; real Android provider replacement |
-| Host helper | loopback-only TCP 46151 and UDP 46152 servers on the disposable runner |
+| Host helper | loopback-only TCP 46151/46153 and UDP 46152 servers on the disposable runner |
 | Fixed subprocess | PR 4 UID observation only; networking Not exercised |
 
 External per-app VPN applies to the broker's Android application identity, not

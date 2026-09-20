@@ -29,13 +29,13 @@ Keep the repository root deliberately clean:
 
 ```text
 Privacy-Decoy/
-â”œâ”€â”€ .github/
-â”œâ”€â”€ android/
-â”œâ”€â”€ docs/
-â”œâ”€â”€ .editorconfig
-â”œâ”€â”€ .gitattributes
-â”œâ”€â”€ .gitignore
-â””â”€â”€ README.md
+├── .github/
+├── android/
+├── docs/
+├── .editorconfig
+├── .gitattributes
+├── .gitignore
+└── README.md
 ```
 
 Android-specific source, Gradle files, wrappers, configuration, and tooling belong

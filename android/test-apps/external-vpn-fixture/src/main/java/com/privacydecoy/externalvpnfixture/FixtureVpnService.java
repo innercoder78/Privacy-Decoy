@@ -61,7 +61,7 @@ public final class FixtureVpnService extends VpnService {
                     else if(eq(packet,16,new int[]{198,51,100,7}))category="documentation-v4";
                 } else if(eq(packet,24,new int[]{32,1,13,184,0,0,0,0,0,0,0,0,0,0,0,7}))category="documentation-v6";
                 // Unknown traffic never reveals an address or arbitrary port/protocol.
-                if("other".equals(category)||!(port==46151||port==46152||port==53)) {category="other";port=0;}
+                if("other".equals(category)||!(port==46151||port==46152||port==46153||port==46154||port==53)) {category="other";port=0;}
                 if(count<128) {
                     count++;
                     Log.i("PD_PR5_VPN","PACKET mode="+mode+" family="+family+" protocol="+

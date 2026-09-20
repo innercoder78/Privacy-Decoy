@@ -58,18 +58,23 @@ public final class NetworkTests {
     public void testDirectProcessRestrictions()throws Exception{
         try(ResearchSession s=session()){
             check(s.policy.uid()!=android.os.Process.myUid(),"probe is not isolated");
-            check("denied".equals(FixedNetworkProbe.run("JAVA_TCP4")),"management TCP not permission denied");
-            evidence("DIRECT producer=management op=JAVA_TCP4 result=denied");
+            String management=FixedNetworkProbe.run("JAVA_TCP4");
+            evidence("DIRECT producer=management op=JAVA_TCP4 result="+management);
+            boolean restricted="denied".equals(management);
             for(String op:new String[]{"JAVA_TCP4","JAVA_UDP4","NATIVE_TCP4","NATIVE_UDP4","JAVA_UDP6","NATIVE_UDP6"}){
                 String result=s.directNetwork(op).getString("result");
                 evidence("DIRECT producer=isolated op="+op+" result="+result);
-                check("denied".equals(result),"isolated socket not permission denied");
+                restricted &= "denied".equals(result);
             }
+            check(restricted,"direct socket restriction needs investigation");
         }
     }
     public void testBrokerSessionBoundary()throws Exception{
         try(Broker broker=new Broker();ResearchSession a=session();ResearchSession b=session()){
+            long before=broker.route("calibration-off");
+            check("denied".equals(broker.request(a,before,"HOST_UDP4",0).getString("result")),"unregistered isolated caller accepted");
             broker.register(a);broker.register(b);long g=broker.route("calibration-off");
+            check("success".equals(broker.op(b,g,"HOST_UDP4")),"active B denied");
             check("success".equals(broker.op(a,g,"HOST_UDP4")),"active A denied");
             Bundle claim=ResearchSession.claim(a.id,a.epoch,"HOST_UDP4");claim.putLong("generation",g);
             check("denied".equals(b.network(broker.binder,claim,NetworkWire.REQUEST).getString("result")),"B claimed A");
@@ -165,12 +170,18 @@ public final class NetworkTests {
     public void testRealSessionSocketRevocation()throws Exception{
         try(Broker b=new Broker();ResearchSession s=session()){
             b.register(s);long g=b.route("calibration-off");
-            check("success".equals(b.request(s,g,"OPEN_CONTROLLED_TCP_CONNECTION",0).getString("result")),"owned open failed");
+            Bundle first=b.request(s,g,"OPEN_CONTROLLED_TCP_CONNECTION",0);
+            check("success".equals(first.getString("result")),"owned open failed");
+            long id=first.getLong("connection");
+            check("success".equals(b.request(s,g,"SEND_ON_CONTROLLED_CONNECTION",id).getString("result")),"owned send failed");
+            check("success".equals(b.request(s,g,"CLOSE_CONTROLLED_CONNECTION",id).getString("result")),"owned close failed");
+            check("closed".equals(b.request(s,g,"SEND_ON_CONTROLLED_CONNECTION",id).getString("result")),"explicitly closed socket usable");
+            check("success".equals(b.request(s,g,"OPEN_CONTROLLED_TCP_CONNECTION",0).getString("result")),"reopened socket failed");
             s.revoke();check(b.state().getInt("owned")==0&&b.state().getInt("physicallyClosed")>0,"session revoke did not close Socket");
             try(ResearchSession dead=session()){
                 b.register(dead);check("success".equals(b.request(dead,g,"OPEN_CONTROLLED_TCP_CONNECTION",0).getString("result")),"death socket open failed");
                 dead.killAndAwaitDeath();Thread.sleep(300);
-                check(b.state().getInt("owned")==0&&b.state().getInt("physicallyClosed")>=2,"session death did not close Socket");
+                check(b.state().getInt("owned")==0&&b.state().getInt("physicallyClosed")>=3,"session death did not close Socket");
             }
             evidence("REGISTRY sessionClosed=true deathClosed=true");
         }

@@ -49,8 +49,8 @@ JNIEXPORT jint JNICALL Java_com_privacydecoy_research_nativeprobe_NativeProbe_ne
     int fd = socket(operation == 2 ? AF_INET6 : AF_INET,
         (operation == 0 ? SOCK_STREAM : SOCK_DGRAM) | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
     if (fd < 0) return network_category(errno);
-    struct sockaddr_in v4 = {.sin_family = AF_INET, .sin_port = htons(operation == 0 ? 46151 : 46152)};
-    struct sockaddr_in6 v6 = {.sin6_family = AF_INET6, .sin6_port = htons(46152)};
+    struct sockaddr_in v4 = {.sin_family = AF_INET, .sin_port = htons(operation == 0 ? 46153 : 46154)};
+    struct sockaddr_in6 v6 = {.sin6_family = AF_INET6, .sin6_port = htons(46154)};
     inet_pton(AF_INET, operation == 0 ? "10.0.2.2" : "198.51.100.7", &v4.sin_addr);
     inet_pton(AF_INET6, "2001:db8::7", &v6.sin6_addr);
     struct sockaddr *address = operation == 2 ? (struct sockaddr*)&v6 : (struct sockaddr*)&v4;
