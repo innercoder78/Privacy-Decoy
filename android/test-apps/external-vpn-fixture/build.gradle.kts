@@ -4,7 +4,7 @@ android {
     namespace = "com.privacydecoy.externalvpnfixture"
     compileSdk = 37
     defaultConfig {
-        applicationId = "com.privacydecoy.externalvpnfixture"
+        applicationId = providers.gradleProperty("fixtureApplicationId").getOrElse("com.privacydecoy.externalvpnfixture")
         minSdk = 31
         targetSdk = 37
         versionCode = 1

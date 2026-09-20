@@ -3,8 +3,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <queries><package android:name="com.privacydecoy.app" /></queries>
     <application android:allowBackup="false" android:label="External VPN test fixture"
         android:usesCleartextTraffic="false">
+        <activity android:name=".FixtureController" android:exported="true" />
         <service android:name=".FixtureVpnService" android:exported="true"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="specialUse">

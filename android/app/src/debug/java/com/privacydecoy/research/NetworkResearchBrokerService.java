@@ -2,53 +2,178 @@ package com.privacydecoy.research;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
-import android.os.Parcel;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
+import android.net.*;
+import android.os.*;
+import java.net.*;
+import java.util.*;
 
-/**
- * Trusted debug-only broker. It never executes probe code and accepts a fixed enum,
- * fixed synthetic destinations and empty/synthetic payloads only. It is not a product API.
- */
+/** Trusted debug broker. Registered isolated callers receive no OS socket capabilities. */
 public final class NetworkResearchBrokerService extends Service {
-    static final String TOKEN = "com.privacydecoy.networkresearch.v1";
-    static final String TCP4 = "10.0.2.2";
-    static final String RESERVED4 = "198.51.100.7";
-    static final int TCP_PORT = 46151, UDP_PORT = 46152;
-    private final NetworkGate gate = new NetworkGate();
-    private final Binder endpoint = new Binder() {
-        @Override protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) {
-            String result = "denied";
-            try {
-                data.enforceInterface(TOKEN);
-                long generation = data.readLong();
-                NetworkGate.Operation operation = NetworkGate.Operation.values()[data.readInt()];
-                if (data.dataAvail() != 0 || !gate.authorize(generation, operation)) throw new SecurityException();
-                result = executeFixed(operation);
-            } catch (SecurityException | IllegalArgumentException e) { result = "denied"; }
-              catch (Exception e) { result = "io-failure"; }
-            reply.writeNoException(); reply.writeString(result); return true;
+    private final NetworkGate gate=new NetworkGate();
+    private final Map<String,Registration> sessions=new HashMap<>();
+    private final Map<Long,Owned> sockets=new HashMap<>();
+    private long nextId=1;
+    private int physicallyClosed;
+    private ConnectivityManager connectivity;
+    // OS calibration is manager-only, deliberately outside the hostile authority registry.
+    // It exists solely to distinguish platform old-socket behavior from broker revocation.
+    private Socket osCalibration;
+    private static final class Registration {
+        final SessionPolicy policy; final IBinder lifetime; final IBinder.DeathRecipient death;
+        Registration(SessionPolicy p,IBinder b,IBinder.DeathRecipient d) {policy=p;lifetime=b;death=d;}
+    }
+    private static final class Owned {
+        final String session; final Socket socket;
+        Owned(String s,Socket value) {session=s;socket=value;}
+    }
+    private final ConnectivityManager.NetworkCallback callback=new ConnectivityManager.NetworkCallback() {
+        @Override public void onAvailable(Network n) { invalidate(); }
+        @Override public void onLost(Network n) { invalidate(); }
+        @Override public void onCapabilitiesChanged(Network n,NetworkCapabilities c) { invalidate(); }
+        @Override public void onLinkPropertiesChanged(Network n,LinkProperties p) { invalidate(); }
+    };
+    @Override public void onCreate() {
+        super.onCreate(); connectivity=getSystemService(ConnectivityManager.class);
+        connectivity.registerDefaultNetworkCallback(callback);
+    }
+    private synchronized void invalidate() { gate.vpnLost(); closeAll(); }
+    private void closeAll() {
+        for (Owned owned:sockets.values()) {
+            try { owned.socket.close(); } catch (java.io.IOException ignored) {}
+            if (owned.socket.isClosed()) physicallyClosed++;
+        }
+        sockets.clear();
+    }
+    private void revoke(String id,boolean dead) {
+        Registration r=sessions.remove(id);
+        if (r!=null) {
+            if (dead) r.policy.died(); else r.policy.revoke();
+            r.lifetime.unlinkToDeath(r.death,0);
+        }
+        closeAll();
+    }
+    private final Binder endpoint=new Binder() {
+        @Override protected boolean onTransact(int code,Parcel data,Parcel reply,int flags) {
+            if (code<NetworkWire.REQUEST || code>NetworkWire.OS_CLOSE) return false;
+            Bundle result=new Bundle(); result.putString("result","denied");
+            synchronized(NetworkResearchBrokerService.this) {
+                try {
+                    data.enforceInterface(NetworkWire.TOKEN);
+                    if (data.dataSize()>4096) throw new SecurityException();
+                    Bundle input=data.readBundle(getClass().getClassLoader());
+                    if (input==null || data.dataAvail()!=0) throw new SecurityException();
+                    int uid=Binder.getCallingUid(),pid=Binder.getCallingPid();
+                    if (code==NetworkWire.REQUEST) {
+                        result=request(uid,pid,input);
+                    } else {
+                        // Only the trusted application identity can register or validate routes.
+                        // An isolated UID cannot acquire control by binding or transferring this Binder.
+                        if (uid!=android.os.Process.myUid() || pid==android.os.Process.myPid()) throw new SecurityException();
+                        result=control(code,input);
+                    }
+                } catch (Exception | LinkageError denied) { result.putString("result","denied"); }
+            }
+            if (reply!=null) {reply.writeNoException();reply.writeBundle(result);} return true;
         }
     };
-    @Override public IBinder onBind(Intent intent) { return endpoint; }
-    private static String executeFixed(NetworkGate.Operation operation) throws Exception {
-        switch (operation) {
-            case JAVA_TCP4:
-                try (Socket socket = new Socket()) { socket.connect(new java.net.InetSocketAddress(TCP4, TCP_PORT), 1000); }
-                return "success";
-            case JAVA_UDP4:
-                try (DatagramSocket socket = new DatagramSocket()) {
-                    byte[] value = {0x50, 0x44, 0x35};
-                    socket.send(new DatagramPacket(value, value.length, InetAddress.getByName(RESERVED4), UDP_PORT));
+    private Bundle request(int uid,int pid,Bundle b) throws Exception {
+        if (!Set.of("session","epoch","generation","op","connection").containsAll(b.keySet())) throw new SecurityException();
+        String id=b.getString("session"),op=b.getString("op");
+        Registration r=sessions.get(id);
+        NetworkGate.Operation operation;
+        try { operation=NetworkGate.Operation.valueOf(op); } catch (RuntimeException e) {throw new SecurityException();}
+        if (r==null || !r.lifetime.isBinderAlive() ||
+                !r.policy.authorize(uid,pid,id,b.getLong("epoch"),"ping") ||
+                !gate.authorize(b.getLong("generation"),operation)) throw new SecurityException();
+        Bundle out=new Bundle(); String status="success";
+        long identity=Binder.clearCallingIdentity();
+        try {
+            switch(operation) {
+                case OPEN_CONTROLLED_TCP_CONNECTION:
+                    if(sockets.size()>=8) throw new SecurityException();
+                    Socket socket=FixedNetworkProbe.open(); long number=nextId++;
+                    sockets.put(number,new Owned(id,socket)); out.putLong("connection",number); break;
+                case SEND_ON_CONTROLLED_CONNECTION:
+                case CLOSE_CONTROLLED_CONNECTION:
+                    Owned owned=sockets.get(b.getLong("connection"));
+                    if(owned==null || !owned.session.equals(id)) {status="closed";break;}
+                    if(operation==NetworkGate.Operation.CLOSE_CONTROLLED_CONNECTION) {
+                        owned.socket.close(); sockets.remove(b.getLong("connection"));
+                        if(owned.socket.isClosed()) physicallyClosed++;
+                    } else {owned.socket.getOutputStream().write(53);owned.socket.getOutputStream().flush();}
+                    break;
+                default: status=FixedNetworkProbe.run(op);
+            }
+        } catch(java.io.IOException e) {status=FixedNetworkProbe.category(e);}
+          finally {Binder.restoreCallingIdentity(identity);}
+        out.putString("result",status); return out;
+    }
+    private Bundle control(int code,Bundle b) throws Exception {
+        Bundle out=new Bundle();out.putString("result","success");
+        switch(code) {
+            case NetworkWire.REGISTER:
+                String id=b.getString("session");
+                if(sessions.containsKey(id) || sessions.size()>=8) throw new SecurityException();
+                SessionPolicy p=new SessionPolicy(id,b.getLong("epoch"));
+                Map<String,SessionPolicy.Coverage> coverage=new HashMap<>();
+                for(String key:SessionPolicy.MANDATORY) coverage.put(key,SessionPolicy.Coverage.VerifiedForPrototype);
+                if(!p.prepare(coverage,true) || !p.register(b.getInt("uid"),b.getInt("pid"),android.os.Process.myUid()))
+                    throw new SecurityException();
+                IBinder lifetime=b.getBinder("lifetime");
+                if(lifetime==null || !lifetime.isBinderAlive()) throw new SecurityException();
+                IBinder.DeathRecipient death=()-> {synchronized(this){revoke(id,true);}};
+                lifetime.linkToDeath(death,0); sessions.put(id,new Registration(p,lifetime,death));break;
+            case NetworkWire.ROUTE:
+                closeAll();
+                String route=b.getString("route","");
+                if("verified".equals(route)) gate.validateVpnRoute();
+                else if("calibration-off".equals(route)) gate.setExplicitOff(true);
+                else gate.vpnLost();
+                break;
+            case NetworkWire.REVOKE: revoke(b.getString("session"),false);break;
+            case NetworkWire.STATE:
+                Network active=connectivity.getActiveNetwork();
+                NetworkCapabilities c=active==null?null:connectivity.getNetworkCapabilities(active);
+                LinkProperties links=active==null?null:connectivity.getLinkProperties(active);
+                out.putBoolean("vpn",c!=null&&c.hasTransport(NetworkCapabilities.TRANSPORT_VPN));
+                boolean v4=false,v6=false;
+                if(links!=null) for(RouteInfo r:links.getRoutes()) if(r.isDefaultRoute()) {
+                    if(r.getDestination().getAddress() instanceof Inet4Address)v4=true;else v6=true;
                 }
-                return "success";
-            case DNS_LOOKUP_TEST:
-                InetAddress.getAllByName("route-test.invalid"); return "success";
-            default: return "not-exercised";
+                out.putBoolean("default4",v4);out.putBoolean("default6",v6);break;
+            case NetworkWire.CALIBRATE:
+                // Fixed physical Network test is trusted-harness-only, never a hostile operation.
+                if(!"PHYSICAL_TCP4".equals(b.getString("op"))) throw new SecurityException();
+                out.putString("result",physical());break;
+            case NetworkWire.OS_OPEN:
+                closeOs();osCalibration=FixedNetworkProbe.open();break;
+            case NetworkWire.OS_SEND:
+                if(osCalibration==null || osCalibration.isClosed()) out.putString("result","closed");
+                else try {osCalibration.getOutputStream().write(53);osCalibration.getOutputStream().flush();}
+                    catch(Exception e){out.putString("result",FixedNetworkProbe.category(e));}
+                break;
+            case NetworkWire.OS_CLOSE:closeOs();break;
+            default:throw new SecurityException();
         }
+        out.putLong("generation",gate.generation());out.putInt("owned",sockets.size());
+        out.putInt("physicallyClosed",physicallyClosed);return out;
+    }
+    private String physical() {
+        for(Network n:connectivity.getAllNetworks()) {
+            NetworkCapabilities c=connectivity.getNetworkCapabilities(n);
+            if(c==null||c.hasTransport(NetworkCapabilities.TRANSPORT_VPN))continue;
+            try(Socket socket=n.getSocketFactory().createSocket()) {
+                socket.connect(new InetSocketAddress(FixedNetworkProbe.HOST,FixedNetworkProbe.TCP),1200);
+                socket.getOutputStream().write(53);return "success";
+            } catch(Exception e){return FixedNetworkProbe.category(e);}
+        }
+        return "unavailable";
+    }
+    private void closeOs() {try{if(osCalibration!=null)osCalibration.close();}catch(Exception ignored){}osCalibration=null;}
+    @Override public IBinder onBind(Intent intent){return endpoint;}
+    @Override public synchronized void onDestroy(){
+        connectivity.unregisterNetworkCallback(callback);invalidate();closeOs();
+        for(String id:new ArrayList<>(sessions.keySet()))revoke(id,false);
+        super.onDestroy();
     }
 }

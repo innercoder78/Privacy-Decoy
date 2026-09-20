@@ -8,7 +8,7 @@ import android.os.RemoteException;
 /** Fixed research-only protocol, no arbitrary broker operations or file grants. */
 final class Wire {
     static final String TOKEN = "com.privacydecoy.research.v1";
-    static final int INIT = 1, RUN = 2, REQUEST = 3, KILL = 4, COUNT = 5;
+    static final int INIT = 1, RUN = 2, REQUEST = 3, KILL = 4, COUNT = 5, NETWORK = 6, DIRECT_NETWORK = 7;
     static Bundle call(IBinder binder, int code, Bundle input) throws RemoteException {
         Parcel data = Parcel.obtain(), reply = Parcel.obtain();
         try {

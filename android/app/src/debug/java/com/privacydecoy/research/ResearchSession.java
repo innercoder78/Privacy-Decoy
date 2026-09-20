@@ -112,15 +112,26 @@ public final class ResearchSession implements ResearchBoundary {
         Bundle input = claim(claim, generation, "ping"); input.putBinder("targetBroker", owner.broker);
         return call(Wire.REQUEST, input).getBoolean("accepted");
     }
+
+    public IBinder researchLifetime() { return remote; }
+    private Runnable networkRevocation = () -> {};
+    public synchronized void onNetworkRevocation(Runnable callback) { networkRevocation = callback; }
+    public Bundle directNetwork(String operation) throws Exception {
+        Bundle input=new Bundle(); input.putString("op",operation); return call(Wire.DIRECT_NETWORK,input);
+    }
+    public Bundle network(IBinder endpoint, Bundle request, int transaction) throws Exception {
+        Bundle input=new Bundle(request); input.putBinder("networkBroker",endpoint);
+        input.putInt("transaction",transaction); return call(Wire.NETWORK,input);
+    }
     public int invocationCount() throws Exception { return call(Wire.COUNT, new Bundle()).getInt("count"); }
     public void killAndAwaitDeath() throws Exception {
         // Fault injection: no prior revoke and no synchronous call failure masking death handling.
         Wire.simulateUnexpectedDeath(remote);
         if (!death.await(10, TimeUnit.SECONDS)) throw new IllegalStateException("Death not observed");
     }
-    @Override public synchronized void revoke() { policy.revoke(); }
+    @Override public synchronized void revoke() { policy.revoke(); networkRevocation.run(); }
     @Override public synchronized void close() {
-        policy.revoke();
+        policy.revoke(); networkRevocation.run();
         if (bound) { context.unbindService(connection); bound = false; }
         ipc.shutdownNow();
     }

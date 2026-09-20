@@ -75,7 +75,10 @@ a baseline. The debug APK is generated under `app/build/outputs/apk/debug/`
 and must not be committed. Debug builds use ordinary development signing;
 there is no production signing configuration.
 
-PR 5 pure gate tests run as part of `testDebugUnitTest`. The separate fixture can
+PR 5 pure gate tests run as part of `testDebugUnitTest`. The dedicated
+`network-feasibility` CI job runs the API 35 network suite with fixed host servers,
+a separate dropping VPN, and independent emulator packet capture. Generated
+captures are filtered to fixed headers, never uploaded, and deleted after analysis. The separate fixture can
 be generated with `./gradlew :test-apps:external-vpn-fixture:assembleDebug`; its
 APK is generated output and must not be committed or treated as a built-in VPN.
 See [PR 5 evidence](docs/evidence/pr5-network-feasibility.md).

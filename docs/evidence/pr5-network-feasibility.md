@@ -1,129 +1,106 @@
 # PR 5 protected-network feasibility evidence
 
-## Scope and evidence identity
+## Scope and current validation status
 
-This is a **network feasibility research prototype**, not VPN enforcement and not
-evidence that ordinary applications can be networked safely. The tested source is
-the commit containing this document, based on PR 4 commit
-`6dfbe9698d366e03a1665be7e95bebccb1945ed2`. PR 6 remains the mandatory early
-feasibility/STOP decision.
+Research only: API 35 / Google APIs / x86_64 / debug. PR 6 remains mandatory.
+Starting reviewed commit: `a4437ba4f4b92aa7a25a4fe98e54a268cc07f62e`.
+Device observations for this revision are pending its exact-head Actions execution.
+Local JDK 17 validation passed lintDebug, testDebugUnitTest, assembleDebug,
+assembleDebugAndroidTest and the separate VPN fixture build. These are build/unit
+results, not routing evidence. No production protection is claimed.
 
-The intended device target is debug, API 35, x86_64, Google APIs emulator. At
-authoring time the device route matrix is **Not exercised** because no Android SDK
-or emulator is available locally. Unit/build success must not promote those rows;
-exact-head CI and generated filtered capture are required evidence.
+The original Actions run 35528662036 failed both validation and containment.
+The release check used `merged_manifests` instead of AGP's generated
+`merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml`.
+The locally regenerated release XML contains no networking permissions or research
+components. The replacement ElementTree check rejects networking permissions,
+services and research controller components. The debug APK also omitted the
+default application process from `<processes>`, preventing installation and
+causing zero containment tests. The default process is now explicitly declared
+after the default INTERNET denial; the broker alone explicitly allows INTERNET.
 
-## Architecture under test
+## Producer and authority inventory
 
-Privacy Decoy's main manifest remains permissionless and contains neither a
-`VpnService` nor a network broker. Its debug overlay alone requests `INTERNET` and
-`ACCESS_NETWORK_STATE`, denies `INTERNET` by default with the per-process manifest
-facility, explicitly allows it for `:networkresearch`, and keeps the PR 4 service
-isolated. `NetworkResearchBrokerService` is trusted: it executes no untrusted code
-and exposes fixed operation enums and synthetic destinations/ports. It accepts no
-caller URL, hostname, address, port, payload, file descriptor, or `Network`.
-
-`NetworkGate` defaults Require-VPN on. Unknown routes deny, route transitions
-increment a generation, stale requests deny, reconnect requires revalidation, and
-policy changes discard broker-owned connection identities. This is pure state
-machine evidence only. It does not prove Android routing or close sockets unknown
-to the broker.
-
-The separate `com.privacydecoy.externalvpnfixture` application implements
-`VpnService` solely for the disposable test environment. It is **not Privacy
-Decoy**, is not a dependency/release component, never forwards to the Internet,
-retains at most 128 sanitized header observations in memory, and clears packet
-bytes. Modes are full tunnel, per-app include/exclude, split route, and a
-documentation-only IPv6 route. Android user consent is still required.
-
-## Traffic-producer inventory
-
-| Package/process | Role and identity | INTERNET/socket expectation | Route evidence |
-|---|---|---|---|
-| `com.privacydecoy.app` default | management; app UID/default PID | denied in debug; absent in release | merged-manifest check pending |
-| `com.privacydecoy.app:networkresearch` | trusted broker; same package/app UID, distinct PID; expands TCB | debug INTERNET allow; intended originator | device evidence Not exercised |
-| isolated PR 4 instance | hostile fixture; isolated UID/PID | no permissions of its own plus debug deny | direct tests Not exercised |
-| fixed subprocess | child of isolated fixture | expected to inherit restriction | Not exercised |
-| `com.privacydecoy.externalvpnfixture` | separate external VPN app/UID | owns TUN; no forwarding | fixture build pending locally |
-| instrumentation/host helper | control and host loopback server | no claimed protected traffic | Not exercised |
-
-Logical labels are not OS isolation. The broker's same-package/app-UID relationship
-with management expands the TCB and is not final management separation. Android
-per-app VPN policy cannot be presumed to distinguish future logical protected apps
-sharing this broker identity.
-
-## Requirement traceability
-
-| Requirement | Evidence/state |
+| Producer | Identity and scope |
 |---|---|
-| PD-REQ-003, PD-REQ-070 | main/release has no `VpnService`; separate fixture only; **Preliminary evidence** pending merged-release inspection |
-| PD-REQ-032 | producer inventory and fixed correlation ports defined; **Partial** |
-| PD-REQ-033 | default-on fail-closed generation gate unit tested; real route verification **Gap** |
-| PD-REQ-034 | Java fixed paths scaffolded; native, IPv6, DNS, QUIC and captures **Unknown/Not exercised** |
-| PD-REQ-058 | independent emulator pcap is mandatory but **Not exercised**; self-report is insufficient |
-| PD-REQ-011/013/014/015/021/027/044/045/057 | PR 4 boundaries preserved; no full lifecycle/native mediation claim; revocation logic **Partial** |
+| Default/management + instrumentation | `com.privacydecoy.app`, application UID, default process; debug INTERNET denied |
+| Hostile research service | separate isolated UID/PID per PR 4 session; fixed Java and project-owned native attempts |
+| Trusted background broker | `com.privacydecoy.app:networkresearch`, same application UID/package as management; debug INTERNET allowed |
+| VPN A | separate `com.privacydecoy.externalvpnfixture` package/UID; dropping TUN, no forwarding |
+| VPN B | generated `.replacement` application ID from the same source; real Android provider replacement |
+| Host helper | loopback-only TCP 46151 and UDP 46152 servers on the disposable runner |
+| Fixed subprocess | PR 4 UID observation only; networking Not exercised |
 
-No requirement is globally satisfied by this API 35 prototype.
+External per-app VPN applies to the broker's Android application identity, not
+future logical protected applications sharing that identity. No hostile caller
+receives a Socket, FD, Network, arbitrary destination, port, hostname or payload.
 
-## Exact tests and independent method
+## Device experiment and independent observer
 
-The independent observer must be `emulator -tcpdump <generated build path>` (or an
-equivalent official mechanism). Assertions may parse only `198.51.100.0/24`,
-`2001:db8::/32`, `10.0.2.2`, fixed ports 46151/46152, family, protocol, count, and
-timing. Captures must not be logged, uploaded, or committed. Fixture observation
-plus filtered physical/emulator capture are both required for a green full-tunnel
-claim.
+`network-feasibility` is separate from `containment-prototype`; explicit suites
+keep the original nine tests independent. The network job requires twelve named
+device cases and their PASS records; verified lockdown adds a thirteenth case.
+Missing tests, failures, skips and missing required independent evidence fail.
+Optional lockdown is Unknown unless both `VpnService.isAlwaysOn()` and
+`isLockdownEnabled()` report true after disposable secure-settings setup/reboot.
 
-Pure JVM tests cover: `requireVpnDefaultsOn`, `unknownRouteBlocks`,
-`vpnLossInvalidatesGeneration`, `staleNetworkGenerationRejected`,
-`brokerOwnedConnectionsClosedOnRevocation`,
-`routeRevalidationRequiredAfterReconnect`, and
-`explicitOffModeRequiresWarningState`.
+The official emulator `-tcpdump` facility writes only to ignored build output.
+The emulator is terminated before parsing so the capture writer flushes. Cellular
+networking is used to avoid a newer emulator's separately implemented Wi-Fi path.
+The parser reads at most 128 header bytes per record, skips payload, and retains
+only fixed destination/port/protocol/family/count/timing information. It discards
+unrelated traffic. Raw captures are never printed/uploaded and are deleted by the
+script's cleanup trap. Physical positive controls are required for exclusion,
+split routing, allowed explicit selection and VPN-loss OS fallback calibration.
+The separate VPN emits bounded fixed categories using PD_PR5_VPN. Full-tunnel
+evidence requires each IPv4/native/DNS operation's TUN observation and absence of
+fixed-target physical egress. IPv6 has a separate observation status.
 
-| Question/path | Current result |
+DNS uses one fixed wire query for `route-test.invalid` sent directly to controlled
+synthetic `198.51.100.53:53`. This tests DNS packet routing, not Android resolver
+selection/cache behavior, DNS-over-TLS or DNS-over-HTTPS. No public DNS is queried.
+Java, native, and DNS results are recorded separately. Raw UDP is not QUIC evidence.
+
+## Session and socket boundary
+
+Manager-only registration supplies the UID/PID already observed by the PR 4
+ResearchSession Binder handshake and links to the isolated lifetime Binder.
+Every hostile operation verifies the actual Binder UID/PID, registered session,
+epoch, live lifetime, network generation and finite operation. SessionPolicy is
+reused. Cross-session, stale, malformed, unknown, revoked and dead-session calls
+are tested, including attempted hostile route validation and direct bypass.
+
+The actual broker registry maps opaque IDs to owned Socket objects and checks
+the owner on send/close. Route callbacks, generation changes, revocation, lifetime
+death and destruction close resources. Device tests check Socket.isClosed-derived
+closure counts and failed subsequent sends, rather than only numeric ID removal.
+The pure NetworkGate unit model remains a model, not socket-resource evidence.
+
+A separate manager-only retained Socket calibrates Android's old-connection
+behavior. It is explicitly outside hostile authority and closed by calibration
+cleanup/service destruction. Its physical data is compared with deliberate
+closure of policy-owned sockets. This does not revoke arbitrary native sockets.
+
+## Results pending exact-head device evidence
+
+| Question | Current status |
 |---|---|
-| isolated Java Socket/DatagramSocket | **Unknown — Not exercised** |
-| isolated native TCP/UDP and subprocess | **Gap — not implemented/exercised** |
-| broker Java TCP/IPv4 and UDP/IPv4 | fixed operations implemented; route behavior **Not exercised** |
-| DNS resolver (`route-test.invalid`) | fixed synthetic name; observations **Not exercised** |
-| native TCP/UDP | **Gap**; Java is not native evidence |
-| IPv6 | fixture route exists; socket/packet result **Unknown** |
-| full tunnel/no physical egress | **Unknown — Not exercised** |
-| per-app include/exclude | configuration implemented; expected unsafe exclusion is not evidence; **Not exercised** |
-| split route | configuration implemented; routed/non-routed capture **Not exercised** |
-| active network/capabilities/link properties | **Not exercised**; `TRANSPORT_VPN` cannot prove trust, no logging, exit, or coverage |
-| explicit physical `Network` selection | **Unknown — Not exercised** with/without lockdown |
-| connection opened before VPN | **Unknown — Not exercised** |
-| VPN-loss race without lockdown | **Unknown — Not exercised** |
-| always-on/lockdown loss behavior | **Unknown — Not exercised**; shell setup must verify state and packets |
-| genuine replacement/reconnection | replacement **Unknown**; gate requires new generation/revalidation |
-| background broker service | service exists; independent origin evidence **Not exercised** |
-| Cronet/QUIC | **Unknown/Not exercised**; raw UDP is not QUIC evidence |
+| Management TCP, isolated Java/native TCP/UDP | Implemented; device result pending |
+| Broker caller/session/epoch/generation enforcement | Implemented; device result pending |
+| Full tunnel, include, exclude and split route | Implemented; independent evidence pending |
+| Controlled DNS wire packet | Implemented; independent evidence pending |
+| Java/native IPv6 UDP | Implemented; Unknown until observed |
+| Explicit physical Network | Tests provider default and explicit allowBypass mode separately; pending |
+| Existing connection and policy Socket closure | Implemented; independent evidence pending |
+| VPN-loss race | Immediate gated attempt and separate OS fallback calibration; pending; these are not interchangeable evidence |
+| Always-on/lockdown | Setup attempted in CI; Unknown until platform state and capture verified |
+| Reconnect and genuine provider replacement | Implemented; device result pending |
+| Cronet / QUIC | Unknown / Not exercised |
+| External-lockdown dependency | Unknown until loss/lockdown evidence; no favorable conclusion assumed |
 
-## Preserved PR 4 findings
-
-PR 4 preliminarily showed controlled artifact DEX execution in distinct isolated
-UID/PIDs, separate instance identities, denied synthetic management storage via
-exercised Java/native paths, and working harness session/epoch/revocation checks.
-It also showed gaps: no ordinary Application/ContentProvider lifecycle, no
-uninstalled package Context/resources, no imported `System.loadLibrary`, and
-continued visibility of host Build data, supplied Context implementation classes,
-fixed package/services, and selected proc/sys/property surfaces. The isolated
-process is not a complete mediated Android application runtime. PR 5 does not
-weaken or erase those results.
-
-## Limitations and PR 6 implications
-
-VPN presence is not route proof. Per-app exclusion, split routes, explicit network
-selection, pre-existing sockets, loss races, replacement, IPv6, DNS, native paths,
-helpers, and QUIC require independent tests. Public connectivity APIs may be
-insufficient to establish destination coverage.
-
-This commit therefore cannot yet answer whether no-physical-fallback is possible
-without Android's external **Block connections without VPN** enforcement. The
-dependency is **Unknown** until no-lockdown and verified-lockdown packet tests run.
-If callback detection permits fallback while lockdown blocks it, external
-always-on/lockdown becomes a mandatory user/platform dependency and Privacy Decoy
-must block when unable to verify it. Privacy Decoy itself still must not implement
-`VpnService`. Failure of lockdown to cover the broker identity/configuration is a
-PR 6 blocker.
+TRANSPORT_VPN and default-route booleans are observations only: they do not prove
+provider trust, destination coverage, logging practices, full tunneling or exit
+location. Route authorization comes from trusted test setup, not hostile code or
+broker self-attestation; production route validation remains a PR 6 question.
+PR 4 containment limitations remain unchanged. No requirement is globally
+satisfied by this debug prototype; PD-REQ-033/034/058 require actual observations.

@@ -7,13 +7,14 @@
     <queries><package android:name="com.privacydecoy.probe" /></queries>
     <application>
         <processes>
+            <deny-permission android:name="android.permission.INTERNET" />
+            <process android:process="com.privacydecoy.app" />
             <process android:process=":networkresearch">
                 <allow-permission android:name="android.permission.INTERNET" />
             </process>
             <process android:process=":isolated">
                 <deny-permission android:name="android.permission.INTERNET" />
             </process>
-            <deny-permission android:name="android.permission.INTERNET" />
         </processes>
         <service android:name="com.privacydecoy.research.IsolatedProbeService"
             android:exported="false" android:isolatedProcess="true" android:process=":isolated" />

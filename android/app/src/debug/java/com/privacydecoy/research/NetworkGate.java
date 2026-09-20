@@ -7,7 +7,7 @@ import java.util.Set;
 public final class NetworkGate {
     public enum Route { UNKNOWN, VERIFIED_VPN, EXPLICIT_OFF }
     public enum Operation { JAVA_TCP4, JAVA_UDP4, NATIVE_TCP4, NATIVE_UDP4,
-        JAVA_UDP6, DNS_LOOKUP_TEST, OPEN_CONTROLLED_TCP_CONNECTION,
+        JAVA_UDP6, NATIVE_UDP6, HOST_UDP4, DNS_LOOKUP_TEST, OPEN_CONTROLLED_TCP_CONNECTION,
         SEND_ON_CONTROLLED_CONNECTION, CLOSE_CONTROLLED_CONNECTION }
     private boolean requireVpn = true;
     private boolean warningAccepted;
@@ -20,7 +20,7 @@ public final class NetworkGate {
     public synchronized void setRoute(Route next) { route = next; generation++; connections.clear(); }
     public synchronized void vpnLost() { setRoute(Route.UNKNOWN); }
     public synchronized void reconnectObserved() { setRoute(Route.UNKNOWN); }
-    public synchronized void validateVpnRoute() { setRoute(Route.VERIFIED_VPN); }
+    public synchronized void validateVpnRoute() { requireVpn = true; warningAccepted = false; setRoute(Route.VERIFIED_VPN); }
     public synchronized boolean authorize(long requestGeneration, Operation operation) {
         if (operation == null || requestGeneration != generation) return false;
         return requireVpn ? route == Route.VERIFIED_VPN : route == Route.EXPLICIT_OFF && warningAccepted;

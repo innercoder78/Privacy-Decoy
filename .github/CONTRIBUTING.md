@@ -29,13 +29,13 @@ Keep the repository root deliberately clean:
 
 ```text
 Privacy-Decoy/
-├── .github/
-├── android/
-├── docs/
-├── .editorconfig
-├── .gitattributes
-├── .gitignore
-└── README.md
+â”œâ”€â”€ .github/
+â”œâ”€â”€ android/
+â”œâ”€â”€ docs/
+â”œâ”€â”€ .editorconfig
+â”œâ”€â”€ .gitattributes
+â”œâ”€â”€ .gitignore
+â””â”€â”€ README.md
 ```
 
 Android-specific source, Gradle files, wrappers, configuration, and tooling belong
@@ -62,7 +62,11 @@ No open-source license has been selected by this PR.
 
 ## PR 5 controlled network research
 
-Run `./gradlew testDebugUnitTest :test-apps:external-vpn-fixture:assembleDebug`
+Run `bash tools/run-network-feasibility-emulator.sh` on the disposable Linux SDK/KVM
+runner for the independent network experiment. Its twelve mandatory cases and
+optional platform-verified lockdown case are separate from the nine containment
+tests. For local build/unit validation run
+`./gradlew testDebugUnitTest :test-apps:external-vpn-fixture:assembleDebug`
 from `android/` for the fail-closed gate and separate fixture build. Device route
 claims require the disposable API 35 x86_64 environment plus independent filtered
 packet capture; never infer them from broker or fixture self-report. APKs, native
