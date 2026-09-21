@@ -83,33 +83,56 @@ public final class NetworkTests {
             check(restricted,"direct socket restriction needs investigation");
         }
     }
+    private static Bundle boundaryClaim(ResearchSession s) {
+        return ResearchSession.claim(s.id,s.epoch,"BOUNDARY_NOOP");
+    }
+    private static void boundaryResult(Bundle result,String expected,String message) {
+        check(result!=null && result.keySet().equals(Set.of("result")) &&
+                expected.equals(result.getString("result")),message);
+        check(!result.hasFileDescriptors(),"boundary returned a file descriptor");
+    }
     public void testBrokerSessionBoundary()throws Exception{
         try(Broker broker=new Broker();ResearchSession a=session();ResearchSession b=session()){
-            long before=broker.route("calibration-off");
-            check("denied".equals(broker.request(a,before,"HOST_UDP4",0).getString("result")),"unregistered isolated caller accepted");
-            broker.register(a);broker.register(b);long g=broker.route("calibration-off");
-            check("success".equals(broker.op(b,g,"HOST_UDP4")),"active B denied");
-            check("success".equals(broker.op(a,g,"HOST_UDP4")),"active A denied");
-            Bundle claim=ResearchSession.claim(a.id,a.epoch,"HOST_UDP4");claim.putLong("generation",g);
-            check("denied".equals(b.network(broker.binder,claim,NetworkWire.REQUEST).getString("result")),"B claimed A");
-            check("denied".equals(NetworkWire.call(broker.binder,NetworkWire.REQUEST,claim).getString("result")),"unregistered direct caller accepted");
-            claim.putLong("epoch",0);
-            check("denied".equals(a.network(broker.binder,claim,NetworkWire.REQUEST).getString("result")),"stale epoch accepted");
-            check("denied".equals(broker.request(a,g-1,"HOST_UDP4",0).getString("result")),"stale network generation accepted");
-            claim=ResearchSession.claim(a.id,a.epoch,"HOST_UDP4");claim.putLong("generation",g);claim.putString("extra","malformed");
-            check("denied".equals(a.network(broker.binder,claim,NetworkWire.REQUEST).getString("result")),"malformed operation accepted");
-            check("denied".equals(broker.request(a,g,"UNKNOWN",0).getString("result")),"unknown operation accepted");
-            Bundle route=new Bundle();route.putString("route","verified");
-            check("denied".equals(a.network(broker.binder,route,NetworkWire.ROUTE).getString("result")),"hostile verified route");
-            // Do not let incidental stale-generation denial mask identity/epoch checks.
-            check(broker.state().getLong("generation")==g,"route changed during boundary assertions");
-            a.revoke();check("denied".equals(broker.request(a,g,"HOST_UDP4",0).getString("result")),"revoked accepted");
-            b.killAndAwaitDeath();Thread.sleep(250);
-            try(ResearchSession replacement=session()){
-                Bundle old=ResearchSession.claim(b.id,b.epoch,"HOST_UDP4");old.putLong("generation",g);
-                check("denied".equals(replacement.network(broker.binder,old,NetworkWire.REQUEST).getString("result")),"dead session replaced authority");
+            // No route authorization or generation participates in identity evidence.
+            boundaryResult(a.network(broker.binder,boundaryClaim(a),NetworkWire.REQUEST),"denied","unregistered isolated caller accepted");
+            broker.register(a);broker.register(b);
+            boundaryResult(b.network(broker.binder,boundaryClaim(b),NetworkWire.REQUEST),"success","active B denied");
+            boundaryResult(a.network(broker.binder,boundaryClaim(a),NetworkWire.REQUEST),"success","active A denied");
+            boundaryResult(b.network(broker.binder,boundaryClaim(a),NetworkWire.REQUEST),"denied","B claimed A");
+            boundaryResult(NetworkWire.call(broker.binder,NetworkWire.REQUEST,boundaryClaim(a)),"denied","unregistered direct caller accepted");
+            Bundle claim=boundaryClaim(a);claim.putLong("epoch",0);
+            boundaryResult(a.network(broker.binder,claim,NetworkWire.REQUEST),"denied","stale epoch accepted");
+            for(String extra:new String[]{"extra","hostname","url","ip","port","payload","connection","generation"}){
+                claim=boundaryClaim(a);claim.putString(extra,"malformed");
+                boundaryResult(a.network(broker.binder,claim,NetworkWire.REQUEST),"denied","boundary accepted extra field: "+extra);
             }
-            evidence("BOUNDARY active=true crossSessionDenied=true staleEpochDenied=true staleGenerationDenied=true revokedDenied=true deadDenied=true malformedDenied=true controlDenied=true");
+            for(String missing:new String[]{"session","epoch","op"}){
+                claim=boundaryClaim(a);claim.remove(missing);
+                boundaryResult(a.network(broker.binder,claim,NetworkWire.REQUEST),"denied","boundary accepted missing field: "+missing);
+            }
+            claim=boundaryClaim(a);claim.putString("op","UNKNOWN");
+            boundaryResult(a.network(broker.binder,claim,NetworkWire.REQUEST),"denied","unknown operation accepted");
+            Bundle route=new Bundle();route.putString("route","verified");
+            boundaryResult(a.network(broker.binder,route,NetworkWire.ROUTE),"denied","hostile verified route");
+            // Deliberately invalidate route authority; the same session-only request still works.
+            route.putString("route","unknown");broker.control(NetworkWire.ROUTE,route);
+            boundaryResult(a.network(broker.binder,boundaryClaim(a),NetworkWire.REQUEST),"success","boundary depended on route");
+            check(broker.state().getInt("owned")==0,"boundary created an owned socket");
+            a.revoke();
+            boundaryResult(a.network(broker.binder,boundaryClaim(a),NetworkWire.REQUEST),"denied","revoked accepted");
+            b.killAndAwaitDeath();
+            try(ResearchSession replacement=session()){
+                broker.register(replacement);
+                boundaryResult(replacement.network(broker.binder,boundaryClaim(replacement),NetworkWire.REQUEST),"success","active replacement denied");
+                boundaryResult(replacement.network(broker.binder,boundaryClaim(b),NetworkWire.REQUEST),"denied","dead session replaced authority");
+                // Separate real fixed-network evidence; never retry a measured operation.
+                long unauthorized=broker.state().getLong("generation");
+                check("denied".equals(broker.request(replacement,unauthorized,"HOST_UDP4",0).getString("result")),"unvalidated route accepted");
+                long g=broker.route("calibration-off");
+                check("success".equals(broker.op(replacement,g,"HOST_UDP4")),"authorized network generation denied");
+                check("denied".equals(broker.request(replacement,g-1,"HOST_UDP4",0).getString("result")),"stale network generation accepted");
+            }
+            evidence("BOUNDARY active=true crossSessionDenied=true staleEpochDenied=true staleGenerationDenied=true revokedDenied=true deadDenied=true malformedDenied=true controlDenied=true nonNetworking=true");
         }
     }
     private void routed(String mode)throws Exception{

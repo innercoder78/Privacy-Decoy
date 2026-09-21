@@ -2,7 +2,7 @@
 
 ## Scope and current validation status
 
-Research only: API 35 / Google APIs / x86_64 / debug. PR 6 remains mandatory.
+Research only: API 35 / Google APIs / x86_64 / debug. The next roadmap feasibility/STOP decision stage remains mandatory; its eventual GitHub PR number is no longer #6.
 
 **Completed revised implementation evidence:**
 [Actions run 35564605873](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35564605873)
@@ -21,6 +21,58 @@ Verified lockdown produced no fixed physical packets after confirmed VPN loss.
 This is evidence of an external enforcement dependency, not production protection.
 The documentation-only follow-up records this completed implementation run;
 its own head's CI status is reported in PR #5 rather than inferred here.
+
+## PR #5 session-boundary revision after the PR #6 merge
+
+GitHub PR #6 was the stacked lockdown-harness correction and was merged into
+PR #5. It did not perform the roadmap's mandatory feasibility/STOP decision;
+that decision remains the next roadmap stage under a later GitHub PR number.
+
+[Exact-head run 35633747836](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35633747836)
+on PR #5 head `34c1eb33a3f742d904a871bcb3a07844a607e35d` passed `validate`
+and `containment-prototype` (9/9). Twelve of thirteen network cases passed.
+Only `testBrokerSessionBoundary` failed, with
+`route changed during boundary assertions`. ConnectivityManager callbacks can
+invalidate NetworkGate generations asynchronously even after the quiet setup
+window. The generation-equality assertion correctly exposed that identity/epoch
+checks still depended on volatile route state. The earlier quiet-window approach
+and its failure history remain recorded below.
+
+Verified lockdown still passed with Android reporting `alwaysOn=true` and
+`lockdown=true`; tested physical fallback operations were denied. Independent
+capture again recorded non-lockdown VPN-loss physical egress as **Known Gap**.
+Neither observation establishes production protection.
+
+This revision separates Binder/session authorization from network-generation
+evidence. Debug-only `BOUNDARY_NOOP` traverses the real isolated-process Binder
+request path and checks Binder-observed UID/PID, registered session ID and epoch,
+live lifetime Binder, and active/non-revoked/non-dead SessionPolicy. It accepts
+exactly `session`, `epoch`, and `op`; no generation, connection, destination or
+payload is accepted. It returns only `result=success` or `result=denied`, with no
+socket, FD, Network or manager state. Its branch returns before route observation
+or network dispatch and is absent from the network-operation enum.
+
+The device case independently checks unregistered isolated and ordinary callers,
+active A/B, B claiming A, stale epoch, extra/missing fields, unknown operation,
+hostile ROUTE, revocation and dead-session claims by an active registered
+replacement. It requires exact bounded reply keys and no file descriptors, checks
+no owned socket was created, and repeats a positive boundary check after deliberate
+route invalidation. Identity assertions use no network generation or retry.
+A separate phase uses actual fixed `HOST_UDP4`: an unvalidated current generation
+is denied, an intentionally authorized current generation succeeds, and a stale
+generation is denied. Existing network experiments and their measured operations
+are unchanged. Focused JVM coverage checks every network operation across current,
+stale, invalidated and reauthorized generations and keeps BOUNDARY_NOOP outside
+the networking enum.
+
+Local validation for this revision: all 10 Python capture/readiness regression
+tests and `py_compile` passed. Gradle version/build/lint/unit/instrumentation/fixture
+tasks were attempted through the Windows wrapper but could not start because no
+Java runtime was available on PATH or through JAVA_HOME. No configured Android
+SDK/emulator was found; no local device validation is claimed. New-head GitHub
+Actions results are reported in the updated PR #5 body after publication, without
+inferring success from prior runs. Cronet/QUIC, subprocess networking and general
+Android resolver behavior remain **Unknown / Not exercised**.
 
 ### Earlier runs and corrections
 
@@ -116,13 +168,14 @@ Java, native, and DNS results are recorded separately. Raw UDP is not QUIC evide
 Manager-only registration supplies the UID/PID already observed by the PR 4
 ResearchSession Binder handshake and links to the isolated lifetime Binder.
 Every hostile operation verifies the actual Binder UID/PID, registered session,
-epoch, live lifetime, network generation and finite operation. SessionPolicy is
+epoch, live lifetime and finite operation. Actual network operations additionally require
+the current authorized NetworkGate generation. SessionPolicy is
 reused. Cross-session, stale, malformed, unknown, revoked and dead-session calls
 are tested, including attempted hostile route validation and direct bypass.
 
 The actual broker registry maps opaque IDs to owned Socket objects and checks
 the owner on send/close. Route callbacks, generation changes, revocation, lifetime
-death and destruction close resources. Each Binder dispatch also samples active
+death and destruction close resources. Each networking/control Binder dispatch also samples active
 Network/capabilities/link properties under the broker identity and invalidates
 changed state synchronously, so queued callback delivery cannot postpone closure
 of an already-observable route change. Observation and socket I/O are still not
@@ -164,7 +217,7 @@ classified only TCP payload as a race; the revised analyzer counts SYNs too.
 This is **Known Gap: physical egress**, not successful TCP data delivery, and the
 distinct calibration port 46153 cannot account for it. External platform lockdown
 is therefore required for the tested no-physical-fallback goal; verifying that
-dependency reliably in a product remains a PR 6 blocker. Callback/snapshot checks
+dependency reliably in a product remains a next-roadmap-stage blocker. Callback/snapshot checks
 alone are not enforcement.
 
 ## Follow-up harness stabilization
@@ -247,6 +300,6 @@ unchanged. Its exact-head CI result is maintained in PR #5.
 TRANSPORT_VPN and default-route booleans are observations only: they do not prove
 provider trust, destination coverage, logging practices, full tunneling or exit
 location. Route authorization comes from trusted test setup, not hostile code or
-broker self-attestation; production route validation remains a PR 6 question.
+broker self-attestation; production route validation remains a next-roadmap-stage question.
 PR 4 containment limitations remain unchanged. No requirement is globally
 satisfied by this debug prototype; PD-REQ-033/034/058 require actual observations.

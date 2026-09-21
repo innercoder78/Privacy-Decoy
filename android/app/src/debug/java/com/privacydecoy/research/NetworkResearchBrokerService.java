@@ -80,8 +80,8 @@ public final class NetworkResearchBrokerService extends Service {
                     Bundle input=data.readBundle(getClass().getClassLoader());
                     if (input==null || data.dataAvail()!=0) throw new SecurityException();
                     int uid=Binder.getCallingUid(),pid=Binder.getCallingPid();
-                    long identity=Binder.clearCallingIdentity();
-                    try { refreshRoute(); } finally { Binder.restoreCallingIdentity(identity); }
+                    if (code!=NetworkWire.REQUEST || !"BOUNDARY_NOOP".equals(input.getString("op")))
+                        refreshTrustedRoute();
                     if (code==NetworkWire.REQUEST) {
                         result=request(uid,pid,input);
                     } else {
@@ -95,15 +95,25 @@ public final class NetworkResearchBrokerService extends Service {
             if (reply!=null) {reply.writeNoException();reply.writeBundle(result);} return true;
         }
     };
+    private void refreshTrustedRoute() {
+        long identity=Binder.clearCallingIdentity();
+        try { refreshRoute(); } finally { Binder.restoreCallingIdentity(identity); }
+    }
     private Bundle request(int uid,int pid,Bundle b) throws Exception {
         if (!Set.of("session","epoch","generation","op","connection").containsAll(b.keySet())) throw new SecurityException();
         String id=b.getString("session"),op=b.getString("op");
         Registration r=sessions.get(id);
+        if (r==null || !r.lifetime.isBinderAlive() ||
+                !r.policy.authorize(uid,pid,id,b.getLong("epoch"),"ping")) throw new SecurityException();
+        // Debug-only identity evidence: exact schema, no route observation, socket,
+        // network operation, capability or manager state in either direction.
+        if ("BOUNDARY_NOOP".equals(op)) {
+            if (!b.keySet().equals(Set.of("session","epoch","op"))) throw new SecurityException();
+            Bundle out=new Bundle();out.putString("result","success");return out;
+        }
         NetworkGate.Operation operation;
         try { operation=NetworkGate.Operation.valueOf(op); } catch (RuntimeException e) {throw new SecurityException();}
-        if (r==null || !r.lifetime.isBinderAlive() ||
-                !r.policy.authorize(uid,pid,id,b.getLong("epoch"),"ping") ||
-                !gate.authorize(b.getLong("generation"),operation)) throw new SecurityException();
+        if (!gate.authorize(b.getLong("generation"),operation)) throw new SecurityException();
         Bundle out=new Bundle(); String status="success";
         long identity=Binder.clearCallingIdentity();
         try {
