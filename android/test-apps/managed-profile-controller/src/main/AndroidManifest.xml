@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application android:allowBackup="false" android:label="PD research profile controller" android:usesCleartextTraffic="false">
+    <receiver android:name=".ResearchAdminReceiver" android:permission="android.permission.BIND_DEVICE_ADMIN" android:exported="true">
+      <meta-data android:name="android.app.device_admin" android:resource="@xml/research_admin" />
+      <intent-filter><action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/><action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE"/></intent-filter>
+    </receiver>
+    <receiver android:name=".SetupReceiver" android:exported="true"><intent-filter><action android:name="com.privacydecoy.research.COMPLETE_SETUP"/></intent-filter></receiver>
+  </application>
+</manifest>

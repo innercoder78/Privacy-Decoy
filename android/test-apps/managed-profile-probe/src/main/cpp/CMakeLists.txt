@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(managed_probe)
+add_library(managed_probe SHARED managed_probe.cpp)
+find_library(log-lib log)
+target_link_libraries(managed_probe ${log-lib} dl)

@@ -17,3 +17,4 @@ rootProject.name = "PrivacyDecoy"
 include(":app")
 include(":probe-app", ":research-native")
 include(":test-apps:external-vpn-fixture")
+include(":test-apps:managed-profile-controller", ":test-apps:managed-profile-probe")

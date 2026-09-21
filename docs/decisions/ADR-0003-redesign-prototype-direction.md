@@ -125,6 +125,10 @@ and pcap assets are baselines, not inherited proof. Physical ARM64, API/OEM and
 release-equivalent evidence remains required before another explicit feasibility
 gate.
 
+Roadmap PR 8 implements the first direction solely as the controlled experiment
+specified in [its evidence plan](../evidence/pr8-managed-profile-boundary.md).
+That work does not change this ADR's proposed status or select S1 for production.
+
 ## Invalidation conditions
 
 Return to **REDESIGN AGAIN** if S1's failure is architectural but another compliant
