@@ -9,7 +9,7 @@ roadmap's **PR 6 feasibility gate**. Privacy takes precedence over compatibility
 
 This repository contains the PR 1 development foundation, PR 2 clean Android
 project layout, PR 3 security/design evidence, and the PR 4 adversarial research
-harness. PR 5 adds a controlled networking feasibility harness: a debug-only
+harness. PR 5's controlled networking feasibility research is merged: a debug-only
 trusted broker, fail-closed gate model, and a separate external-VPN test fixture.
 It does **not** provide production protected networking. The fixture's
 `VpnService` belongs to `com.privacydecoy.externalvpnfixture`, is not included in
@@ -18,8 +18,14 @@ spoofing are not implemented or verified.** There is no protected-app execution,
 virtualization, Decoy Persona, VPN enforcement, or verified privacy/security
 boundary. Version `0.1.0-dev` (version code 1) is a development identifier; this
 work does not represent a public or production release. PR 3's analysis is not
-protection and selects no production containment engine. PR 6 remains the
-mandatory feasibility/STOP gate.
+protection and selects no production containment engine.
+
+The project is now at the mandatory feasibility/STOP gate and product
+implementation is paused pending an explicit user decision. The stage remains
+**Roadmap PR 6**, although GitHub PR #6 was consumed by a corrective stacked PR
+merged into PR #5 and this gate therefore has a later GitHub PR number. The
+[decision package](docs/decisions/ADR-0002-feasibility-stop-gate.md) records the
+technical conclusion and leaves the path as **PENDING USER SELECTION**.
 
 PR 4 builds a controlled, uninstalled probe APK and a debug-only isolated-service
 experiment. Artifact-derived DEX execution is not full Android app execution.
