@@ -61,9 +61,11 @@ def lockdown_setup_control(deadline_seconds=60,interval=.5):
             packages.append(result is not None and result.returncode==0 and result.stdout.startswith('package:'))
         if not all(packages):
             category='package-unavailable';time.sleep(interval);continue
-        resolved=adb_result('shell','cmd','package','resolve-activity','--brief',A+'/'+CONTROLLER,timeout=5)
+        # -n avoids the MAIN/LAUNCHER defaults of a positional component Intent.
+        resolved=adb_result('shell','cmd','package','resolve-activity','--components',
+                            '-n',A+'/'+CONTROLLER,timeout=5)
         if (resolved is None or resolved.returncode or
-                (CONTROLLER not in resolved.stdout and '/.FixtureController' not in resolved.stdout)):
+                resolved.stdout.strip()!=A+'/.FixtureController'):
             category='controller-unresolved';time.sleep(interval);continue
         activity=adb_result('shell','cmd','activity','get-config',timeout=5)
         if activity is None or activity.returncode:

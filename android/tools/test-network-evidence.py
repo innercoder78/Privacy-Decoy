@@ -68,6 +68,8 @@ class LockdownReadinessTests(unittest.TestCase):
         if args[1:3]==('getprop','sys.boot_completed'):return self.result('1\n')
         if args[1:3]==('pm','path'):return self.result('package:/fixture.apk\n')
         if args[1:4]==('cmd','package','resolve-activity'):
+            self.assertEqual(args,('shell','cmd','package','resolve-activity','--components',
+                                   '-n',evidence.A+'/'+evidence.CONTROLLER))
             return self.result('com.privacydecoy.externalvpnfixture/.FixtureController\n')
         if args[1:4]==('cmd','activity','get-config'):return self.result('config\n')
         if args[1:3]==('appops','set'):return self.result()
@@ -85,6 +87,26 @@ class LockdownReadinessTests(unittest.TestCase):
             evidence.lockdown_setup_control(deadline_seconds=2,interval=0)
         self.assertEqual(len(launches),2)
         self.assertTrue(all(call[-1]=='FULL_TUNNEL_BYPASS' for call in launches))
+
+    def test_lockdown_setup_rejects_unresolved_or_wrong_component_output(self):
+        for output in ('No activity found\n', '',
+                       'other.package/.FixtureController\n',
+                       'other.package/'+evidence.CONTROLLER+'\n',
+                       'priority=0\n'+evidence.A+'/.FixtureController\n'):
+            with self.subTest(output=output):
+                launches=[]
+                def unresolved(*args,**kwargs):
+                    result=self.ready_result(args,launches)
+                    if args[1:4]==('cmd','package','resolve-activity'):
+                        return self.result(output)
+                    return result
+                ticks=iter((0,0,0,2))
+                with mock.patch.object(evidence,'adb_result',side_effect=unresolved), \
+                     mock.patch.object(evidence.time,'monotonic',side_effect=lambda:next(ticks)), \
+                     mock.patch.object(evidence.time,'sleep'):
+                    with self.assertRaisesRegex(AssertionError,r'^Lockdown setup failed: controller-unresolved$'):
+                        evidence.lockdown_setup_control(deadline_seconds=1,interval=0)
+                self.assertEqual(launches,[])
 
     def test_lockdown_setup_reports_fixed_package_category(self):
         def unavailable(*args,**kwargs):
