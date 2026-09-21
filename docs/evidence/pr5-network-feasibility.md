@@ -3,6 +3,27 @@
 ## Scope and current validation status
 
 Research only: API 35 / Google APIs / x86_64 / debug. PR 6 remains mandatory.
+
+**Completed revised implementation evidence:**
+[Actions run 35564605873](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35564605873)
+on `b87b2682ba6085bef2edab4e99aea74568fdb6d7` passed all three jobs:
+validation, **9/9 containment tests**, and **13/13 network tests with independent
+packet analysis** (12 mandatory plus verified lockdown). Local lint, all 12 JVM
+tests, debug/instrumentation/fixture builds, generated release-manifest validation,
+seven parser regression tests and five unsafe-manifest rejection checks passed.
+No pinned toolchain version changed. The only local lint warning suggests a newer
+Gradle; the requested 9.6.0 pin is retained.
+
+The implementation run reproduced physical egress during VPN loss: two packets
+on gated TCP port 46151 while the operation returned `timeout`. The independent
+OS fallback calibration produced four packets on port 46153 and returned success.
+Verified lockdown produced no fixed physical packets after confirmed VPN loss.
+This is evidence of an external enforcement dependency, not production protection.
+The documentation-only follow-up records this completed implementation run;
+its own head's CI status is reported in PR #5 rather than inferred here.
+
+### Earlier runs and corrections
+
 Starting reviewed commit: `a4437ba4f4b92aa7a25a4fe98e54a268cc07f62e`.
 The resumed published head was `e9e646056b4757d1319e93d2f1b627c10157c952`.
 [Actions run 35533011105](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35533011105)
@@ -146,21 +167,21 @@ is therefore required for the tested no-physical-fallback goal; verifying that
 dependency reliably in a product remains a PR 6 blocker. Callback/snapshot checks
 alone are not enforcement.
 
-## Results from baseline ab7db51; revised exact-head rerun required
+## Observed results on b87b268 (run 35564605873)
 
 | Question | Current status |
 |---|---|
-| Management TCP, isolated Java/native TCP/UDP | Denied; no fixed physical packets in the push run |
+| Management TCP, isolated Java/native TCP/UDP | Denied; no fixed physical packets |
 | Broker caller/session/epoch/generation enforcement | Passed device boundary assertions |
 | Full tunnel and per-app include | Java/native IPv4 and controlled DNS observed in TUN; no fixed physical egress |
 | Per-app exclude and split route | Known Gap: host TCP physically escaped; split documentation target stayed in TUN |
 | Controlled DNS wire packet | Fixed .53 query seen in TUN; platform .54 resolver traffic separately classified |
 | Java/native IPv6 UDP | Both observed in TUN for full tunnel/include; preliminary API 35 evidence only |
 | Explicit physical Network | Default full tunnel denied; allowBypass connected with physical capture |
-| Existing connection and policy Socket closure | Push passed closure; PR assertion race corrected above. OS retained-socket send returned io-failure in both baseline runs |
-| VPN-loss race | Known Gap: one gated physical TCP packet despite io-failure; separate OS fallback calibration succeeded |
-| Always-on/lockdown | Both platform booleans true; physical selection denied after confirmed VPN loss; no fixed physical packets in push run |
-| Reconnect and genuine provider replacement | Push passed; PR replacement timing failure requires corrected rerun |
+| Existing connection and policy Socket closure | Actual closure verified; post-closure send denied during route invalidation. Explicit close, revocation and death also passed. Separate OS retained-socket send returned io-failure |
+| VPN-loss race | Known Gap: two gated physical TCP packets despite timeout; separate OS fallback calibration succeeded |
+| Always-on/lockdown | Both platform booleans true; physical selection denied after confirmed VPN loss; no fixed physical packets |
+| Reconnect and genuine provider replacement | Both passed: old and unvalidated generations denied; reconnect required explicit revalidation; replacement observed a different active VPN Network and old-provider revocation |
 | Cronet / QUIC | Unknown / Not exercised |
 | Subprocess networking and general Android resolver behavior | Unknown / Not exercised |
 | External-lockdown dependency | Required for tested no-physical-fallback goal; reliable product verification remains unresolved |
