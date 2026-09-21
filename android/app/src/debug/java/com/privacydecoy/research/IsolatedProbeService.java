@@ -22,7 +22,7 @@ public final class IsolatedProbeService extends Service {
     private String phase = "protocol";
     private final Binder endpoint = new Binder() {
         @Override protected synchronized boolean onTransact(int code, Parcel data, Parcel reply, int flags) {
-            if (code < Wire.INIT || code > Wire.COUNT) return false;
+            if (code < Wire.INIT || code > Wire.DIRECT_NETWORK) return false;
             Bundle result = new Bundle();
             phase = "protocol";
             try {
@@ -45,6 +45,15 @@ public final class IsolatedProbeService extends Service {
                         case Wire.REQUEST:
                             IBinder target = input.getBinder("targetBroker"); input.remove("targetBroker");
                             result = Wire.call(target == null ? broker : target, Wire.REQUEST, input);
+                            break;
+
+                        case Wire.DIRECT_NETWORK:
+                            result.putString("result",FixedNetworkProbe.run(input.getString("op", "")));
+                            break;
+                        case Wire.NETWORK:
+                            IBinder network=input.getBinder("networkBroker"); input.remove("networkBroker");
+                            int transaction=input.getInt("transaction",NetworkWire.REQUEST); input.remove("transaction");
+                            result=NetworkWire.call(network,transaction,input);
                             break;
                         case Wire.COUNT: result.putInt("count", invocations); break;
                         case Wire.KILL: Process.killProcess(Process.myPid()); break;

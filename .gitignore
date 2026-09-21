@@ -38,3 +38,8 @@ google-services.json
 *~
 .DS_Store
 Thumbs.db
+
+# Research packet captures and Python generated caches
+*.pcap
+*.pcapng
+__pycache__/
