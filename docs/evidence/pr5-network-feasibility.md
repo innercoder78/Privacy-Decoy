@@ -169,6 +169,49 @@ alone are not enforcement.
 
 ## Follow-up harness stabilization
 
+[Exact-head run 35566250067](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35566250067)
+on `5e4089a5c065989eb111ea5deedc171237d2cad8` passed validation and the
+nine-test containment suite. The network job completed all mandatory VPN-loss,
+reconnect, and provider-replacement operations, then failed during optional
+lockdown setup: immediately after `sys.boot_completed` became `1`, Activity
+Manager did not successfully start the external fixture controller. This was a
+post-reboot harness readiness failure, not a measured network result. The revised
+setup now waits, with a fixed deadline, for ADB, boot completion, both fixture
+packages, controller resolution, Activity Manager, and the restored development
+VPN app-op. Only the pre-measurement controller start may be retried. It then
+requires fixture establishment and both platform lockdown booleans exactly as
+before; measured network operations remain single observations.
+
+### PR #6 explicit controller Intent correction
+
+[Exact-head run 35620936585](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35620936585)
+on `35c41c79b21ba4f119e9a3d9bfa750b243a8b5fd` passed validation and containment,
+but failed at `Lockdown setup failed: controller-unresolved` after the mandatory
+VPN-loss/reconnect and provider-replacement operations. This is a readiness
+harness/setup failure, not a measured network-security failure or evidence that
+Android lockdown is Unknown. The new probe used a bare positional component
+with `--brief`, rather than the intended component-only Intent.
+
+The [Android 15/API 35 Intent parser](https://github.com/aosp-mirror/platform_frameworks_base/blob/android-15.0.0_r1/core/java/android/content/Intent.java)
+accepts a positional component but adds `ACTION_MAIN` and `CATEGORY_LAUNCHER`;
+`-n` sets the component without those defaults, matching the existing controller
+launch. Thus the old form is not an unsupported syntax; its Intent semantics
+are wrong for the intended probe. The corrected command is
+`adb shell cmd package resolve-activity --components -n com.privacydecoy.externalvpnfixture/com.privacydecoy.externalvpnfixture.FixtureController`.
+The [API 35 PackageManager shell implementation](https://github.com/aosp-mirror/platform_frameworks_base/blob/android-15.0.0_r1/services/core/java/com/android/server/pm/PackageManagerShellCommand.java)
+supports `--components` and prints `flattenToShortString()`: the probe now requires
+exactly `com.privacydecoy.externalvpnfixture/.FixtureController` after stripping
+surrounding whitespace. A zero exit status with `No activity found` is rejected.
+Regression tests require the exact `-n` command and reject unresolved, wrong-package,
+and unexpected multiline output before any controller launch.
+
+This correction is source-verified; no local Android SDK/emulator was available
+for direct system-image verification. The exact causal explanation and corrected
+probe on the CI image remain subject to the new exact-head Actions result,
+recorded in PR #6 after publication. No new device/analyzer/lockdown success is
+claimed here. All other bounded setup checks and measured operations are unchanged;
+lockdown still requires both platform booleans before `testLockdownLoss`.
+
 [Run 35565382044](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35565382044)
 on documentation head `d3bb06d` passed validation and all nine containment cases,
 but the network boundary case accepted B and then denied A using the same route
