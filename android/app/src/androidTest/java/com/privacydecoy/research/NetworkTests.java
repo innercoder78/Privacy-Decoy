@@ -35,7 +35,21 @@ public final class NetworkTests {
         Bundle control(int code,Bundle b)throws Exception{return NetworkWire.call(binder,code,b);}
         Bundle state()throws Exception{return control(NetworkWire.STATE,new Bundle());}
         long route(String value)throws Exception{
-            Bundle b=new Bundle();b.putString("route",value);return control(NetworkWire.ROUTE,b).getLong("generation");
+            Bundle b=new Bundle();b.putString("route",value);
+            // Establish a quiet baseline BEFORE the experiment. Never retry an
+            // operation or revalidate during the measured loss/replacement interval.
+            long deadline=SystemClock.elapsedRealtime()+10000;
+            while(SystemClock.elapsedRealtime()<deadline){
+                long generation=control(NetworkWire.ROUTE,b).getLong("generation");
+                long quietUntil=SystemClock.elapsedRealtime()+1000;
+                boolean stable=true;
+                while(SystemClock.elapsedRealtime()<quietUntil){
+                    Thread.sleep(100);
+                    if(state().getLong("generation")!=generation){stable=false;break;}
+                }
+                if(stable)return generation;
+            }
+            throw new AssertionError("route generation did not settle before experiment");
         }
         void register(ResearchSession s)throws Exception{
             Bundle b=ResearchSession.claim(s.id,s.epoch,"");b.putInt("uid",s.policy.uid());b.putInt("pid",s.policy.pid());
@@ -87,6 +101,8 @@ public final class NetworkTests {
             check("denied".equals(broker.request(a,g,"UNKNOWN",0).getString("result")),"unknown operation accepted");
             Bundle route=new Bundle();route.putString("route","verified");
             check("denied".equals(a.network(broker.binder,route,NetworkWire.ROUTE).getString("result")),"hostile verified route");
+            // Do not let incidental stale-generation denial mask identity/epoch checks.
+            check(broker.state().getLong("generation")==g,"route changed during boundary assertions");
             a.revoke();check("denied".equals(broker.request(a,g,"HOST_UDP4",0).getString("result")),"revoked accepted");
             b.killAndAwaitDeath();Thread.sleep(250);
             try(ResearchSession replacement=session()){

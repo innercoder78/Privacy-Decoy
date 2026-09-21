@@ -167,6 +167,21 @@ is therefore required for the tested no-physical-fallback goal; verifying that
 dependency reliably in a product remains a PR 6 blocker. Callback/snapshot checks
 alone are not enforcement.
 
+## Follow-up harness stabilization
+
+[Run 35565382044](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35565382044)
+on documentation head `d3bb06d` passed validation and all nine containment cases,
+but the network boundary case accepted B and then denied A using the same route
+generation. The other twelve network cases and packet assertions passed, including
+both previously corrected cases. The broker intentionally invalidates generations
+on asynchronous network changes. The harness now requires a one-second quiet
+generation before authorizing an experiment, within a ten-second deadline.
+No measured operation is retried and no route is revalidated during the measured
+VPN-loss or replacement interval. An additional generation-equality assertion
+prevents incidental stale-generation denials from masking identity/epoch checks.
+This follow-up changes test preparation only; broker fail-closed behavior is
+unchanged. Its exact-head CI result is maintained in PR #5.
+
 ## Observed results on b87b268 (run 35564605873)
 
 | Question | Current status |
