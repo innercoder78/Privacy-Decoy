@@ -12,6 +12,7 @@ import threading
 import time
 
 OUT=Path('app/build/reports/network')
+CAPTURES=('physical.pcap','wifi.pcap')
 A='com.privacydecoy.externalvpnfixture'
 B=A+'.replacement'
 CASES=[
@@ -47,12 +48,31 @@ def reset():
     adb('shell','am','force-stop',A);adb('shell','am','force-stop',B)
     adb('shell','am','force-stop','com.privacydecoy.app')
     time.sleep(.4);adb('logcat','-c')
+def capture_offsets():
+    # QEMU filter-dump writes each record directly with writev (no stdio buffer).
+    # File offsets avoid comparing its virtual-clock timestamps with host time.
+    offsets={name:(OUT/name).stat().st_size for name in CAPTURES}
+    assert all(size>=24 for size in offsets.values()), 'Missing capture header'
+    return offsets
+
+def case_packets(captures,case):
+    rows=[]
+    for name,packets_ in captures.items():
+        start=case['captureStart'][name];end=case['captureEnd'][name]
+        assert 24<=start<=end, 'Invalid capture interval'
+        # Include a boundary-overlapping record conservatively; never hide leakage.
+        rows.extend(p for p in packets_ if p['recordEnd']>start and p['recordStart']<end)
+    return rows
+
 def run_case(name,mode):
     reset()
     if mode:start(mode)
+    capture_start=capture_offsets()
     begin=time.time()
     output=adb('shell','am','instrument','-w','-r','-e','suite','network','-e','case',name,
         'com.privacydecoy.app.test/com.privacydecoy.research.PrototypeTestRunner',timeout=150)
+    time.sleep(.4)  # Include trailing fixed packets before closing the case interval.
+    capture_end=capture_offsets()
     end=time.time();observations=logs()
     # Both the runner summary and a fixed PASS record are mandatory (no skip/zero-test escape).
     passed='Tests run: 1, Failures: 0' in output and 'PASS '+name in observations
@@ -68,7 +88,7 @@ def run_case(name,mode):
     for line in observations.splitlines():
         if allowed.fullmatch(line):safe.append(line)
     for line in safe: print(name+' '+line,flush=True)
-    return dict(name=name,start=begin,end=end,observations=safe,passed=passed)
+    return dict(name=name,start=begin,end=end,captureStart=capture_start,captureEnd=capture_end,observations=safe,passed=passed)
 
 class TCP(socketserver.BaseRequestHandler):
     def handle(self):
@@ -126,6 +146,7 @@ def packets(path):
         link=struct.unpack(endian+'I',header[20:24])[0]
         assert link in (1,101),'Unsupported capture link type'
         while True:
+            record_start=f.tell()
             h=f.read(16)
             if not h:break
             assert len(h)==16,'Truncated capture record'
@@ -154,25 +175,32 @@ def packets(path):
             data=False
             if protocol==6 and len(p)>=transport+20:
                 data=iplen-ihl-((p[transport+12]>>4)*4)>0
-            yield dict(time=sec+usec/1e6,family=family,protocol='tcp' if protocol==6 else 'udp',category=category,port=port,data=data)
+            yield dict(recordStart=record_start,recordEnd=f.tell(),time=sec+usec/1e6,family=family,protocol='tcp' if protocol==6 else 'udp',category=category,port=port,data=data)
 
 def analyze():
     report=json.loads(OUT.joinpath('observations.json').read_text())
-    fixed=list(packets(OUT/'physical.pcap'))
-    assert len(report['cases'])>=12,'Missing mandatory network device tests'
+    captures={name:list(packets(OUT/name)) for name in CAPTURES}
+    for name,rows in captures.items():
+        print('CAPTURE '+name+' fixedPackets='+str(len(rows)),flush=True)
+    assert [c['name'] for c in report['cases'][:len(CASES)]]==[n for n,_ in CASES], 'Missing or reordered mandatory network device tests'
     for case in report['cases']:
-        rows=[r for r in fixed if case['start']<=r['time']<=case['end']]
+        rows=case_packets(captures,case)
         name=case['name'];obs='\n'.join(case['observations'])
         host=[r for r in rows if r['category']=='host-control' and r['protocol']=='tcp']
         if name=='testDirectProcessRestrictions':assert not rows,'Restricted process emitted fixed traffic'
         if name in ('testFullTunnel','testPerAppInclude'):
             assert not rows,'Fixed target escaped full VPN route'
             for op in ('JAVA_TCP4','JAVA_UDP4','NATIVE_TCP4','NATIVE_UDP4','DNS_LOOKUP_TEST'):
-                window=obs.split('BEGIN op='+op+'\n')[-1].split('END op='+op)[0]
+                assert 'BEGIN op='+op+'\n' in obs and 'END op='+op+' ' in obs, 'Missing operation bounds: '+op
+                window=obs.split('BEGIN op='+op+'\n',1)[1].split('END op='+op,1)[0]
                 port={'JAVA_TCP4':46151,'JAVA_UDP4':46152,'NATIVE_TCP4':46153,'NATIVE_UDP4':46154,'DNS_LOOKUP_TEST':53}[op]
                 assert re.search(r'PACKET .* port='+str(port)+r' ',window),'Missing per-operation TUN evidence: '+op
             assert 'category=synthetic-dns port=53' in obs,'Missing controlled DNS TUN evidence'
-            case['ipv6']='Preliminary evidence' if 'category=documentation-v6' in obs else 'Unknown'
+            case['ipv6']={}
+            for op in ('JAVA_UDP6','NATIVE_UDP6'):
+                window=obs.split('BEGIN op='+op+'\n')[-1].split('END op='+op)[0]
+                case['ipv6'][op]='Preliminary evidence' if 'category=documentation-v6' in window else 'Unknown'
+            print('IPV6 '+name+' '+json.dumps(case['ipv6']),flush=True)
         if name in ('testKnownGapPerAppExclude','testKnownGapPhysicalSelectionAllowed'):
             assert host,'Missing independent physical positive control'
             assert 'category=host-control' not in obs,'Excluded/physical host traffic unexpectedly entered TUN'

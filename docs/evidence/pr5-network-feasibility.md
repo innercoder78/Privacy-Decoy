@@ -4,7 +4,12 @@
 
 Research only: API 35 / Google APIs / x86_64 / debug. PR 6 remains mandatory.
 Starting reviewed commit: `a4437ba4f4b92aa7a25a4fe98e54a268cc07f62e`.
-Device observations for this revision are pending its exact-head Actions execution.
+The resumed published head was `e9e646056b4757d1319e93d2f1b627c10157c952`.
+[Actions run 35533011105](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35533011105)
+passed validation and containment; all 13 network device cases emitted PASS, but
+the independent analyzer failed its physical positive control. Those device
+observations alone do not establish no-egress evidence. Corrected capture results
+remain pending a new exact-head run.
 Local JDK 17 validation passed lintDebug, testDebugUnitTest, assembleDebug,
 assembleDebugAndroidTest and the separate VPN fixture build. These are build/unit
 results, not routing evidence. No production protection is claimed.
@@ -44,10 +49,20 @@ Missing tests, failures, skips and missing required independent evidence fail.
 Optional lockdown is Unknown unless both `VpnService.isAlwaysOn()` and
 `isLockdownEnabled()` report true after disposable secure-settings setup/reboot.
 
-The official emulator `-tcpdump` facility writes only to ignored build output.
-The emulator is terminated before parsing so the capture writer flushes. The
-official `-feature -WiFiPacketStream` flag selects legacy Wi-Fi/slirp rather than
-the separate netsim Wi-Fi backend; positive physical capture controls are mandatory.
+Two independent QEMU packet filters write only to ignored build output:
+`-tcpdump` attaches to `mynet`, and an explicit `filter-dump` attaches to
+`virtio-wifi`. `-feature -WiFiPacketStream` selects the legacy Wi-Fi backend.
+Capturing only `mynet` missed the working Wi-Fi positive control. The official
+[emulator netdev wiring](https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android-qemu2-glue/main.cpp)
+and [QEMU capture writer](https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/net/dump.c)
+show separate interfaces and virtual-clock packet timestamps. Each test records
+both files' byte offsets before instrumentation and after a bounded trailing
+wait; matching records are selected by overlap with these intervals, not by
+comparing virtual timestamps with host wall time. The writer uses unbuffered
+`writev`, and the emulator terminates before final parsing. Missing capture
+headers, malformed/truncated records, missing named cases and missing physical
+positive controls fail. Synthetic regression checks cover Wi-Fi-only evidence,
+clock independence, conservative interval overlap and parser rejection.
 The parser reads at most 128 header bytes per record, skips payload, and retains
 only fixed destination/port/protocol/family/count/timing information. It discards
 unrelated traffic. Raw captures are never printed/uploaded and are deleted by the
