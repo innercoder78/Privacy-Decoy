@@ -2,8 +2,8 @@
 
 Privacy Decoy is a planned **Android-only, root-free privacy container/mediation
 project**. The intended product would mediate applications' access to sensitive
-device information. Technical feasibility remains subject to the canonical
-roadmap's **PR 6 feasibility gate**. Privacy takes precedence over compatibility.
+device information. Roadmap PR 6 selected **REDESIGN**; technical feasibility remains
+subject to another explicit gate. Privacy takes precedence over compatibility.
 
 ## Current status
 
@@ -20,12 +20,16 @@ boundary. Version `0.1.0-dev` (version code 1) is a development identifier; this
 work does not represent a public or production release. PR 3's analysis is not
 protection and selects no production containment engine.
 
-The project is now at the mandatory feasibility/STOP gate and product
-implementation is paused pending an explicit user decision. The stage remains
-**Roadmap PR 6**, although GitHub PR #6 was consumed by a corrective stacked PR
-merged into PR #5 and this gate therefore has a later GitHub PR number. The
-[decision package](docs/decisions/ADR-0002-feasibility-stop-gate.md) records the
-technical conclusion and leaves the path as **PENDING USER SELECTION**.
+The **Roadmap PR 6** gate decision is **A — REDESIGN**, selected on 2026-09-21.
+Product implementation remains paused; the current research prototype will not
+proceed unchanged as the product. The next phase is containment/runtime
+architecture redesign and evidence work, with another explicit feasibility gate
+required before ordinary third-party-app implementation. No production engine
+has been selected. Ordinary protected apps, real accounts, and private user data
+remain prohibited. GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
+PR #6 was consumed by the earlier corrective stacked PR merged into PR #5. The
+[decision record](docs/decisions/ADR-0002-feasibility-stop-gate.md) contains the
+rationale, preserved constraints, and roadmap consequences.
 
 PR 4 builds a controlled, uninstalled probe APK and a debug-only isolated-service
 experiment. Artifact-derived DEX execution is not full Android app execution.

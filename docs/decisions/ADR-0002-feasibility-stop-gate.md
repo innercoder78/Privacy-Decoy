@@ -1,8 +1,8 @@
 # ADR-0002: Mandatory feasibility / STOP gate
 
-- **Status:** Proposed — USER DECISION REQUIRED / ROADMAP STOP
+- **Status:** Accepted — REDESIGN SELECTED / PRODUCT IMPLEMENTATION STILL GATED
 - **Date:** 2026-09-21
-- **Decision:** PENDING USER SELECTION
+- **Decision:** A — REDESIGN
 
 ## Purpose and evidence basis
 
@@ -11,7 +11,7 @@ This is Roadmap PR 6, the mandatory user decision gate required by
 [PR 4](../evidence/pr4-containment-prototype.md) and
 [PR 5](../evidence/pr5-network-feasibility.md) into a decision package; it does
 not authorize implementation. GitHub PR #6 was a stacked correction merged into
-PR #5, so the GitHub number of this roadmap stage differs from its roadmap number.
+PR #5, so GitHub PR #7 corresponds to Roadmap PR 6.
 
 The containment evidence was produced by a debug API 35 x86_64 emulator run at
 PR 4 tested commit `8386a4e86d588e5f50abf724798f9aca87f0cec3`
@@ -70,7 +70,9 @@ or release-equivalent evidence.
 
 ## Requirements-based gate
 
-No row declares a requirement globally satisfied. “Preliminary evidence” and
+No row declares a technical requirement globally satisfied. PD-REQ-063 is
+satisfied only in the governance sense: the user explicitly selected REDESIGN;
+unchanged product implementation remains blocked. “Preliminary evidence” and
 “Partial” describe only tested paths. “Known Gap,” “Unknown,” “Unsupported,” and
 “Not yet evidenced for production” retain their ordinary limiting meanings; they
 must not be read as **Fully mediated** under PD-REQ-020.
@@ -97,7 +99,7 @@ must not be read as **Fully mediated** under PD-REQ-020.
 | PD-REQ-057 | Preliminary evidence | Controlled positive, negative, adversarial, lifecycle, and failure cases exist, but device, production, and hostile-workload coverage is incomplete. |
 | PD-REQ-058 | Not yet evidenced for production | Packet and persistent-state observers were used, but evidence is debug/emulator-only; non-rooted physical release evidence is absent. |
 | PD-REQ-060 | Partial | A project-owned research replacement interface exists; no production engine is selected and production SBOM, license, provenance, and vulnerability inventories do not exist. |
-| PD-REQ-063 | Roadmap STOP | This ADR presents the required user decision. Implementation cannot continue until the user selects and records a compliant path. |
+| PD-REQ-063 | Governance decision recorded — REDESIGN | The mandatory user decision occurred on 2026-09-21. Unchanged product implementation remains blocked; a redesigned architecture requires another explicit feasibility gate. Underlying containment/network requirements are not satisfied by this decision. |
 | PD-REQ-070 | Preliminary evidence | Privacy Decoy adds no product VPN or tracker blocklist; the external fixture is test-only. This does not resolve route verification or fail-closed gaps. |
 
 ## Technical gate conclusion
@@ -112,16 +114,19 @@ Accordingly:
 - ordinary protected-app execution remains blocked;
 - real accounts and private user data remain prohibited;
 - no production privacy or security claims are authorized; and
-- later product implementation remains blocked until the user selects and
-  records a compliant path below.
+- ordinary third-party-app product implementation remains blocked until a
+  redesigned architecture passes another explicit feasibility gate.
 
-## User decision — no option selected
+## User decision — A. REDESIGN selected
 
-There is no default or preselected option. **“GO unchanged into arbitrary-app
+The user explicitly selected **A — REDESIGN** on **2026-09-21**. Options B, C,
+and D below are retained as considered alternatives and were not selected.
+
+**“GO unchanged into arbitrary-app
 implementation” is NOT presently a requirements-compliant gate outcome**, because
 mandatory guarantees still lack credible evidence.
 
-### A. REDESIGN
+### A. REDESIGN — selected
 
 Redesign the containment/runtime architecture before ordinary-app implementation,
 then repeat the relevant feasibility gates.
@@ -136,7 +141,11 @@ gate is passed.
 
 Explicitly remove unsupported classes of apps or capabilities from planned scope
 and redesign requirements and UX around a smaller defensible boundary. This path
-requires explicit user acceptance of the reduced scope.
+requires explicit user acceptance of the reduced scope. Any future scope decision
+must identify every excluded application class, capability, path, platform, and
+lifecycle entry; block it before protected code; and update requirements, coverage,
+and UX only through separate approval. It cannot relabel an Unknown mandatory
+path as safe. This path was not selected.
 
 ### D. STOP
 
@@ -144,51 +153,108 @@ Stop Privacy Decoy development under the current product goals.
 
 ### Decision record
 
-- **Decision:** PENDING USER SELECTION
-- **Selected path:** _Not selected_
-- **Decision date:** _Pending_
-- **Decision rationale:** _Pending_
-- **Roadmap consequences:** _Pending_
+- **Decision:** A — REDESIGN
+- **Selected path:** A — REDESIGN
+- **Decision date:** 2026-09-21
+- **Decision rationale:** Preserve the original product goals and privacy guarantees; structural prototype gaps require architecture redesign, as detailed below.
+- **Roadmap consequences:** Architecture redesign/research is next; product implementation remains gated, as detailed below.
 
-## Evidence required by a continuation path
+## Decision rationale
 
-REDESIGN or ADDITIONAL RESEARCH does not itself clear the gate. Before a later
-gate can authorize relevant scope, controlled evidence must resolve or explicitly
-exclude at least the following items. This list records gates; it does not
-schedule or authorize experiments.
+The intended product remains a root-free Android privacy container/mediation
+system for ordinary third-party apps. REDESIGN preserves the original goals,
+existing privacy guarantees, and fail-closed principles instead of narrowing or
+abandoning them to fit the current prototype. Privacy takes precedence over
+compatibility.
 
-### Containment
+PR #4 and PR #5 demonstrated useful mechanisms and valuable test infrastructure,
+but exposed structural gaps in ordinary Android lifecycle execution, imported
+native code, early initialization and multiprocess coverage, broad Binder/service/
+provider mediation, host-state leakage, cached/native capability revocation, and
+production-grade containment. Networking demonstrated an external Android
+lockdown dependency for the tested no-physical-fallback goal and left QUIC/Cronet,
+subprocess, and general resolver paths unevidenced. Continuing directly from the
+current prototype to the product is therefore not justified.
 
-- real Android component, `Application`, and provider lifecycle;
-- native imported-code execution and mediation;
+Acceptance records the user's choice of direction. It does not approve a specific
+redesign, establish that one is implemented or proven, or guarantee feasibility.
+PD-REQ-001 through PD-REQ-070 retain their IDs and meanings; the technical Known
+Gap, Partial, Unknown, and other evidence classifications above remain unchanged.
+
+## Roadmap consequences
+
+1. The PR #4 / PR #5 prototypes are **not the production architecture** and will
+   not proceed unchanged as the product.
+2. Useful components remain research/test assets and evidence baselines: hostile
+   probes, fail-closed coverage concepts, Binder/session authority testing,
+   lifecycle/death/revocation tests, network-generation tests, independent packet
+   capture, the external-VPN fixture, and containment/network regression cases.
+3. The next roadmap phase is containment/runtime architecture redesign and
+   research. It must evaluate replacement architectures against this ADR's
+   mandatory gaps; this PR records the direction and performs no implementation.
+4. Ordinary protected apps remain blocked. Real accounts and private user data
+   remain prohibited. No production privacy/security claims are authorized.
+5. No replacement architecture or production containment engine is selected.
+6. Any redesigned architecture must pass another explicit feasibility gate before
+   ordinary third-party-app implementation is authorized. Selecting REDESIGN does
+   not satisfy the underlying containment or networking requirements.
+7. Privacy takes precedence over compatibility. Redesign must not silently fall
+   back to real host data or uncontrolled physical networking to hide gaps.
+
+## Next stage: architecture redesign and evidence work
+
+The next stage must examine and compare candidate containment/runtime
+architectures against the mandatory gaps below, using PR #4 and PR #5 as
+adversarial test baselines. This section defines future evaluation obligations;
+it does not implement or preselect an architecture or authorize ordinary-app use.
+
+Candidates may include revised bespoke containment, suitable open-source
+virtualization/container approaches, OS-managed/profile-based components where
+useful, and other architectures consistent with existing project constraints.
+Comparison must preserve the limitations in the
+[engine assessment](../engine-assessment.md) and
+[prototype-direction ADR](ADR-0001-engine-prototype-direction.md). A candidate
+previously marked disqualifying must not be revived without new evidence.
+
+### Containment/runtime evaluation
+
+- real Android `Application`, component, and provider lifecycle;
+- imported native-library execution and mediation;
 - early initialization and multiprocess behavior;
-- broad Binder, service, and provider mediation;
+- broad Binder/service/provider mediation and package-universe isolation;
 - host `Build`, `Context`, Settings, and package-state leakage;
-- native/syscall, `/proc`, `/sys`, property, and filesystem mediation or explicit denial;
+- native/syscall, `/proc`, `/sys`, property, and filesystem behavior and mediation
+  or explicit denial;
 - cached-capability and native-thread revocation;
-- cross-app and storage isolation; and
-- physical ARM64, OEM, non-rooted-device, and release-equivalent evidence.
+- cross-app and storage isolation;
+- artifact identity without routine APK rewriting or re-signing, preserving the
+  existing requirements for any separately approved exception;
+- root-free operation under existing platform constraints; and
+- API/OEM/ARM64 viability, non-rooted physical-device and release-equivalent
+  containment evidence.
 
-### Networking
+### Networking evaluation
 
-- reliable external-lockdown verification before protected networking;
-- fail-closed behavior when lockdown cannot be verified;
+- retain the user-controlled external-VPN model; Privacy Decoy itself MUST NOT
+  implement Android `VpnService`;
+- reliable verification of required external lockdown and routing state before
+  protected networking;
+- fail-closed networking when required routing or lockdown cannot be verified;
 - QUIC/Cronet, subprocess networking, and general resolver paths;
-- background/helper traffic inventory and attribution;
-- physical-device independent packet evidence; and
-- release-equivalent build evidence.
+- resolver/background/helper traffic inventory and attribution; and
+- physical-device independent packet evidence and release-equivalent validation.
 
-NARROW SCOPE / MARK UNSUPPORTED must identify every excluded application class,
-capability, path, platform, and lifecycle entry; block it before protected code;
-and update requirements, coverage, and UX only through a separately approved
-scope decision. It cannot relabel an Unknown mandatory path as safe.
+### Governance and supply-chain evaluation
 
-## Consequences while pending
+- explicit engine replacement boundary;
+- source availability and immutable source provenance;
+- license compatibility and provenance review;
+- native binaries and dependency inventory;
+- SBOM and vulnerability review; and
+- explicit compatibility versus privacy tradeoffs without weakening requirements
+  or silently reclassifying an Unknown mandatory path as safe.
 
-This ADR freezes product progression without changing runtime behavior,
-dependencies, permissions, APIs, workflows, or the requirements register. The
-research artifacts remain unsafe for ordinary apps, accounts, or private data.
-No production containment engine is selected. A later edit may mark this ADR
-accepted only after the user explicitly selects a path and completes the decision
-record; implementation authority is limited by the selected path and all
-remaining requirements.
+Controlled evidence must support another explicit feasibility decision before
+product progression. This accepted governance decision changes no runtime
+behavior, dependencies, permissions, APIs, workflows, or requirements. Research
+artifacts remain unsafe for ordinary apps, accounts, or private data.
