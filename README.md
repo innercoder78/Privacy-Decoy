@@ -2,14 +2,14 @@
 
 Privacy Decoy is a planned **Android-only, root-free privacy container/mediation
 project**. The intended product would mediate applications' access to sensitive
-device information. Technical feasibility remains subject to the canonical
-roadmap's **PR 6 feasibility gate**. Privacy takes precedence over compatibility.
+device information. Roadmap PR 6 selected **REDESIGN**; technical feasibility remains
+subject to another explicit gate. Privacy takes precedence over compatibility.
 
 ## Current status
 
 This repository contains the PR 1 development foundation, PR 2 clean Android
 project layout, PR 3 security/design evidence, and the PR 4 adversarial research
-harness. PR 5 adds a controlled networking feasibility harness: a debug-only
+harness. PR 5's controlled networking feasibility research is merged: a debug-only
 trusted broker, fail-closed gate model, and a separate external-VPN test fixture.
 It does **not** provide production protected networking. The fixture's
 `VpnService` belongs to `com.privacydecoy.externalvpnfixture`, is not included in
@@ -18,8 +18,18 @@ spoofing are not implemented or verified.** There is no protected-app execution,
 virtualization, Decoy Persona, VPN enforcement, or verified privacy/security
 boundary. Version `0.1.0-dev` (version code 1) is a development identifier; this
 work does not represent a public or production release. PR 3's analysis is not
-protection and selects no production containment engine. PR 6 remains the
-mandatory feasibility/STOP gate.
+protection and selects no production containment engine.
+
+The **Roadmap PR 6** gate decision is **A — REDESIGN**, selected on 2026-09-21.
+Product implementation remains paused; the current research prototype will not
+proceed unchanged as the product. The next phase is containment/runtime
+architecture redesign and evidence work, with another explicit feasibility gate
+required before ordinary third-party-app implementation. No production engine
+has been selected. Ordinary protected apps, real accounts, and private user data
+remain prohibited. GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
+PR #6 was consumed by the earlier corrective stacked PR merged into PR #5. The
+[decision record](docs/decisions/ADR-0002-feasibility-stop-gate.md) contains the
+rationale, preserved constraints, and roadmap consequences.
 
 PR 4 builds a controlled, uninstalled probe APK and a debug-only isolated-service
 experiment. Artifact-derived DEX execution is not full Android app execution.
