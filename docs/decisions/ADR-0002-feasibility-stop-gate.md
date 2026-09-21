@@ -16,13 +16,20 @@ PR #5, so the GitHub number of this roadmap stage differs from its roadmap numbe
 The containment evidence was produced by a debug API 35 x86_64 emulator run at
 PR 4 tested commit `8386a4e86d588e5f50abf724798f9aca87f0cec3`
 ([Actions run 35487976187](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35487976187)).
-The final PR #5 head after the stacked correction was
-`29723d89052267f64b49af91613d88e0263c8610`; the merged
-[PR #5](https://github.com/innercoder78/Privacy-Decoy/pull/5) records its
-exact-head result. The evidence document's completed implementation run is
+The final [PR #5](https://github.com/innercoder78/Privacy-Decoy/pull/5) head after
+the stacked correction was `29723d89052267f64b49af91613d88e0263c8610`.
+Its decisive final exact-head PR evidence is
+[Actions run 35637885698](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35637885698):
+`validate`: SUCCESS; `containment-prototype`: SUCCESS (9/9 cases);
+`network-feasibility`: SUCCESS (13/13 cases); independent packet evidence passed;
+and lockdown was verified platform state. Non-lockdown VPN-loss physical egress
+remained a **Known Gap**.
+
+For historical traceability, the evidence document's earlier implementation
 [Actions run 35564605873](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35564605873)
-on `b87b2682ba6085bef2edab4e99aea74568fdb6d7`, which passed validation,
+on `b87b2682ba6085bef2edab4e99aea74568fdb6d7` passed validation,
 9/9 containment cases, and 13/13 network cases with independent packet analysis.
+That earlier commit and run are not the final PR #5 exact-head evidence.
 These are scoped prototype observations, not production proof.
 
 ## Evidence reviewed
