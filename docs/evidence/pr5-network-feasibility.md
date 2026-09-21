@@ -114,22 +114,56 @@ behavior. It is explicitly outside hostile authority and closed by calibration
 cleanup/service destruction. Its physical data is compared with deliberate
 closure of policy-owned sockets. This does not revoke arbitrary native sockets.
 
-## Results pending exact-head device evidence
+## Resumption and observed baseline
+
+The 2026-09-21 resumption found local and remote head
+`ab7db51340603aadcc7230d7e33bd8a11b1afe84`, with six prior revision commits intact.
+Eleven working files contained nested conflicts against the old scaffold; every
+added non-marker line was checked against that scaffold or the preserved HEAD.
+Copies were retained outside the repository and only the stale conflict additions
+were resolved. The original stash `3448e814e87cdb0b647329e89fc5f9674d1e6887`
+remains preserved; it was not applied, popped or dropped during this resumption.
+
+[Push run 35548440242](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35548440242)
+passed validation, nine containment cases and thirteen network cases with the
+independent analyzer. However,
+[parallel PR run 35548443052](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35548443052)
+failed two network assertions. The socket test had already verified actual
+closure, then required the missing-ID response `closed` even when a concurrent
+route invalidation could return `denied`. Both responses prevent use; the revised
+test logs the distinction while still requiring actual closure and stale-generation
+denial. Provider replacement now waits up to ten seconds for a different active
+VPN Network instead of assuming completion after 1.2 seconds. It still requires
+old-generation and unvalidated-generation denial plus independent fixture revoke
+and establishment records.
+
+The baseline push run observed one gated TCP packet on physical port 46151 during
+VPN loss even though the operation returned `io-failure`. The previous analyzer
+classified only TCP payload as a race; the revised analyzer counts SYNs too.
+This is **Known Gap: physical egress**, not successful TCP data delivery, and the
+distinct calibration port 46153 cannot account for it. External platform lockdown
+is therefore required for the tested no-physical-fallback goal; verifying that
+dependency reliably in a product remains a PR 6 blocker. Callback/snapshot checks
+alone are not enforcement.
+
+## Results from baseline ab7db51; revised exact-head rerun required
 
 | Question | Current status |
 |---|---|
-| Management TCP, isolated Java/native TCP/UDP | Implemented; device result pending |
-| Broker caller/session/epoch/generation enforcement | Implemented; device result pending |
-| Full tunnel, include, exclude and split route | Implemented; independent evidence pending |
-| Controlled DNS wire packet | Implemented; independent evidence pending |
-| Java/native IPv6 UDP | Implemented; Unknown until observed |
-| Explicit physical Network | Tests provider default and explicit allowBypass mode separately; pending |
-| Existing connection and policy Socket closure | Implemented; independent evidence pending |
-| VPN-loss race | Immediate gated attempt and separate OS fallback calibration; pending; these are not interchangeable evidence |
-| Always-on/lockdown | Setup attempted in CI; Unknown until platform state and capture verified |
-| Reconnect and genuine provider replacement | Implemented; device result pending |
+| Management TCP, isolated Java/native TCP/UDP | Denied; no fixed physical packets in the push run |
+| Broker caller/session/epoch/generation enforcement | Passed device boundary assertions |
+| Full tunnel and per-app include | Java/native IPv4 and controlled DNS observed in TUN; no fixed physical egress |
+| Per-app exclude and split route | Known Gap: host TCP physically escaped; split documentation target stayed in TUN |
+| Controlled DNS wire packet | Fixed .53 query seen in TUN; platform .54 resolver traffic separately classified |
+| Java/native IPv6 UDP | Both observed in TUN for full tunnel/include; preliminary API 35 evidence only |
+| Explicit physical Network | Default full tunnel denied; allowBypass connected with physical capture |
+| Existing connection and policy Socket closure | Push passed closure; PR assertion race corrected above. OS retained-socket send returned io-failure in both baseline runs |
+| VPN-loss race | Known Gap: one gated physical TCP packet despite io-failure; separate OS fallback calibration succeeded |
+| Always-on/lockdown | Both platform booleans true; physical selection denied after confirmed VPN loss; no fixed physical packets in push run |
+| Reconnect and genuine provider replacement | Push passed; PR replacement timing failure requires corrected rerun |
 | Cronet / QUIC | Unknown / Not exercised |
-| External-lockdown dependency | Unknown until loss/lockdown evidence; no favorable conclusion assumed |
+| Subprocess networking and general Android resolver behavior | Unknown / Not exercised |
+| External-lockdown dependency | Required for tested no-physical-fallback goal; reliable product verification remains unresolved |
 
 TRANSPORT_VPN and default-route booleans are observations only: they do not prove
 provider trust, destination coverage, logging practices, full tunneling or exit

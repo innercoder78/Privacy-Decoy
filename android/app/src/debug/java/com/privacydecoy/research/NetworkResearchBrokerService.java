@@ -155,6 +155,8 @@ public final class NetworkResearchBrokerService extends Service {
                 NetworkCapabilities c=active==null?null:connectivity.getNetworkCapabilities(active);
                 LinkProperties links=active==null?null:connectivity.getLinkProperties(active);
                 out.putBoolean("vpn",c!=null&&c.hasTransport(NetworkCapabilities.TRANSPORT_VPN));
+                // Manager-only identity comparison; never passed to hostile callers or logged.
+                out.putLong("networkHandle",active==null?0:active.getNetworkHandle());
                 boolean v4=false,v6=false;
                 if(links!=null) for(RouteInfo r:links.getRoutes()) if(r.isDefaultRoute()) {
                     if(r.getDestination().getAddress() instanceof Inet4Address)v4=true;else v6=true;

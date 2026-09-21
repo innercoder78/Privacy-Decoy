@@ -164,7 +164,12 @@ public final class NetworkTests {
             evidence("OLD_SOCKET_SEND result="+result);
             Bundle state=b.state();check(state.getInt("owned")==0&&state.getInt("physicallyClosed")>0,"route did not close real owned socket");
             check("denied".equals(b.request(s,g,"SEND_ON_CONTROLLED_CONNECTION",id).getString("result")),"old generation usable");
-            long fresh=b.route("verified");check("closed".equals(b.request(s,fresh,"SEND_ON_CONTROLLED_CONNECTION",id).getString("result")),"owned socket still usable");
+            long fresh=b.route("verified");
+            String after=b.request(s,fresh,"SEND_ON_CONTROLLED_CONNECTION",id).getString("result");
+            // A concurrent route callback can deny the new generation before the
+            // missing-ID lookup. Both outcomes forbid use; actual closure was checked above.
+            check("closed".equals(after)||"denied".equals(after),"closed owned socket request was not blocked");
+            evidence("REGISTRY postClosureResult="+after);
             b.control(NetworkWire.OS_CLOSE,new Bundle());evidence("REGISTRY routeClosed=true sendClosed=true");
         }
     }
@@ -207,8 +212,18 @@ public final class NetworkTests {
     }
     public void testProviderReplacement()throws Exception{
         try(Broker b=new Broker();ResearchSession s=session()){
-            b.register(s);long g=b.route("verified");fixture(B,"FULL_TUNNEL");Thread.sleep(1200);
-            check(b.state().getBoolean("vpn"),"replacement VPN absent");
+            b.register(s);long g=b.route("verified");
+            Bundle initial=b.state();long oldNetwork=initial.getLong("networkHandle");
+            check(oldNetwork!=0&&initial.getBoolean("vpn"),"initial VPN absent");
+            fixture(B,"FULL_TUNNEL");
+            boolean replaced=false;
+            long deadline=SystemClock.elapsedRealtime()+10000;
+            while(SystemClock.elapsedRealtime()<deadline){
+                Bundle state=b.state();
+                if(state.getBoolean("vpn")&&state.getLong("networkHandle")!=oldNetwork){replaced=true;break;}
+                Thread.sleep(100);
+            }
+            check(replaced,"replacement VPN network not observed before deadline");
             check("denied".equals(b.request(s,g,"JAVA_UDP4",0).getString("result")),"replacement retained old generation");
             check("denied".equals(b.request(s,b.state().getLong("generation"),"JAVA_UDP4",0).getString("result")),"replacement self-validated");
             evidence("REPLACEMENT oldDenied=true unverifiedDenied=true");

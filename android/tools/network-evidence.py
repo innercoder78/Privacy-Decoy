@@ -177,6 +177,12 @@ def packets(path):
                 data=iplen-ihl-((p[transport+12]>>4)*4)>0
             yield dict(recordStart=record_start,recordEnd=f.tell(),time=sec+usec/1e6,family=family,protocol='tcp' if protocol==6 else 'udp',category=category,port=port,data=data)
 
+def gated_race_packets(rows):
+    # A SYN is already physical egress, even if connect fails before payload.
+    # Port 46153 belongs to the independent ungated OS fallback calibration.
+    return [r for r in rows if r['category']=='host-control'
+            and r['protocol']=='tcp' and r['port']==46151]
+
 def analyze():
     report=json.loads(OUT.joinpath('observations.json').read_text())
     captures={name:list(packets(OUT/name)) for name in CAPTURES}
@@ -223,10 +229,10 @@ def analyze():
             assert case['oldSocketPhysicalData']>0 or 'OLD_SOCKET_SEND result=success' not in obs,'Old socket success lacks independent data evidence'
         if name=='testVpnLossAndReconnect':
             assert host,'Missing OS physical fallback calibration evidence'
-            race=[r for r in host if r['port']==46151 and r['data']]
+            race=gated_race_packets(rows)
             calibration=[r for r in host if r['port']==46153]
             assert calibration,'Missing distinct OS fallback calibration capture'
-            assert race or 'LOSS immediate=success' not in obs,'Gated race success lacks distinct physical data evidence'
+            assert race or 'LOSS immediate=success' not in obs,'Gated race success lacks distinct physical packet evidence'
             case['gatedRace']='Known Gap' if race else 'Not reproduced in this run'
             print('RACE '+name+' '+case['gatedRace'],flush=True)
         if name=='testProviderReplacement':

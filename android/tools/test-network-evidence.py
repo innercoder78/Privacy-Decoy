@@ -44,6 +44,12 @@ class CaptureTests(unittest.TestCase):
         case={'captureStart':{'wifi.pcap':25},'captureEnd':{'wifi.pcap':rows[0]['recordEnd']-1}}
         self.assertEqual(evidence.case_packets({'wifi.pcap':rows},case),rows)
 
+    def test_gated_race_counts_syn_without_payload(self):
+        syn=dict(category='host-control',protocol='tcp',port=46151,data=False)
+        calibration=dict(syn,port=46153)
+        self.assertEqual(evidence.gated_race_packets([syn,calibration]),[syn])
+        self.assertEqual(evidence.gated_race_packets([calibration]),[])
+
     def test_rejects_truncated_record(self):
         with self.assertRaisesRegex(AssertionError,'truncated'):
             self.parse(self.capture([self.frame()])[:-1])
