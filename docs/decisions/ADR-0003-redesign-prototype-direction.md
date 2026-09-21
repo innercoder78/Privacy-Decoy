@@ -27,10 +27,22 @@ research directions:
    probe may test whether normal OS installation/profile UIDs supply lifecycle,
    split/native and storage isolation while supported ordinary-app mechanisms can
    replace or block every mandatory real host-state path before protected code.
-2. **S2: conditional source-complete user-space engine audit.** VirtualSpace may
-   receive a non-executing source/provenance audit only after an unambiguous license
-   covering the immutable tree is established. Audit success would authorize only
-   a later prototype proposal.
+2. **S2: current open-source engine source/provenance audit.** One bounded,
+   non-executing audit covers VirtualSpace and Blacks-BlackBox at the study's
+   immutable refs, with separate evidence and outcomes. Initial license/ancestry
+   screening must establish complete inherited grants before deeper architecture
+   review. License, native/binary/dependency provenance and hidden-API questions
+   must be resolved before any runtime prototype is proposed. Audit success only
+   permits that later proposal, never execution or integration under this PR.
+
+Independent PR review on 2026-09-21 revalidated the study's listed source refs and
+identified Black00Z/Blacks-BlackBox at
+`40282a7bf4500948cfd598fc67e6e63114b26dd9` (2026-05-12). Its public tree and
+root Apache-2.0 text warrant screening, but do not resolve inherited
+BlackBox/VirtualApp licensing, native/AAR provenance or containment. Both S2
+candidates remain **Major unresolved risk**. A shared audit checklist with
+independent outcomes is narrower than two separate research tracks; neither
+modern app launches nor profile-support claims select an engine.
 
 This is **not** a production architecture/engine decision. It does not authorize
 ordinary applications, accounts, private data, third-party integration, vendoring,
@@ -80,9 +92,19 @@ service, `/proc`, `/sys`, property, Binder, provider, or network observations.
 Provisioning, DPC authority, OEM differences, cross-profile paths, revocation,
 external VPN treatment, API 31–37 behavior and distribution remain unproved.
 
-VirtualSpace's license coverage, ancestry, native/binary provenance, dependencies,
-hidden-API/version strategy, UID/process design and every claimed containment
-property remain unresolved. README claims are not evidence.
+VirtualSpace's README MIT wording without a root LICENSE leaves grant coverage
+unresolved. Blacks-BlackBox's root Apache-2.0 text does not establish inherited
+grants; its native source, committed AARs, Maven inputs, target SDK 28 and
+hidden-API bypass require provenance and platform review. Both candidates'
+source completeness, forkability, security maintenance, UID/process design,
+management isolation, Binder/native/filesystem/network mediation and fail-closed
+behavior remain unresolved. README Android/ARM64/split/profile/spoofing claims are
+not security evidence; work-profile support resolves none of those uncertainties.
+
+S1 remains a falsification experiment: if hostile Java/native code can obtain a
+mandatory real host value that allowed root-free ordinary-app mechanisms cannot
+replace or block, S1 fails. Profile isolation is not Decoy Persona mediation;
+PD-REQ-001 through PD-REQ-070 must not be weakened to make it pass.
 
 ## Prototype-only authorization and next decisions
 
@@ -91,8 +113,11 @@ The proposed sequence is:
 1. a managed-profile lifecycle/native/storage/host-state boundary probe;
 2. only if it survives, a separate networking/revocation probe using the external
    VPN fixture and independent packet observation; and
-3. independently, only after its license prerequisite, a non-executing immutable-
-   source/SBOM/architecture audit of VirtualSpace.
+3. independently, a bounded non-executing source/provenance audit of VirtualSpace
+   and Blacks-BlackBox, starting with their separate license/ancestry gates and
+   stopping each unresolved candidate before deeper architecture review. No
+   runtime prototype proposal precedes resolution of its provenance, binary,
+   dependency and hidden-API issues.
 
 Each requires its own reviewed PR. Existing hostile probe, native library,
 sentinel, lifecycle, Binder/session, revocation, external-VPN, provider-replacement

@@ -3,8 +3,9 @@
 - **Roadmap stage:** PR 7 (architecture-redesign research)
 - **Research date:** 2026-09-21
 - **Starting repository commit:** `63be1521521e42ba75a81a800eaff9843f1b1ad5`
-- **Outcome:** two tightly bounded directions merit feasibility prototypes; no
-  production architecture or containment engine is selected.
+- **Outcome:** S1 merits a controlled feasibility/falsification prototype; S2
+  merits only a bounded non-executing source/provenance audit of two candidates.
+  No production architecture or containment engine is selected.
 
 This study follows [ADR-0002](decisions/ADR-0002-feasibility-stop-gate.md), which
 selected **A — REDESIGN**. It is a research plan, not a protection claim or an
@@ -26,13 +27,35 @@ and CI/emulator tooling at the starting commit. It uses these labels:
 - **PRIVACY DECOY ANALYSIS**: consequence for this threat model.
 - **UNKNOWN — REQUIRES EXPERIMENT**: no adequate reproducible evidence exists.
 
-Canonical links and immutable refs from the 2026-09-19 engine assessment were
-re-reviewed on 2026-09-21. Fresh remote retrieval was attempted, but this
-execution environment's network proxy rejected GitHub and Android documentation
-requests. Therefore this document does **not** claim a newer upstream observation
-than the recorded immutable refs. Ref existence, license files, link health, and
-default-branch heads must be revalidated before any source is fetched in a future
-PR. This limitation turns uncertainty into `Unknown`, never a positive score.
+The original Codex Cloud research re-reviewed the 2026-09-19 engine assessment
+on 2026-09-21, but its network proxy blocked fresh external retrieval. Subsequent
+independent PR review by ChatGPT on 2026-09-21 revalidated the following examined
+heads and specific observations. These are **reviewer-verified REPOSITORY
+OBSERVATIONS**, not retrievals performed by that original Codex environment:
+
+| Repository | Independently revalidated immutable head | Specifically revalidated observation |
+|---|---|---|
+| chiyuan5/VirtualSpace | `b1ff7988ac598b00b45c22003390ff43396c1c01` | README says MIT; no root LICENSE file. |
+| PeterCxy/Shelter | `672560f551772b5cd829b2947bae830d78f20edf` | GPL-3.0 LICENSE. |
+| FBlackBox/BlackBox | `a13734339f85a85b4400926f7142557cb6f97dd9` | Examined head revalidated. |
+| asLody/VirtualApp | `85768db8e29b5c840f1ba795d09a9d510fb5d068` | Examined head revalidated. |
+| DroidPluginTeam/DroidPlugin | `c6ebf652e0f73aa0e5746766e117e51efaf41dbd` | LGPL-3.0 LICENSE. |
+| FSpaceCore/SpaceCore | `3826a2fa1ac492fbbe7435ccb52074c1e2b702de` | README says the SDK is not open-source. |
+
+That review also identified Black00Z/Blacks-BlackBox at
+`40282a7bf4500948cfd598fc67e6e63114b26dd9` (commit date 2026-05-12), screened
+below. During this Desktop Local revision, read-only GitHub retrieval separately
+cross-checked that fork's commit date, README, root LICENSE, Gradle declarations,
+native-source tree and named AAR paths at the same ref. No engine was built or
+executed. Desktop retrieval also confirmed the six immutable refs exist and the
+listed license/README observations; it did not establish their latest moving
+heads or complete source/dependency provenance.
+
+Head revalidation does not revalidate every historical claim or runtime property.
+Other inherited observations, including Island/Insular currency and security
+maintenance claims, are not newly verified here; unresolved properties remain
+`Unknown`. Recheck moving heads and policies before any later audit/prototype;
+never turn source access or README compatibility into positive security evidence.
 
 Primary platform sources used are Android's [application
 sandbox](https://source.android.com/docs/security/app-sandbox), [managed
@@ -149,19 +172,56 @@ copied or approved.
 | FBlackBox original | FBlackBox/[BlackBox](https://github.com/FBlackBox/BlackBox/tree/a13734339f85a85b4400926f7142557cb6f97dd9), `a13734339f85a85b4400926f7142557cb6f97dd9` (`master`, 2024-04-12) | Canonical repository shows dissolution/deletion, no complete current engine tree or root license. An unknown fork cannot cure missing upstream license/provenance, native binary ancestry, dependencies, or security history. | Not auditable or safely forkable from canonical source. **Disqualifying.** |
 | SpaceCore | FSpaceCore/[SpaceCore](https://github.com/FSpaceCore/SpaceCore/tree/3826a2fa1ac492fbbe7435ccb52074c1e2b702de), `3826a2fa1ac492fbbe7435ccb52074c1e2b702de` (`main`, 2024-02-01) | Public repository is a demo/integration shell with no root license; upstream describes the SDK as non-open-source. Claimed Android 6–14 and ARM32/ARM64 support does not reveal engine/native source, bundled binaries, transitive dependencies, vulnerabilities, or security reporting. | Opaque engine is inside the TCB and cannot be independently reviewed or replaced. **Disqualifying.** |
 | chiyuan5 VirtualSpace | chiyuan5/[VirtualSpace](https://github.com/chiyuan5/VirtualSpace/tree/b1ff7988ac598b00b45c22003390ff43396c1c01), `b1ff7988ac598b00b45c22003390ff43396c1c01` (`main`, observed 2026-05-14) | Source visible; README says MIT but no root license file was observed, so grant/coverage is unresolved. Recent activity is not security maintenance. Small/new ancestry, native provenance, Maven graph, imported binaries, SBOM, and reporting process require audit. | README claims package/activity/service interception and C/C++ PLT/GOT hooks, but inconsistently maps Android 16 to API 35. ARM64, splits, API 31–37/OEMs, Binder, syscalls, multiprocess, signing, isolation, and fail-closed behavior are **Unknown**. **Major unresolved risk; conditional audit only.** |
+| Blacks-BlackBox | Black00Z/[Blacks-BlackBox](https://github.com/Black00Z/Blacks-BlackBox/tree/40282a7bf4500948cfd598fc67e6e63114b26dd9), `40282a7bf4500948cfd598fc67e6e63114b26dd9` (2026-05-12) | Public source and root Apache-2.0 text; BlackBox/NewBlackbox-derived lineage with unresolved inherited grants, native provenance and committed AARs. Recent compatibility work is not established security maintenance. | Modern Android/ARM64/profile/split/spoofing claims do not prove containment. **Major unresolved risk; non-executing source/provenance screening only.** |
 
-No newly discovered project was added because no additional canonical, adequately
-licensed and source-complete engine could be established. README feature lists
-are not proof of lifecycle completeness, containment, native mediation, or
-revocation. User-space hook engines commonly execute tenants within host-defined
-UID/process/resources; the exact identity and bypass behavior must be measured,
-not inferred from UI compatibility.
+Independent review therefore identified at least one additional current,
+actively developed BlackBox-derived fork worth **source/provenance screening**.
+This corrects the original network-limited conclusion; it does not establish a
+source-complete, adequately licensed or secure engine. README feature lists are
+not proof of lifecycle completeness, containment, native mediation or revocation.
+User-space hook engines commonly execute tenants within host-defined identities;
+the exact UID/process/resource and bypass behavior remains to be established.
 
-VirtualSpace is retained only as a **conditional static-audit comparator**. Before
-any build or prototype: upstream must provide an unambiguous license covering the
-examined tree; every Git submodule, Maven artifact, `.so`/archive and source origin
-must be inventoried; binary-only engine content is disqualifying; and a defensible
-API 31–37 non-SDK strategy must exist. It is not a shortlisted runtime.
+#### Blacks-BlackBox: bounded evidence and unresolved risks
+
+At the immutable ref above, the reviewer-verified [README](https://github.com/Black00Z/Blacks-BlackBox/blob/40282a7bf4500948cfd598fc67e6e63114b26dd9/README.md)
+claims Android 14+/16 compatibility work, physical ARM64 as the primary validation
+path, main/work-profile smoke validation, `.apks`/split import, device spoofing
+and additional service hooks. It also says VPN mode is disabled on Android 14+
+because forwarding is incomplete. These remain **UPSTREAM CLAIMS**, including
+any statement that a modern application launches; none is security evidence.
+
+The root [build.gradle](https://github.com/Black00Z/Blacks-BlackBox/blob/40282a7bf4500948cfd598fc67e6e63114b26dd9/build.gradle)
+declares `compileSdkVersion = 35`, `targetSdkVersion = 28`, `minSdk = 21` and
+`hiddenApiBypass = '4.3'`. The tree contains substantial C/C++ hook source and
+committed `app/libs/catloading-release.aar` and
+`app/libs/floatingview-release.aar`. These are **REPOSITORY OBSERVATIONS**.
+
+| Screening question | Evidence and Privacy Decoy analysis |
+|---|---|
+| Ancestry and inherited grants | README credits/identifies NewBlackbox, BlackBox, VirtualApp, Dobby, xDL, BlackReflection and FreeReflection (also VirtualAPK). Acknowledgments do not establish file-level ancestry or rights. The root [Apache-2.0 text](https://github.com/Black00Z/Blacks-BlackBox/blob/40282a7bf4500948cfd598fc67e6e63114b26dd9/LICENSE) does not resolve inherited BlackBox/VirtualApp grants. Exact upstream revisions, notices, modifications and coverage are **Unknown / Major unresolved risk**. |
+| Native source and libraries | Visible C/C++ permits inspection but does not prove all native inputs are present or reproducible. Map each hook/loader component to licensed upstream source and all generated/packaged native libraries to that source. Source completeness, library provenance and ABI behavior are **Unknown**. |
+| AARs and binary-only TCB | The two named AARs need exact source/version, license/notice, build recipe, integrity and privilege/TCB mapping. Their names do not establish harmless UI-only behavior. Whether they or other inputs contain binary-only trusted code is **Unknown**, not proven absent; an irreplaceable opaque TCB component is disqualifying. |
+| Maven/repositories | Desktop read-only inspection of [settings.gradle](https://github.com/Black00Z/Blacks-BlackBox/blob/40282a7bf4500948cfd598fc67e6e63114b26dd9/settings.gradle) shows JitPack, Aliyun mirrors, Google and Maven Central, plus the Gradle Plugin Portal for plugins. [app/build.gradle](https://github.com/Black00Z/Blacks-BlackBox/blob/40282a7bf4500948cfd598fc67e6e63114b26dd9/app/build.gradle) loads local JAR/AAR files and Maven artifacts. Complete transitive coordinates, source/license mapping, immutable verification and native contents remain **Unknown**; declarations are not an audited dependency graph. |
+| Forkability/security maintenance | A public tree and recent compatibility changes make static questions answerable. Legally defensible forkability, reproducible source completeness, vulnerability response and maintained security coverage are **Unknown** until the inherited grant and supply-chain audit passes. |
+| SDK/hidden-API strategy | Target 28 can retain target-dependent compatibility behavior on newer Android; compiling against 35 does not establish a modern target strategy. Android's [target-SDK semantics](https://developer.android.com/guide/topics/manifest/uses-sdk-element#target) and non-SDK restrictions require per-API analysis. The bypass declaration and hook claims leave private-interface dependence, API 31–37/OEM stability, target migration, install/distribution eligibility and fail-closed handling **Major unresolved risk**. Android 14/16 launch claims resolve none of these. |
+| ARM64 and splits | Physical ARM64 and `.apks` import are README claims. Imported hostile JNI, native threads/loading, direct syscalls, complete split/signature/resource handling and release/OEM coverage are **Unknown**. |
+| UID/process and management | OS UID/process mapping, tenant separation, management authority and shared resources are **Unknown**. A virtual package/user ID is not proof of an independent kernel UID; no safe management boundary is inferred. |
+| Mediation and revocation | Complete Binder/service/provider, filesystem/direct-syscall, host-state and direct-network coverage is **Unknown**. Device spoofing and added hooks do not prove alternate paths are blocked. Pre-code policy, cached capabilities, engine death and fail-closed teardown require source mapping and later independent evidence. |
+| Network/profile interaction | Disabled/incomplete VPN forwarding proves no external-route enforcement. Privacy Decoy still must not implement `VpnService`. Claimed work-profile support does not resolve grants, dependencies, shared in-engine identities, native bypass, persona mediation or fail-closed networking. Profile separation alone cannot supply a Decoy Persona. |
+
+**Classification: Major unresolved risk.** The evidence supports only a
+non-executing static audit; neither modern app compatibility nor the root license
+justifies promotion to a runtime prototype or production selection. Do not
+import/vendor, build or execute this engine under this PR.
+
+VirtualSpace and Blacks-BlackBox are conditional static-audit comparators only.
+Initial screening may inspect public metadata/source and license artifacts without
+execution. Before deeper architecture auditing, establish unambiguous grants for
+each complete immutable tree and inherited material. Before proposing any runtime
+prototype, inventory every submodule, Maven artifact, native library/archive and
+source origin, resolve binary/dependency provenance and hidden-API strategy, and
+exclude opaque engine TCB content. Neither candidate is a shortlisted runtime.
 
 ### 3. Work-profile / managed-profile hybrid
 
@@ -245,33 +305,36 @@ justifies the cost. It is not selected for convenience.
 
 States mean exactly **Potentially viable**, **Requires prototype**, **Major gap**,
 **Disqualifying**, or **Unknown**. `Profile hybrid` means OS-managed profile plus
-a yet-unproven least-authority mediation layer. `OSS engine` means the only
-non-disqualified current comparator, VirtualSpace, subject to its license gate;
-the other named engines are individually disqualified above.
+a yet-unproven least-authority mediation layer. The existing `VirtualSpace`
+column retains its prior scores, subject to the S2 license/provenance gate.
+`Blacks-BlackBox` is separately recorded as `Unknown` for each unproved mandatory
+property and `Major gap` for PD-REQ-060's unresolved provenance/SBOM. Its overall
+candidate classification is **Major unresolved risk**. No cell authorizes runtime
+work; the historical engines remain individually disqualified above.
 
-| Requirement | Revised bespoke | OSS engine | Profile hybrid | Full VM |
-|---|---|---|---|---|
-| PD-REQ-008 imported unchanged artifacts | Major gap | Requires prototype | Potentially viable | Requires prototype |
-| PD-REQ-011 adversarial process/UID/resources | Major gap | Major gap | Requires prototype | Potentially viable |
-| PD-REQ-013 Binder/service/provider mediation | Major gap | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-014 native/syscall/proc/sys/filesystem | Disqualifying | Requires prototype | Requires prototype | Potentially viable |
-| PD-REQ-015 lifecycle/early init/revocation | Major gap | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-019 reproducible claim evidence | Requires prototype | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-020 complete coverage classification | Unknown | Unknown | Unknown | Unknown |
-| PD-REQ-021 pre-code fail closed | Major gap | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-027 capability revocation | Major gap | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-030 virtual package universe | Major gap | Requires prototype | Major gap | Potentially viable |
-| PD-REQ-031 host services mediated/blocked | Major gap | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-032 traffic producer attribution | Major gap | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-033 required route fails closed | Requires prototype | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-034 all network stacks/paths evidenced | Unknown | Unknown | Unknown | Unknown |
-| PD-REQ-041 storage/native isolation | Major gap | Requires prototype | Potentially viable | Potentially viable |
-| PD-REQ-044 validation before any app code | Major gap | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-045 supervisor safety | Requires prototype | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-057 adversarial test program | Potentially viable | Potentially viable | Potentially viable | Potentially viable |
-| PD-REQ-058 independent/release/device evidence | Requires prototype | Requires prototype | Requires prototype | Requires prototype |
-| PD-REQ-060 reviewable engine boundary/SBOM | Potentially viable | Major gap | Potentially viable | Major gap |
-| PD-REQ-070 no built-in VPN/blocklist | Potentially viable | Unknown | Potentially viable | Unknown |
+| Requirement | Revised bespoke | VirtualSpace | Blacks-BlackBox | Profile hybrid | Full VM |
+|---|---|---|---|---|---|
+| PD-REQ-008 imported unchanged artifacts | Major gap | Requires prototype | Unknown | Potentially viable | Requires prototype |
+| PD-REQ-011 adversarial process/UID/resources | Major gap | Major gap | Unknown | Requires prototype | Potentially viable |
+| PD-REQ-013 Binder/service/provider mediation | Major gap | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-014 native/syscall/proc/sys/filesystem | Disqualifying | Requires prototype | Unknown | Requires prototype | Potentially viable |
+| PD-REQ-015 lifecycle/early init/revocation | Major gap | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-019 reproducible claim evidence | Requires prototype | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-020 complete coverage classification | Unknown | Unknown | Unknown | Unknown | Unknown |
+| PD-REQ-021 pre-code fail closed | Major gap | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-027 capability revocation | Major gap | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-030 virtual package universe | Major gap | Requires prototype | Unknown | Major gap | Potentially viable |
+| PD-REQ-031 host services mediated/blocked | Major gap | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-032 traffic producer attribution | Major gap | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-033 required route fails closed | Requires prototype | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-034 all network stacks/paths evidenced | Unknown | Unknown | Unknown | Unknown | Unknown |
+| PD-REQ-041 storage/native isolation | Major gap | Requires prototype | Unknown | Potentially viable | Potentially viable |
+| PD-REQ-044 validation before any app code | Major gap | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-045 supervisor safety | Requires prototype | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-057 adversarial test program | Potentially viable | Potentially viable | Unknown | Potentially viable | Potentially viable |
+| PD-REQ-058 independent/release/device evidence | Requires prototype | Requires prototype | Unknown | Requires prototype | Requires prototype |
+| PD-REQ-060 reviewable engine boundary/SBOM | Potentially viable | Major gap | Major gap | Potentially viable | Major gap |
+| PD-REQ-070 no built-in VPN/blocklist | Potentially viable | Unknown | Unknown | Potentially viable | Unknown |
 
 The matrix does not declare any requirement satisfied. The bespoke native row is
 disqualifying under the presently available ordinary-app primitives; this does
@@ -330,16 +393,24 @@ AGAIN**. If only a precisely enumerated application/API/device class fails,
 core synthetic persona cannot be mediated against hostile native code on ordinary
 devices, or the required matrix cannot fail closed, **STOP** under current goals.
 
-### Direction S2: conditional source-complete user-space engine audit
+### Direction S2: current open-source engine source/provenance audit
 
-This is shortlisted only as a **non-executing audit experiment**, not as an engine
-prototype. VirtualSpace is the initial subject because it is the only reviewed
-open candidate not already disqualified by staleness/native absence or opacity.
+Choose one bounded **non-executing static audit** covering only VirtualSpace and
+Blacks-BlackBox at the pinned refs above, with separate evidence and pass/fail
+records. This is the smallest justified scope: both visible current trees pose
+the same decisive grant/provenance/containment questions, so one checklist avoids
+duplicating research tracks without combining their evidence or selecting an
+engine based on compatibility. No broader candidate search is authorized.
 
-**Why it survived this far:** a canonical visible source tree and recent observed
-activity make questions answerable. It has **not** survived the license gate and
-is not approved for fetching/building/integration. Its claimed hooks are not
-accepted properties.
+**Why they survived this far:** public source and recent observed compatibility
+activity permit screening, not a passing grade. Both remain **Major unresolved
+risk**. Phase 1 examines license artifacts, ancestry and supply-chain provenance;
+unresolved grants block deeper architecture audit for that candidate. VirtualSpace
+needs explicit coverage beyond README MIT wording; Blacks-BlackBox needs inherited
+grant coverage beyond its root Apache-2.0 text. No build, engine execution,
+vendoring, dependency integration or protected-mode test is authorized. Binary,
+dependency and hidden-API questions must be resolved before a runtime prototype
+may even be proposed; each candidate stands or fails independently.
 
 **TCB if it ever passed audit:** protected code would likely run in engine-defined
 host processes/UIDs; management must be in a distinct OS UID; engine Java/native
@@ -362,9 +433,12 @@ authorizes a later controlled engine prototype ADR/update.
 commercial dependency in the TCB; routine rewriting/re-signing; shared hostile
 and management UID without credible native containment; hook-only direct-syscall
 story; unavoidable prohibited framework; or no fail-closed version strategy.
-License/provenance failure **STOPs S2 immediately** without fetching or executing
-code. Architectural failure disqualifies this engine, not S1. If every auditable
-engine shares the same structural bypass, **REDESIGN AGAIN** or **STOP**.
+Unresolved license/provenance **STOPs progression for that candidate** at static
+screening; no build or execution follows. A confirmed unresolvable grant, opaque
+TCB or architectural failure disqualifies that candidate, not the other S2
+candidate or S1. Record unresolved evidence as Unknown/Major unresolved risk,
+never audit PASS. If every auditable engine shares the same structural bypass,
+**REDESIGN AGAIN** or **STOP**.
 
 ## Proposed experimental PR sequence (design only)
 
@@ -424,10 +498,14 @@ research PR requiring its own review. No ordinary apps, accounts, or private dat
 
 ### Proposed Roadmap PR 8A (parallel in roadmap, not implementation): engine source audit
 
-- **Objective:** resolve S2 without compiling or executing it.
-- **Prerequisites:** canonical upstream response or immutable license artifact;
-  immutable full source ref; ancestry; submodule/dependency locks; reproducible
-  provenance for every native/bundled binary; security contact/process.
+- **Objective:** screen only the two pinned S2 candidates, VirtualSpace and
+  Blacks-BlackBox, without compiling or executing either; keep separate findings.
+- **Phases/prerequisites:** first resolve full-tree and inherited grants from
+  immutable license artifacts/upstream clarification. Stop a candidate with an
+  unresolved grant before deeper architecture review. Inventory immutable source,
+  ancestry, submodule/dependency locks, native/AAR provenance and reproducibility,
+  binary TCB and security process. Resolve these and hidden-API/version strategy
+  before proposing any later runtime prototype.
 - **Review evidence:** source/module graph; lifecycle/component virtualization;
   package/signature/split behavior; process/UID map; native loader/hooks and direct
   syscall bypass; Binder/filesystem/network paths; hidden APIs by API level;
@@ -479,9 +557,13 @@ emulator or debug pass cannot establish physical/release support.
 selected.** S1 is the sole executable architecture direction: managed-profile
 kernel isolation plus a least-authority mediation boundary, tested first for
 fatal native/persona leaks. S2 is only a conditional, non-executing source audit
-of VirtualSpace; it cannot proceed until license and provenance are resolved.
+of VirtualSpace and Blacks-BlackBox with independent outcomes. Both are **Major
+unresolved risk**; initial public-source/license screening is allowed, but
+unresolved grants block deeper audit and unresolved provenance, binary/dependency
+or hidden-API questions block any runtime prototype proposal.
 
-All other reviewed engines and the full VM are disqualified on current evidence;
+The historical engines outside S2 and the full VM are disqualified on current
+evidence;
 standalone bespoke/user-space virtualization hybrids retain structural major
 gaps. Ordinary protected apps remain blocked. If S1 cannot prevent or block
 mandatory real host state for hostile native code, and S2 supplies no fully
