@@ -15,6 +15,7 @@ OUT=Path('app/build/reports/network')
 CAPTURES=('physical.pcap','wifi.pcap')
 A='com.privacydecoy.externalvpnfixture'
 B=A+'.replacement'
+CONTROLLER='com.privacydecoy.externalvpnfixture.FixtureController'
 CASES=[
  ('testDirectProcessRestrictions',None),
  ('testBrokerSessionBoundary',None),
@@ -29,13 +30,61 @@ CASES=[
  ('testVpnLossAndReconnect','FULL_TUNNEL'),
  ('testProviderReplacement','FULL_TUNNEL'),
 ]
-def adb(*args,timeout=30,check=True):
-    p=subprocess.run(['adb',*args],capture_output=True,text=True,timeout=timeout)
-    if check and p.returncode: raise AssertionError('ADB operation failed: '+args[0])
-    return p.stdout
+def adb_result(*args,timeout=30):
+    try:
+        return subprocess.run(['adb',*args],capture_output=True,text=True,timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return None
+def adb(*args,timeout=30,check=True,category=None):
+    p=adb_result(*args,timeout=timeout)
+    if p is None or (check and p.returncode):
+        raise AssertionError(category or 'ADB operation failed: '+args[0])
+    return '' if p is None else p.stdout
 def control(pkg,mode):
     if mode!='STOP':adb('shell','appops','set',pkg,'ACTIVATE_VPN','allow')
-    adb('shell','am','start','-W','-n',pkg+'/com.privacydecoy.externalvpnfixture.FixtureController','--es','mode',mode)
+    adb('shell','am','start','-W','-n',pkg+'/'+CONTROLLER,'--es','mode',mode)
+
+def lockdown_setup_control(deadline_seconds=60,interval=.5):
+    """Wait for observable post-reboot services, then launch setup with bounded retries."""
+    deadline=time.monotonic()+deadline_seconds
+    category='device-unavailable'
+    while time.monotonic()<deadline:
+        device=adb_result('wait-for-device',timeout=min(5,max(.1,deadline-time.monotonic())))
+        if device is None or device.returncode:
+            category='device-unavailable';time.sleep(interval);continue
+        boot=adb_result('shell','getprop','sys.boot_completed',timeout=5)
+        if boot is None or boot.returncode or boot.stdout.strip()!='1':
+            category='activity-manager-not-ready';time.sleep(interval);continue
+        packages=[]
+        for pkg in (A,B):
+            result=adb_result('shell','pm','path',pkg,timeout=5)
+            packages.append(result is not None and result.returncode==0 and result.stdout.startswith('package:'))
+        if not all(packages):
+            category='package-unavailable';time.sleep(interval);continue
+        resolved=adb_result('shell','cmd','package','resolve-activity','--brief',A+'/'+CONTROLLER,timeout=5)
+        if (resolved is None or resolved.returncode or
+                (CONTROLLER not in resolved.stdout and '/.FixtureController' not in resolved.stdout)):
+            category='controller-unresolved';time.sleep(interval);continue
+        activity=adb_result('shell','cmd','activity','get-config',timeout=5)
+        if activity is None or activity.returncode:
+            category='activity-manager-not-ready';time.sleep(interval);continue
+        appops_ready=True
+        for pkg in (A,B):
+            set_op=adb_result('shell','appops','set',pkg,'ACTIVATE_VPN','allow',timeout=5)
+            get_op=adb_result('shell','appops','get',pkg,'ACTIVATE_VPN',timeout=5)
+            appops_ready &= (set_op is not None and set_op.returncode==0 and
+                             get_op is not None and get_op.returncode==0 and 'allow' in get_op.stdout)
+        if not appops_ready:
+            category='consent-preparation-unavailable';time.sleep(interval);continue
+        cleared=adb_result('logcat','-c',timeout=5)
+        if cleared is None or cleared.returncode:
+            category='activity-manager-not-ready';time.sleep(interval);continue
+        launched=adb_result('shell','am','start','-W','-n',A+'/'+CONTROLLER,
+                            '--es','mode','FULL_TUNNEL_BYPASS',timeout=10)
+        if launched is not None and launched.returncode==0:
+            return
+        category='controller-start-failed';time.sleep(interval)
+    raise AssertionError('Lockdown setup failed: '+category)
 def logs():return adb('logcat','-d','-v','raw','PD_PR5:I','PD_PR5_VPN:I','*:S')
 def start(mode,pkg=A):
     control(pkg,mode)
@@ -114,13 +163,17 @@ def exercise():
         adb('shell','settings','put','secure','always_on_vpn_app',A)
         adb('shell','settings','put','secure','always_on_vpn_lockdown','1')
         adb('reboot')
-        boot=False
-        for _ in range(120):
-            time.sleep(2)
-            if adb('shell','getprop','sys.boot_completed',timeout=5,check=False).strip()=='1':boot=True;break
-        assert boot,'Lockdown setup reboot timed out'
-        adb('logcat','-c');control(A,'FULL_TUNNEL_BYPASS');time.sleep(2)
-        setup=logs()
+        lockdown_setup_control()
+        setup=''
+        for _ in range(50):
+            setup=logs()
+            if ('STATE established mode=FULL_TUNNEL_BYPASS' in setup or
+                    'STATE consent-required' in setup):break
+            time.sleep(.2)
+        if 'STATE consent-required' in setup:
+            raise AssertionError('Lockdown setup failed: consent-preparation-unavailable')
+        if 'STATE established mode=FULL_TUNNEL_BYPASS' not in setup:
+            raise AssertionError('Lockdown setup failed: controller-start-failed')
         for line in setup.splitlines():
             if line.startswith('STATE ') and re.fullmatch(r'[A-Za-z0-9_= .-]+',line):print('LOCKDOWN_SETUP '+line,flush=True)
         if 'alwaysOn=true lockdown=true' in setup:

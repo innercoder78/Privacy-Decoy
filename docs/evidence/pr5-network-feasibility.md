@@ -169,6 +169,19 @@ alone are not enforcement.
 
 ## Follow-up harness stabilization
 
+[Exact-head run 35566250067](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35566250067)
+on `5e4089a5c065989eb111ea5deedc171237d2cad8` passed validation and the
+nine-test containment suite. The network job completed all mandatory VPN-loss,
+reconnect, and provider-replacement operations, then failed during optional
+lockdown setup: immediately after `sys.boot_completed` became `1`, Activity
+Manager did not successfully start the external fixture controller. This was a
+post-reboot harness readiness failure, not a measured network result. The revised
+setup now waits, with a fixed deadline, for ADB, boot completion, both fixture
+packages, controller resolution, Activity Manager, and the restored development
+VPN app-op. Only the pre-measurement controller start may be retried. It then
+requires fixture establishment and both platform lockdown booleans exactly as
+before; measured network operations remain single observations.
+
 [Run 35565382044](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35565382044)
 on documentation head `d3bb06d` passed validation and all nine containment cases,
 but the network boundary case accepted B and then denied A using the same route
