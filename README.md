@@ -21,15 +21,20 @@ work does not represent a public or production release. PR 3's analysis is not
 protection and selects no production containment engine.
 
 The **Roadmap PR 6** gate decision is **A — REDESIGN**, selected on 2026-09-21.
-Product implementation remains paused; the current research prototype will not
-proceed unchanged as the product. The next phase is containment/runtime
-architecture redesign and evidence work, with another explicit feasibility gate
-required before ordinary third-party-app implementation. No production engine
-has been selected. Ordinary protected apps, real accounts, and private user data
-remain prohibited. GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
+Roadmap PR 7 begins architecture-redesign research and controlled prototype
+planning. The prior post-gate Core Domain/Persistence product-implementation
+sequence is superseded and paused until a redesigned architecture passes another
+explicit feasibility gate; the current research prototype will not proceed
+unchanged as the product. No production architecture or engine has been selected.
+Ordinary protected apps, real accounts, and private user data remain prohibited.
+GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
 PR #6 was consumed by the earlier corrective stacked PR merged into PR #5. The
 [decision record](docs/decisions/ADR-0002-feasibility-stop-gate.md) contains the
-rationale, preserved constraints, and roadmap consequences.
+rationale, preserved constraints, and roadmap consequences. The
+[architecture-redesign study](docs/architecture-redesign-study.md) and
+[ADR-0003](docs/decisions/ADR-0003-redesign-prototype-direction.md) compare
+candidate families and define proposed experiments without selecting or
+implementing a production architecture.
 
 PR 4 builds a controlled, uninstalled probe APK and a debug-only isolated-service
 experiment. Artifact-derived DEX execution is not full Android app execution.
