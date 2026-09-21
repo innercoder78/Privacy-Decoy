@@ -135,7 +135,7 @@ def exercise():
 
 TARGETS={ipaddress.ip_address(s).packed:c for s,c in [
     ('10.0.2.2','host-control'),('198.51.100.7','documentation-v4'),
-    ('198.51.100.53','synthetic-dns'),('2001:db8::7','documentation-v6')]}
+    ('198.51.100.53','synthetic-dns'),('198.51.100.54','platform-dns'),('2001:db8::7','documentation-v6')]}
 def packets(path):
     # Decode only link/IP/transport headers. Never inspect or retain payload bytes.
     with path.open('rb') as f:
@@ -186,6 +186,15 @@ def analyze():
     for case in report['cases']:
         rows=case_packets(captures,case)
         name=case['name'];obs='\n'.join(case['observations'])
+        counts=lambda items:{str(k):v for k,v in collections.Counter((r['family'],r['protocol'],r['category'],r['port']) for r in items).items()}
+        # The VPN advertises a DIFFERENT address to Android's system resolver.
+        # Report that traffic separately; the broker's direct fixed DNS probe is .53.
+        background=[r for r in rows if r['category']=='platform-dns']
+        case['platformDnsPhysicalCounts']=counts(background)
+        rows=[r for r in rows if r['category']!='platform-dns']
+        case['physicalCounts']=counts(rows)
+        print('PCAP '+name+' '+json.dumps(case['physicalCounts']),flush=True)
+        print('PCAP_PLATFORM_DNS '+name+' '+json.dumps(case['platformDnsPhysicalCounts']),flush=True)
         host=[r for r in rows if r['category']=='host-control' and r['protocol']=='tcp']
         if name=='testDirectProcessRestrictions':assert not rows,'Restricted process emitted fixed traffic'
         if name in ('testFullTunnel','testPerAppInclude'):
@@ -214,15 +223,19 @@ def analyze():
             assert case['oldSocketPhysicalData']>0 or 'OLD_SOCKET_SEND result=success' not in obs,'Old socket success lacks independent data evidence'
         if name=='testVpnLossAndReconnect':
             assert host,'Missing OS physical fallback calibration evidence'
-            case['gatedRace']='Known Gap' if 'LOSS immediate=success' in obs else 'Not reproduced in this run'
+            race=[r for r in host if r['port']==46151 and r['data']]
+            calibration=[r for r in host if r['port']==46153]
+            assert calibration,'Missing distinct OS fallback calibration capture'
+            assert race or 'LOSS immediate=success' not in obs,'Gated race success lacks distinct physical data evidence'
+            case['gatedRace']='Known Gap' if race else 'Not reproduced in this run'
+            print('RACE '+name+' '+case['gatedRace'],flush=True)
         if name=='testProviderReplacement':
             assert 'STATE revoked' in obs and 'STATE established mode=FULL_TUNNEL' in obs,'Real provider replacement evidence missing'
         if name=='testLockdownLoss':
             assert 'alwaysOn=true lockdown=true' in obs,'Unverified lockdown'
             assert 'LOCKDOWN_DOWN vpn=false' in obs,'VPN loss not confirmed during lockdown'
             assert not rows,'SEVERE: fixed traffic escaped verified lockdown'
-        case['physicalCounts']={str(k):v for k,v in collections.Counter((r['family'],r['protocol'],r['category'],r['port']) for r in rows).items()}
-        print('PCAP '+name+' '+json.dumps(case['physicalCounts']),flush=True)
+
     assert all(c['passed'] for c in report['cases']), 'One or more network device cases failed'
     OUT.joinpath('summary.json').write_text(json.dumps(report,indent=2))
     print('NETWORK_EVIDENCE tests='+str(len(report['cases']))+' requiredEvidence=passed lockdown='+report['lockdown'])

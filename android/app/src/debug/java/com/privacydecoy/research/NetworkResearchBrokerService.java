@@ -15,6 +15,23 @@ public final class NetworkResearchBrokerService extends Service {
     private long nextId=1;
     private int physicallyClosed;
     private ConnectivityManager connectivity;
+    private Network observedNetwork;
+    private NetworkCapabilities observedCapabilities;
+    private LinkProperties observedLinks;
+    private boolean observedRoute;
+    // Binder dispatch must not wait for asynchronous callback delivery to invalidate
+    // sockets after an already observable route change. This is still not atomic
+    // with socket I/O; the VPN-loss race remains a measured platform dependency.
+    private void refreshRoute() {
+        Network network=connectivity.getActiveNetwork();
+        NetworkCapabilities capabilities=network==null?null:connectivity.getNetworkCapabilities(network);
+        LinkProperties links=network==null?null:connectivity.getLinkProperties(network);
+        if(!observedRoute || !Objects.equals(network,observedNetwork) ||
+                !Objects.equals(capabilities,observedCapabilities) || !Objects.equals(links,observedLinks)) {
+            observedRoute=true;observedNetwork=network;observedCapabilities=capabilities;observedLinks=links;
+            invalidate();
+        }
+    }
     // OS calibration is manager-only, deliberately outside the hostile authority registry.
     // It exists solely to distinguish platform old-socket behavior from broker revocation.
     private Socket osCalibration;
@@ -63,6 +80,8 @@ public final class NetworkResearchBrokerService extends Service {
                     Bundle input=data.readBundle(getClass().getClassLoader());
                     if (input==null || data.dataAvail()!=0) throw new SecurityException();
                     int uid=Binder.getCallingUid(),pid=Binder.getCallingPid();
+                    long identity=Binder.clearCallingIdentity();
+                    try { refreshRoute(); } finally { Binder.restoreCallingIdentity(identity); }
                     if (code==NetworkWire.REQUEST) {
                         result=request(uid,pid,input);
                     } else {
@@ -158,12 +177,14 @@ public final class NetworkResearchBrokerService extends Service {
         out.putLong("generation",gate.generation());out.putInt("owned",sockets.size());
         out.putInt("physicallyClosed",physicallyClosed);return out;
     }
+    // Separate fixed port from the gated Java TCP path, so loss-race packets
+    // cannot be confused with this deliberately ungated OS fallback calibration.
     private String physical() {
         for(Network n:connectivity.getAllNetworks()) {
             NetworkCapabilities c=connectivity.getNetworkCapabilities(n);
             if(c==null||c.hasTransport(NetworkCapabilities.TRANSPORT_VPN))continue;
             try(Socket socket=n.getSocketFactory().createSocket()) {
-                socket.connect(new InetSocketAddress(FixedNetworkProbe.HOST,FixedNetworkProbe.TCP),1200);
+                socket.connect(new InetSocketAddress(FixedNetworkProbe.HOST,46153),1200);
                 socket.getOutputStream().write(53);return "success";
             } catch(Exception e){return FixedNetworkProbe.category(e);}
         }

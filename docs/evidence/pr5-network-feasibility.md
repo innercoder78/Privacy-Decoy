@@ -9,7 +9,17 @@ The resumed published head was `e9e646056b4757d1319e93d2f1b627c10157c952`.
 passed validation and containment; all 13 network device cases emitted PASS, but
 the independent analyzer failed its physical positive control. Those device
 observations alone do not establish no-egress evidence. Corrected capture results
-remain pending a new exact-head run.
+are recorded in [run 35547581742](https://github.com/innercoder78/Privacy-Decoy/actions/runs/35547581742)
+on `f3c09f1`: Wi-Fi capture saw 49 fixed packets and physical positive controls.
+Full tunnel/include had no fixed physical egress in that run and both Java/native
+IPv6 probes were seen in TUN. One socket-closure check failed, and lockdown's
+all-target assertion failed. The parallel PR run failed an earlier full-tunnel
+all-target assertion. Because platform resolver and controlled DNS used the same
+address, those failures are not attributed to the broker without further evidence.
+The immediate gated VPN-loss attempt returned success in the push run, with
+physical TCP captured in the combined race/calibration interval: a Known Gap,
+not production protection. The follow-up separates physical calibration onto
+port 46153 and keeps gated Java TCP on 46151 for independent race attribution.
 Local JDK 17 validation passed lintDebug, testDebugUnitTest, assembleDebug,
 assembleDebugAndroidTest and the separate VPN fixture build. These are build/unit
 results, not routing evidence. No production protection is claimed.
@@ -74,7 +84,10 @@ fixed-target physical egress. IPv6 has a separate observation status.
 
 DNS uses one fixed wire query for `route-test.invalid` sent directly to controlled
 synthetic `198.51.100.53:53`. This tests DNS packet routing, not Android resolver
-selection/cache behavior, DNS-over-TLS or DNS-over-HTTPS. No public DNS is queried.
+selection/cache behavior, DNS-over-TLS or DNS-over-HTTPS. The VPN advertises
+`198.51.100.54` to the platform resolver instead; its packets are reported separately
+as `PCAP_PLATFORM_DNS`, never counted as broker DNS evidence. This avoids conflating
+background resolver traffic with the fixed `.53` operation. No public DNS is queried.
 Java, native, and DNS results are recorded separately. Raw UDP is not QUIC evidence.
 
 ## Session and socket boundary
@@ -88,7 +101,11 @@ are tested, including attempted hostile route validation and direct bypass.
 
 The actual broker registry maps opaque IDs to owned Socket objects and checks
 the owner on send/close. Route callbacks, generation changes, revocation, lifetime
-death and destruction close resources. Device tests check Socket.isClosed-derived
+death and destruction close resources. Each Binder dispatch also samples active
+Network/capabilities/link properties under the broker identity and invalidates
+changed state synchronously, so queued callback delivery cannot postpone closure
+of an already-observable route change. Observation and socket I/O are still not
+atomic; this does not prove absence of a VPN-loss race. Device tests check Socket.isClosed-derived
 closure counts and failed subsequent sends, rather than only numeric ID removal.
 The pure NetworkGate unit model remains a model, not socket-resource evidence.
 

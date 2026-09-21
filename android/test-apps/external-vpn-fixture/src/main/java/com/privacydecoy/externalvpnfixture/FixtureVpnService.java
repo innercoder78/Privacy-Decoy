@@ -28,8 +28,9 @@ public final class FixtureVpnService extends VpnService {
     }
     private synchronized void establish(Mode mode) throws Exception {
         closeTun();
+        // Platform resolver traffic uses .54; the fixed broker DNS experiment alone uses .53.
         Builder b=new Builder().setSession("PR5 external fixture").setMtu(1500).setBlocking(false)
-            .addAddress("192.0.2.1",32).addAddress("2001:db8::1",128).addDnsServer("198.51.100.53");
+            .addAddress("192.0.2.1",32).addAddress("2001:db8::1",128).addDnsServer("198.51.100.54");
         switch(mode) {
             case FULL_TUNNEL:case FULL_TUNNEL_BYPASS:
                 b.addRoute("0.0.0.0",0).addRoute("::",0);break;
@@ -68,6 +69,7 @@ public final class FixtureVpnService extends VpnService {
                 if(family==4) {
                     if(eq(packet,16,new int[]{10,0,2,2}))category="host-control";
                     else if(eq(packet,16,new int[]{198,51,100,53}))category="synthetic-dns";
+                    else if(eq(packet,16,new int[]{198,51,100,54}))category="platform-dns";
                     else if(eq(packet,16,new int[]{198,51,100,7}))category="documentation-v4";
                 } else if(eq(packet,24,new int[]{32,1,13,184,0,0,0,0,0,0,0,0,0,0,0,7}))category="documentation-v6";
                 // Unknown traffic never reveals an address or arbitrary port/protocol.

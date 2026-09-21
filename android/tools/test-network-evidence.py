@@ -28,6 +28,10 @@ class CaptureTests(unittest.TestCase):
         self.assertEqual(len(rows),1)
         self.assertEqual(rows[0]['category'],'host-control')
 
+    def test_controlled_dns_is_distinct_from_platform_resolver(self):
+        rows=self.parse(self.capture([self.frame((198,51,100,53),53),self.frame((198,51,100,54),53)]))
+        self.assertEqual([r['category'] for r in rows],['synthetic-dns','platform-dns'])
+
     def test_wifi_positive_control_uses_offsets_not_wall_clock(self):
         rows=self.parse(self.capture([self.frame(),self.frame()]))
         case={'start':2000000000,'end':2000000001,
