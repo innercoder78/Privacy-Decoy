@@ -26,9 +26,12 @@ planning. **Roadmap PR 8 falsified S1 managed-profile feasibility**: the tested
 slice retained useful OS isolation/lifecycle properties but exposed all seven
 mandatory parent Build identity fields in both managed-profile tenants. See the
 [completed S1 evidence](docs/evidence/pr8-managed-profile-boundary.md).
-S1's networking follow-up is blocked. Redesign research proceeds to the separately
-authorized S2 non-executing source/provenance audit of VirtualSpace and
-Blacks-BlackBox; no third-party engine execution or integration is authorized.
+S1's Roadmap PR 9 networking follow-up remains blocked. **Roadmap PR 8A completed
+the S2 non-executing source/provenance audit**: VirtualSpace and Blacks-BlackBox
+each received **STOPPED_UNRESOLVED** at Gate 1, so deeper architecture review
+stopped for both. See the [S2 audit evidence](docs/evidence/pr8a-engine-source-provenance-audit.md).
+No engine was built, executed or integrated. S2 supplied no audit-cleared engine;
+another explicit architectural decision is required. **NO PRODUCTION ARCHITECTURE SELECTED**.
 The test DPC and hostile tenants remain research fixtures only. Product
 implementation remains paused, no production architecture or engine is selected,
 and ordinary protected applications remain prohibited. The prior post-gate Core Domain/Persistence product-implementation
