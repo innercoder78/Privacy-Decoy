@@ -36,19 +36,28 @@ Historical REDESIGN, S1 falsification, the blocked S1 networking follow-up, and
 all scoped containment/network evidence remain unchanged. Roadmap PR 20 has not
 occurred.
 
-## Open GitHub PR #10
+## Merged GitHub PR #10
 
 GitHub PR #10, **Roadmap PR 8A: Audit S2 engine source and provenance**, is
 supplemental redesign/feasibility research created after the early architecture
 failed. It is not canonical production Roadmap PR 8 or an inserted production
 PR 8A. Its historical title and findings are neither renumbered nor invalidated.
 
-After this restoration PR merges, PR #10 may be refreshed onto current `main`,
-reconciled against PD-REQ-001 through PD-REQ-085 and the restored canonical
-documents, reviewed as research/evidence, and potentially merged under normal
-hard-merge rules. This restoration does not modify, rebase, merge, or copy
-evidence from PR #10.
+PR #10 was reconciled and merged after source restoration. Its final reviewed
+head was `ad2f0d4d9083ee49866ce6998ac3db0d0225d667`; the resulting current-main
+merge commit at the time of this decision was
+`09b45dba63523a66efac297ac22ea4be99922af1`. Its S2 findings remain unchanged:
+VirtualSpace and Blacks-BlackBox are **STOPPED_UNRESOLVED**, neither is
+AUDIT_PASS, and no engine is audit-cleared.
 
-Merging PR #10 would not authorize production implementation of canonical
-Roadmap PR 6 or later. A separate project decision must determine the next
-architecture direction from the REDESIGN/S1/S2 evidence.
+The merge did not authorize production implementation of canonical Roadmap PR 6
+or later.
+
+## Subsequent architecture decision
+
+On 2026-09-22, the project owner selected **REDESIGN AGAIN**.
+[ADR-0006](decisions/ADR-0006-redesign-again-architecture-discovery.md) records
+that choice and authorizes one bounded, final open-ended architecture-discovery
+phase under the current product goals. It selects no production architecture;
+canonical production PR 6 remains unstarted and product implementation remains
+paused.
