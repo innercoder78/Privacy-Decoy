@@ -19,6 +19,35 @@ validated first, and architecture is evaluated only when that evidence is valid.
 Revised exact-head emulator evidence is pending. No S1 runtime outcome is claimed
 by this document or by the synthetic classifier unit tests.
 
+## Bounded emulator startup and cleanup
+
+The harness follows the established containment/network startup pattern with its
+own `android-user-managed-profile` and `avd-managed-profile` build directories,
+explicit AVD path and Pixel 2 device definition. It verifies the AVD ini and system
+image before launch, fixes the emulator port to 5554 and all device commands to
+`emulator-5554`, and rejects an already-connected emulator on that port.
+
+The hosted-runner flags use software GPU, 2048 MB memory, two cores, a 2048 MB data
+partition, no window/audio/boot animation/snapshots, and wiped disposable data.
+There is no unbounded `adb wait-for-device`. A five-minute boot deadline checks
+the emulator PID and uses three-second property-query timeouts, with a bounded
+kill grace period. Progress output is categorical. API 35 and x86_64 are verified
+before profile provisioning; raw property values are not printed.
+
+Startup failures inspect a bounded portion of the local emulator log and emit only
+fixed diagnostic categories: insufficient disk space, missing library, GPU failure,
+unavailable acceleration, missing AVD/image, AVD path conflict, or unclassified
+startup failure. No raw log lines, paths, IP addresses, identifiers, nonce or fixture
+values are emitted. Failure is `FAIL / INCONCLUSIVE`, never S1 falsification.
+
+Device operations have a 60-second bound (120 seconds for APK installation), plus
+a two-second kill grace period. Evidence-file readiness checks retain bounded
+polling with three-second command limits; measured component/access execution is
+not retried. Cleanup skips device operations before successful boot, bounds profile
+removal and emulator shutdown, retains local PID termination with a bounded grace
+period, and bounds local AVD deletion. No unbounded child wait remains. The existing
+45-minute CI job limit is unchanged. New exact-head runtime evidence remains pending.
+
 ## Engineering setup and pre-code ordering
 
 The disposable emulator uses development ADB provisioning only. The harness knows
