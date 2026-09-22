@@ -31,7 +31,29 @@ jobs:
       - name: Install Android SDK packages
         run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"'
       - name: Lint, unit-test task, and debug build
-        run: ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug :test-apps:external-vpn-fixture:assembleDebug :test-apps:managed-profile-controller:lintDebug :test-apps:managed-profile-controller:assembleDebug :test-apps:managed-profile-probe:lintDebug :test-apps:managed-profile-probe:assembleDebug
+        run: >-
+          ./gradlew --no-daemon
+          :app:lintDebug
+          :app:testDebugUnitTest
+          :app:assembleDebug
+          :probe-app:lintDebug
+          :probe-app:testDebugUnitTest
+          :probe-app:assembleDebug
+          :research-native:lintDebug
+          :research-native:testDebugUnitTest
+          :research-native:assembleDebug
+          :test-apps:external-vpn-fixture:lintDebug
+          :test-apps:external-vpn-fixture:testDebugUnitTest
+          :test-apps:external-vpn-fixture:assembleDebug
+          :test-apps:managed-profile-controller:lintDebug
+          :test-apps:managed-profile-controller:testDebugUnitTest
+          :test-apps:managed-profile-controller:assembleDebug
+          :test-apps:managed-profile-probe:lintTenantADebug
+          :test-apps:managed-profile-probe:assembleTenantADebug
+          :test-apps:managed-profile-probe:lintTenantBDebug
+          :test-apps:managed-profile-probe:assembleTenantBDebug
+          :test-apps:managed-profile-probe:testTenantADebugUnitTest
+          :test-apps:managed-profile-probe:testTenantBDebugUnitTest
         working-directory: android
       - name: Verify release manifest remains network-free
         working-directory: android

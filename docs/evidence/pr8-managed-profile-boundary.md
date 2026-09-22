@@ -2,102 +2,158 @@
 
 ## Question and outcome semantics
 
-This controlled S1 falsification asks whether a supported Android managed profile
-provides kernel-backed identity/storage isolation **and** whether ordinary profile-
-owner/application mechanisms block or replace every mandatory real host-state path
-before hostile code. Harness validity and architecture outcome are independent:
-complete evidence yields `PD_S1_HARNESS=PASS`; matching mandatory parent/device
-Build identity yields `PD_S1_OUTCOME=FALSIFIED`. `INCONCLUSIVE` fails the job.
-Exact-head emulator evidence is pending GitHub Actions and no local outcome is
-claimed here.
+This research-only S1 falsification tests the managed-profile identity/storage
+boundary and mandatory real host-state exposure before hostile code. Evidence is
+validated first, and architecture is evaluated only when that evidence is valid.
 
-## Design, ordering, and TCB
+- `PD_S1_HARNESS=PASS / PD_S1_OUTCOME=FALSIFIED` is a successful experiment with
+  adverse architectural evidence: any tenant management/peer read or write succeeds,
+  a fixture changes, unsafe UID sharing is observed, or any mandatory Build field
+  matches the parent real host value. This does not raise a harness error.
+- `PD_S1_HARNESS=FAIL / PD_S1_OUTCOME=INCONCLUSIVE` means evidence is untrustworthy:
+  absent/malformed nonce, uncreated fixture, setup uncertainty, missing/duplicate
+  lifecycle evidence, identity mismatch, unsafe output, or unclassified storage error.
+- `SURVIVED_CURRENT_SLICE` credits only this bounded slice; it neither selects a
+  production architecture nor satisfies any requirement.
 
-The disposable API-parameterized harness creates a managed profile with documented
-`pm create-user`/`dpm set-profile-owner` shell commands, installs the minimal
-project-owned controller, broadcasts provisioning completion, verifies the owner,
-and proves the probe absent before installing it. ADB is development setup only;
-it does not satisfy production provisioning and must never become a production
-dependency. PD-REQ-006 is unchanged.
+Revised exact-head emulator evidence is pending. No S1 runtime outcome is claimed
+by this document or by the synthetic classifier unit tests.
 
-The TCB is the emulator Android OS/kernel, package/profile policy, harness, and
-evidence classifier. The controller has a `DeviceAdminReceiver`, claims no optional
-admin policy, calls only `setProfileEnabled`, and stores setup completion in its own
-UID. It has no Internet permission, VPN, telemetry, secrets, broker, cross-profile
-grant, or production integration. Production Privacy Decoy is neither profile nor
-device owner.
+## Engineering setup and pre-code ordering
 
-Two flavor APKs (`com.privacydecoy.research.managedprobe.a` and `.b`) share source
-but are independently installed and must have distinct app UIDs in the same profile
-user; controller and parent installations are distinct identities. The harness
-rejects ambiguous Java/native UIDs, wrong users, missing owner/probe ordering,
-missing lifecycle events, unsafe report characters, duplicate fields, and failed
-cleanup. A synthetic parent `no_backup` sentinel never enters shared storage.
+The disposable emulator uses development ADB provisioning only. The harness knows
+the exact target **shell user ID**, requires successful `dpm set-profile-owner
+--user <target>`, and reads the controller checkpoint using
+`run-as <controller-package> --user <target>`
+from that same package. The controller verifies `isProfileOwnerApp()` and
+`UserManager.isManagedProfile()`, records its package UID and public **user serial**,
+and enables the profile. The serial is not an Android internal user ID. The harness
+correlates controller UID with the target user's PackageManager UID independently.
 
-## Exercised Stage A surfaces
+The exported custom setup receiver accepts only the fixed setup action, refuses to
+rewrite an existing checkpoint, and disables itself using public PackageManager
+APIs before writing the checkpoint. The harness validates the disabled checkpoint
+and verifies probes absent before installing any probe. A final owner read must
+match the checkpoint byte for byte. No optional broad admin policies are requested.
+The normal provisioning callback does not write this experiment checkpoint.
 
-The installed probe executes normal `ContentProvider` (before `Application`),
-`Application`, deep-link `Activity`, explicit `Service`, and `BroadcastReceiver`
-components. Lifecycle success establishes package semantics, not privacy. Native
-code is built from source for normal APK ABIs and loaded with `System.loadLibrary`;
-JNI records categorical UID/GID/PID, creates a native thread, uses direct `openat`
-for management/peer paths, and categorizes `/proc/self` and `/sys` availability.
-No `.so` is committed.
+The harness then installs tenant A in the parent and managed profile and tenant B
+in the managed profile. Before **any** hostile component executes, it prepares:
 
-Parent/profile comparisons use the same fresh emulator-boot nonce and retain only
-SHA-256 hashes/equality for fingerprint, model, manufacturer, brand, device,
-product, hardware, Android ID, locale, and time zone. Build surfaces are classified
-`same-as-parent real host value`, `different but uncontrolled real/platform value`,
-or Unknown; Android ID is profile/package-scoped platform-generated, never called
-synthetic. PackageManager installation/identity, profile identity, Settings access,
-provider initialization, ActivityManager component dispatch, and service
-availability are represented by setup and lifecycle evidence. No personal provider
-or account data is accessed.
+1. A management sentinel in the production app's private `no_backup` directory,
+   without launching that app or modifying its manifest/code.
+2. Parent-baseline and tenant A/B sentinels, each through `run-as` under that
+   installation's own package UID. Contents are independently generated synthetic
+   random test values. Both tenant targets exist before either tenant executes.
+3. One fresh cryptographically random 256-bit **synthetic test nonce**, generated
+   by Python `secrets` for this run and seeded into all three probe installations'
+   private storage. It is verified by an owner read before launch, never logged,
+   never generated by a probe, and never derived from host state. Only its SHA-256
+   commitment is retained. Missing or malformed preparation fails closed.
+4. An engineering peer-path fixture containing the target shell user ID. This avoids
+   hidden UserHandle internals; public user serials are never used as filesystem IDs.
 
-Java and native attempts against the management sentinel must be blocked; tenant
-UID/user assertions and private evidence directories test storage separation.
-After collection the harness stops the profile from outside the protected UID,
-requires tenant process death, restarts the profile, then removes it during teardown.
-The native worker is joined and private descriptor is closed before stop; persistent
-FD/worker and recovery re-execution therefore remain Unknown.
+Independent owner `sha256sum` reads prove each sentinel existed and was readable
+before attacks, and retain safe before/after hashes. No sentinel contents are logged.
+Mutation is architectural failure, not a hash-equality assertion that fails the
+harness. A missing required owner read is inconclusive. All engineering preparation
+is development-only and must never become an ordinary-use ADB/run-as dependency.
 
-## Evidence schema and classification
+## Observations and access semantics
 
-Generated files live only under `app/build/reports/managed-profile/`. Every event
-has schema, event, user, Java/native UID, PID-presence, categorical access results,
-and nonce-keyed hashes. Raw identifiers, properties, sentinel content, accounts,
-location, network identifiers, tokens, and secrets are forbidden. The independent
-classifier checks exact lifecycle sets and identities before deciding outcome.
-A same parent/profile mandatory Build hash is fatal S1 evidence: it is not relabeled
-External and does not fail otherwise-valid CI. Missing or unsafe evidence is
-Inconclusive and exits nonzero.
+Normal ContentProvider (before Application), Application, deep-link Activity,
+Service, and BroadcastReceiver executions each emit a bounded schema-2 record.
+Repeated writes append and are rejected as duplicate keys instead of overwriting
+evidence. JNI uses public NDK APIs and direct `openat`, read and write syscalls;
+it records UID/GID, PID presence and a joined native thread.
 
-## Platform facts, observations, assumptions, and limits
+Both Java and native code attempt **management read, management write, peer read,
+and peer write**, including A -> B and B -> A. Java uses actual FileInputStream and
+FileOutputStream operations; it does not infer denial from `canRead`/`canWrite`.
+Writes append only a synthetic byte. Native writes do not create missing targets.
+Java append streams may create a missing file only if their open succeeds; fixture
+existence was already independently proved and any success is adverse evidence.
+No accessed contents are emitted.
 
-Managed profiles supply separate Android users and package UIDs, but do not promise
-a synthetic device. Repository observation: the profile owner API used here cannot
-replace Build constants before provider/native code. Experimental observations,
-head SHA, API/ABI/image and exact S1 outcome remain pending exact-head CI. Planned
-primary scope is API 35 Google APIs x86_64 debug signing. API 31 is an endpoint to
-attempt where its official image is available; API 37 image availability is
-**Unknown / environment unavailable** until inspected. No API 35 result is API 37
-evidence.
+| Category | Meaning and treatment |
+| --- | --- |
+| `ACCESSIBLE` | Actual storage operation succeeded; tenant private-target success falsifies S1. |
+| `PERMISSION_DENIED` | EACCES/EPERM, or Java SecurityException. |
+| `ABSENT` | ENOENT; kept distinct from denial. With owner-proven existence it may reflect namespace hiding. |
+| `OTHER_ERROR` | Unclassified error, including Java IOExceptions without a supported errno cause. Storage evidence is inconclusive. |
 
-Stage B is not silently credited. Split installation, multidex, dynamic code,
-secondary processes, jobs, alarms, long-lived descriptors/workers, and networking
-are **not reached pending Stage A**. If Stage A decisively falsifies S1 they remain
-not reached rather than attracting compatibility hooks. Roadmap PR 9 network and
-socket-revocation work proceeds only if S1 survives. Physical non-rooted ARM64,
-Samsung/other OEM, release-equivalent, API 31–37, provisioning/distribution, and
-production recovery evidence remain Unknown. No root, `su`, system-image changes,
-hidden APIs, hooking, third-party DPC/engine, ordinary application, real data, or
-network capability is used.
+Public Android `ErrnoException` causes preserve Java errno categories without parsing
+raw error strings. Every observation must use the fixed allowlist. Native availability
+observations separately open `/proc/self/status`, `/proc/sys/kernel/random/boot_id`,
+and `/sys/devices`; they do not dump or read contents. The boot ID is **never a nonce**.
+Uninterpretable availability is reported as **Unknown**, not blocked or mediated.
 
-## Requirements trace
+Native `__system_property_get` observes `ro.build.fingerprint`. It returns only
+`property_available` and `property_matches_java_build`, comparing in native memory
+against Java Build.FINGERPRINT. Neither raw value is emitted. Availability is not
+mediation. A match corroborates the same fingerprint surface; parent equality is
+established using the Java hashes, not inferred merely from property availability.
 
-This experiment supplies bounded evidence—not satisfaction—for PD-REQ-006,
-PD-REQ-007, PD-REQ-008, PD-REQ-011, PD-REQ-012, PD-REQ-013, PD-REQ-014,
-PD-REQ-015, PD-REQ-016, PD-REQ-019, PD-REQ-020, PD-REQ-021, PD-REQ-027,
-PD-REQ-028, PD-REQ-030, PD-REQ-031, PD-REQ-041, PD-REQ-044, PD-REQ-045,
-PD-REQ-057, PD-REQ-058, PD-REQ-060, PD-REQ-063, PD-REQ-065, and PD-REQ-070.
-PD-REQ-001 through PD-REQ-070 remain unchanged.
+Parent and both managed tenants hash these values using the same seeded nonce:
+Build.FINGERPRINT, MODEL, MANUFACTURER, BRAND, DEVICE, PRODUCT, HARDWARE, Android ID,
+locale, and timezone. Any of the seven mandatory Build values equal to the parent
+is decisive adverse host-identity evidence. Different values remain uncontrolled
+platform values, not evidence of a supported synthetic replacement. Android ID is
+never called synthetic merely because user/package scoping makes it different.
+
+## Evidence validation and trust boundary
+
+The classifier verifies the exact required fields and event set, filename/event
+agreement, no duplicate keys/events, safe bounded text, stable UID and public user
+serial, Java/native UID agreement **on every record**, package UID correlation with
+independent harness state, shared nonce commitments, and stable static hashes,
+property results and availability categories across lifecycle records. Required
+storage attempts are checked on every event; a later accessible result cannot be
+hidden by an earlier denial. Both tenant comparisons must be evaluated.
+
+The TCB is the emulator OS/kernel, profile/package policy, engineering harness and
+classifier. Probe evidence is instrumentation for this controlled experiment, not a
+production tamper-resistant attestation scheme. Owner fixture hashes and setup
+checkpoints are collected externally. Generated records/reports remain under
+`app/build/reports/managed-profile/` and are never committed. Errors must not print
+raw identifiers, properties, fixture contents or nonce values.
+
+After collection, the coarse profile-stop check requires both tenant UIDs present
+before stopping and absent afterward. The profile is started again and then removed.
+Classification is published only after harness completion and cleanup. Closed
+descriptors and a joined native worker do not prove persistent-resource revocation.
+
+## Validation provenance and limits
+
+The revision starts from reviewed PR #9 head
+`0674bf63b6f1c451a1c3b5e9220472ff6692f74a`. Local classifier/regression tests and shell
+syntax checks are recorded in the PR body. Android compile/lint and emulator results
+must be taken from the revised exact-head checks; they are not fabricated here.
+The workflow uses explicit controller and tenant-flavor tasks.
+
+Primary planned runtime scope remains API 35 Google APIs x86_64 debug signing.
+Physical non-rooted ARM64, Samsung/other OEM, release-equivalent builds, API 31-37
+coverage, distribution/provisioning and production recovery remain Unknown. No
+API 35 outcome establishes API 37 behavior. API 37 image availability is Unknown.
+
+Long-lived FDs, persistent native workers, jobs, alarms, sockets, full restart and
+re-execution validation, networking attribution/revocation, split APKs, multidex,
+dynamic code and secondary processes remain **Unknown / not reached**. Roadmap PR 9
+network work proceeds only if S1 survives Stage A. The unrelated CMake SDK-download
+failure does not justify changing the network prototype or its analyzer/harness.
+
+## Production safety and requirements
+
+Production AndroidManifest.xml and PD-REQ-001 through PD-REQ-070 remain unchanged.
+There is no production DPC, DeviceAdminReceiver, VPN, networking research permission,
+telemetry, native research component or ordinary protected-app support. The controller
+and probe remain exclusively in their respective `android/test-apps/` directories.
+ADR-0003 remains **NO PRODUCTION ARCHITECTURE SELECTED** and README stays conservative.
+
+This supplies bounded evidence, never requirement satisfaction, for PD-REQ-006,
+007, 008, 011-016, 019-021, 027, 028, 030, 031, 041, 044, 045, 057, 058, 060, 063,
+065 and 070. No requirement is weakened. Unknown mandatory coverage stays Unknown.
+
+Public API references: [UserManager user serial](https://developer.android.com/reference/android/os/UserManager#getSerialNumberForUser(android.os.UserHandle)),
+[Android system errno APIs](https://developer.android.com/reference/android/system/package-summary),
+and [NDK system-property header](https://android.googlesource.com/platform/bionic/+/refs/heads/main/libc/include/sys/system_properties.h).
