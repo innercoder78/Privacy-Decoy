@@ -22,10 +22,16 @@ protection and selects no production containment engine.
 
 The **Roadmap PR 6** gate decision is **A — REDESIGN**, selected on 2026-09-21.
 Roadmap PR 7 begins architecture-redesign research and controlled prototype
-planning. Roadmap PR 8 tests S1 managed-profile feasibility as a falsification
-experiment; its test DPC and hostile tenants are research fixtures only. Production
-implementation remains paused, no architecture has been selected, and ordinary
-protected applications remain prohibited. The prior post-gate Core Domain/Persistence product-implementation
+planning. **Roadmap PR 8 falsified S1 managed-profile feasibility**: the tested
+slice retained useful OS isolation/lifecycle properties but exposed all seven
+mandatory parent Build identity fields in both managed-profile tenants. See the
+[completed S1 evidence](docs/evidence/pr8-managed-profile-boundary.md).
+S1's networking follow-up is blocked. Redesign research proceeds to the separately
+authorized S2 non-executing source/provenance audit of VirtualSpace and
+Blacks-BlackBox; no third-party engine execution or integration is authorized.
+The test DPC and hostile tenants remain research fixtures only. Product
+implementation remains paused, no production architecture or engine is selected,
+and ordinary protected applications remain prohibited. The prior post-gate Core Domain/Persistence product-implementation
 sequence is superseded and paused until a redesigned architecture passes another
 explicit feasibility gate; the current research prototype will not proceed
 unchanged as the product. No production architecture or engine has been selected.

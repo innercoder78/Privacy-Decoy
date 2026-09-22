@@ -16,57 +16,79 @@ validated first, and architecture is evaluated only when that evidence is valid.
 - `SURVIVED_CURRENT_SLICE` credits only this bounded slice; it neither selects a
   production architecture nor satisfies any requirement.
 
-## Verified predecessor result and reason preservation
+## Verified exact-head result: S1 FALSIFIED
 
-Tested source head: `919a64e4624d7926f311ab27aabf00ad022ae8e5`.
-The independently verified **Android foundation #98 (push)** and **#99
-(pull_request)** suites both completed successfully. In each suite, `validate`,
-`containment-prototype`, `managed-profile-feasibility`, and `network-feasibility`
-all returned SUCCESS. Both managed-profile logs recorded:
+Tested exact source head: `69f0352510a55d92dcf4a408aa524cc0532788f9`.
+The independently verified **Android foundation #100 (push)** and **#101
+(pull_request)** workflow invocations both completed successfully:
+
+| Job | #100 push | #101 pull_request |
+| --- | --- | --- |
+| validate | SUCCESS | SUCCESS |
+| containment-prototype | SUCCESS | SUCCESS |
+| managed-profile-feasibility | SUCCESS | SUCCESS |
+| network-feasibility | SUCCESS | SUCCESS |
+
+Both managed-profile runs independently recorded the following bounded output:
 
 ```text
 PD_S1_PROFILE_STOP=PROCESS_DEATH_OBSERVED
 PD_S1_HARNESS=PASS
 PD_S1_OUTCOME=FALSIFIED
-```
-
-This is a valid adverse S1 architectural result, not a failed CI job or an
-inconclusive harness. The predecessor logs did **not** retain the specific
-falsification reason: it existed only in the generated, unretained `report.json`.
-The cause is therefore not asserted here; in particular, Build equality must not
-be assumed to have caused the observed result.
-
-This evidence-output-only revision preserves that result and adds permanent,
-bounded log tokens for new exact-head CI. Reasons are internally constructed from
-a fixed vocabulary, sorted and deduplicated, and capped at 87 lines: one shared-UID
-reason, two mandatory-Build summaries, 80 tenant/event/access reasons and four
-fixture-mutation reasons. Examples of the format (not predecessor observations):
-
-```text
 PD_S1_REASON=tenant_a_mandatory_build_same
-PD_S1_REASON=tenant_a_activity_java_management_read_accessible
-PD_S1_REASON=tenant_b_provider_native_peer_write_accessible
-PD_S1_REASON=management_fixture_changed
+PD_S1_REASON=tenant_b_mandatory_build_same
 PD_S1_SAME_AS_PARENT=tenant_a:build_fingerprint
+PD_S1_SAME_AS_PARENT=tenant_a:build_model
+PD_S1_SAME_AS_PARENT=tenant_a:build_manufacturer
+PD_S1_SAME_AS_PARENT=tenant_a:build_brand
+PD_S1_SAME_AS_PARENT=tenant_a:build_device
+PD_S1_SAME_AS_PARENT=tenant_a:build_product
+PD_S1_SAME_AS_PARENT=tenant_a:build_hardware
+PD_S1_SAME_AS_PARENT=tenant_b:build_fingerprint
+PD_S1_SAME_AS_PARENT=tenant_b:build_model
+PD_S1_SAME_AS_PARENT=tenant_b:build_manufacturer
+PD_S1_SAME_AS_PARENT=tenant_b:build_brand
+PD_S1_SAME_AS_PARENT=tenant_b:build_device
+PD_S1_SAME_AS_PARENT=tenant_b:build_product
+PD_S1_SAME_AS_PARENT=tenant_b:build_hardware
 ```
 
-Only a valid FALSIFIED report emits these lines. SURVIVED_CURRENT_SLICE and
-FAIL/INCONCLUSIVE emit no architectural reasons. Mandatory Build equality lines
-use only the two fixed tenant names and seven fixed Build names (at most 14 lines).
-The safe report supplements existing indexes with the exact semantic mapping:
-`build_fingerprint`, `build_model`, `build_manufacturer`, `build_brand`,
-`build_device`, `build_product`, `build_hardware`, `android_id`, `locale`, `timezone`.
-No raw value, hash, UID/PID, user serial, path, nonce, fixture content or property
-content is printed. No Android ID/locale/timezone difference is called synthetic.
-The decision rule remains unchanged: equality of any mandatory Build index 0-6
-falsifies S1.
+**S1 managed-profile isolation is FALSIFIED for the Privacy Decoy requirements.**
+All seven mandatory Build identity surfaces matched the parent environment for
+both tenants in both exact-head workflow invocations. A managed profile supplies
+useful OS user/UID/storage separation and normal Android application lifecycle
+semantics, but the tested boundary did not replace or block mandatory real device
+Build identity before hostile app code executed. Under the existing requirements
+and ADR-0003 falsification rule, this is decisive architectural failure:
+managed-profile OS isolation alone cannot satisfy Decoy Persona mediation.
 
-New exact-head reason evidence remains pending. Synthetic unit tests are not
-emulator observations. S1 remains FALSIFIED; its survival-gated networking follow-up
-is currently **BLOCKED**. Architecture consequences await review of the new safe
-reason output. ADR-0003 is not rewritten around an inferred cause; S2 remains the
-independently authorized, non-executing source/provenance audit direction. No
-production architecture or ordinary protected-app support is selected.
+Green CI means the experiment executed correctly, **not that S1 passed**. The
+harness was valid in both runs; this is neither INCONCLUSIVE nor a failure inferred
+from a red CI job. The experiment accomplished its purpose by falsifying S1.
+The profile-stop observation establishes death of both observed tenant processes.
+Storage and lifecycle observations remain bounded to this controlled experiment;
+they do not establish production containment or complete resource revocation.
+
+No raw host values were logged. Reasons use a fixed vocabulary, are sorted and
+deduplicated, and are capped at 87 lines. Mandatory Build equality uses only two
+fixed tenant names and seven fixed surface names, at most 14 lines. The safe report
+also names `android_id`, `locale`, and `timezone`; differences in those platform
+values are not evidence of synthetic identity. No raw value, hash, UID/PID, user
+serial, path, nonce, fixture content or property content is printed. Synthetic
+unit tests are not the source of this runtime conclusion.
+
+The earlier tested head `919a64e4624d7926f311ab27aabf00ad022ae8e5` also returned
+valid FALSIFIED outcomes in runs #98/#99, but those logs did not retain specific
+reasons. The exact-head #100/#101 evidence above now records mandatory Build
+identity equality explicitly; it is not a guessed explanation of earlier logs.
+
+The S1 networking/revocation follow-up is **BLOCKED by the survival gate**.
+No requirement is weakened and no surface is relabeled External or profile-scoped
+synthetic identity. No hooks, privileged APIs, root or APK rewriting are authorized
+to patch around the result. S2 is the next separately authorized research direction:
+a non-executing source/provenance audit of VirtualSpace and Blacks-BlackBox. No
+third-party engine execution/integration, ordinary protected-app support, or
+production architecture selection is authorized.
 
 ## Bounded emulator startup and cleanup
 
@@ -95,8 +117,8 @@ polling with three-second command limits; measured component/access execution is
 not retried. Cleanup skips device operations before successful boot, bounds profile
 removal and emulator shutdown, retains local PID termination with a bounded grace
 period, and bounds local AVD deletion. No unbounded child wait remains. The existing
-45-minute CI job limit is unchanged. The verified predecessor result is recorded
-above; new exact-head reason evidence remains pending.
+45-minute CI job limit is unchanged. The verified exact-head result and reasons
+are recorded above; this final documentation revision does not alter the harness.
 
 ## Engineering setup and pre-code ordering
 
@@ -204,13 +226,14 @@ descriptors and a joined native worker do not prove persistent-resource revocati
 
 ## Validation provenance and limits
 
-This evidence-preservation revision starts from verified PR #9 head
-`919a64e4624d7926f311ab27aabf00ad022ae8e5`. Its predecessor runtime results are
-recorded above. Local classifier/regression tests and shell syntax checks are
-recorded in the PR body; new exact-head reason output remains pending. The workflow
-uses explicit controller and tenant-flavor tasks.
+This final documentation revision records the completed experiment at exact head
+`69f0352510a55d92dcf4a408aa524cc0532788f9`, with the two successful workflow
+invocations and safe falsification reasons recorded above. It changes no experiment,
+classifier, test, workflow or runtime code. The workflow uses explicit controller
+and tenant-flavor tasks. CI for the subsequent documentation-only commit is
+separate from the already-observed source-head evidence.
 
-The observed predecessor scope is API 35 Google APIs x86_64 debug signing.
+The tested scope is API 35 Google APIs x86_64 debug signing only.
 Physical non-rooted ARM64, Samsung/other OEM, release-equivalent builds, API 31-37
 coverage, distribution/provisioning and production recovery remain Unknown. No
 API 35 outcome establishes API 37 behavior. API 37 image availability is Unknown.
@@ -218,8 +241,8 @@ API 35 outcome establishes API 37 behavior. API 37 image availability is Unknown
 Long-lived FDs, persistent native workers, jobs, alarms, sockets, full restart and
 re-execution validation, networking attribution/revocation, split APKs, multidex,
 dynamic code and secondary processes remain **Unknown / not reached**. Roadmap PR 9
-network work is currently BLOCKED because S1 was FALSIFIED in Stage A. The unrelated CMake SDK-download
-failure does not justify changing the network prototype or its analyzer/harness.
+network work is BLOCKED because S1 was FALSIFIED in Stage A. The unrelated
+CMake SDK-download failure does not justify changing the network prototype or its analyzer/harness.
 
 ## Production safety and requirements
 
