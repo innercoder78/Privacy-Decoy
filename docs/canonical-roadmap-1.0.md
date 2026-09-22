@@ -1,11 +1,47 @@
 # Privacy Decoy 1.0 Canonical 46-PR Roadmap
 
-This document restores the exact roadmap source supplied by the project owner on
-2026-09-22. It supersedes the “roadmap source unavailable” assumption recorded
-in ADR-0004 and the earlier roadmap reconciliation. It does **not** supersede
-historical evidence, rename completed historical work, or establish that a
-production architecture is viable. Roadmap PR numbers are distinct from GitHub
-pull-request numbers.
+## Repository provenance note — 2026-09-22
+
+This document is the authoritative repository transcription of the canonical
+Privacy Decoy 1.0 roadmap supplied by the project owner on 2026-09-22. Markdown
+formatting is normalized for repository use, but normative roadmap obligations
+are preserved. The [Canonical Audit Integration Amendment](canonical-audit-integration.md)
+separately refines the roadmap and remains authoritative.
+
+This resolves the source gap recorded in ADR-0004 without rewriting historical
+evidence or the historical Roadmap PR 6 REDESIGN label. No production architecture
+is selected, and canonical production PR 6 has not started. Roadmap PR numbering
+is distinct from GitHub pull-request numbering. The approximate PR count does
+not permit removal of either mandatory STOP gate.
+
+## Canonical roadmap governance
+
+The target remains approximately 46 cohesive PRs for Privacy Decoy 1.0, subject
+to evidence and practical development needs.
+
+The PR count is a planning estimate rather than a quota.
+
+PRs may be combined, divided, inserted, or reordered when technically justified,
+provided that:
+
+* Reviewability remains strong.
+* Security dependencies remain properly ordered.
+* Mandatory checkpoints remain intact.
+* Privacy boundaries are not deferred merely to reduce PR count.
+* Changes remain cohesive.
+
+The earlier approximately 40-PR roadmap is superseded.
+
+Each PR includes appropriate:
+
+* Tests.
+* Documentation.
+* Failure behavior.
+* Complete-diff review.
+
+Testing is not deferred until later testing PRs.
+
+Feasibility documentation does not substitute for actual experiments.
 
 ## PR 1 — Minimal Android Foundation and Clean Repository Layout
 
@@ -17,10 +53,51 @@ secret-handling defaults, and initial backup exclusions. GitHub Actions validate
 Android from `android/`, and Android Studio opens `android/` correctly.
 
 Do not implement the privacy runtime or imply protection is available. A fresh
-wrapper binary requires the Desktop binary workflow.
+ordinary Gradle wrapper includes `gradle-wrapper.jar`. When the wrapper must be
+created, the binary-file preflight must identify PR 1 as requiring Desktop Codex.
 
-**Existing-old-layout transition:** **PR 1A — Repository Layout Correction** may
-be inserted without renumbering the remaining roadmap.
+## PR 1A — Repository Layout Correction
+
+If development has already begun under the previous root-level Android layout,
+insert PR 1A before PR 2.
+
+PR 1A should:
+
+* Move the Android Gradle project beneath `android/`.
+* Move `CONTRIBUTING.md` beneath `.github/`.
+* Preserve Git history through ordinary Git moves where practical.
+* Update affected paths.
+* Update GitHub Actions.
+* Update documentation.
+* Update relative links.
+* Update Gradle commands.
+* Update scripts.
+* Update configuration.
+* Update tests.
+* Preserve Android behavior.
+* Preserve dependencies.
+* Preserve SDK versions.
+* Preserve Gradle versions.
+* Preserve AGP versions.
+* Preserve application IDs.
+* Preserve package names.
+* Preserve permissions.
+* Preserve privacy behavior.
+* Preserve CI behavior except required path adjustments.
+
+Do not regenerate the Gradle wrapper merely because it has moved.
+
+An unchanged `gradle-wrapper.jar` moved byte-for-byte does not constitute a newly
+generated binary.
+
+If the JAR must actually be created, regenerated, or modified, the Desktop binary
+workflow applies.
+
+PR 1A is organizational and does not count as evidence of containment or privacy
+feasibility.
+
+Existing roadmap numbers do not need to be renumbered merely because PR 1A was
+inserted.
 
 ## PR 2 — Threat Model, Requirements Register, and Engine Assessment
 
@@ -39,7 +116,8 @@ trusted-component failure. Record actual enforcement and unresolved bypasses.
 
 ## PR 4 — Protected Networking Feasibility Prototype
 
-Test external VPN routing, per-app exclusion, destination split routing, IPv4,
+Test the candidate network boundary with external VPN routing, per-app exclusion,
+destination split routing, IPv4,
 IPv6, DNS, native sockets, Java sockets, explicit network selection, open
 connections, supervisor death, and VPN-loss races. Use controlled independent
 packet observation. Identify required external enforcement dependencies.
@@ -52,11 +130,6 @@ unresolved-risk register, and architecture decision.
 
 **STOP. Do not proceed automatically. Obtain explicit user approval.**
 
-Acceptance requires credible evidence addressing at minimum protected-code
-containment, management isolation, native bypass risk, broker authorization,
-network-route feasibility, external VPN interaction, and ordinary non-rooted
-Android operation.
-
 ## PR 6 — Core Domain, Persistence, Capability, and Diagnostic Models
 
 Implement models for protected-app identity, persona identity, persona
@@ -66,11 +139,6 @@ diagnostic session identity, and diagnostic redaction classifications. Define
 migrations, corruption handling, and safe defaults. Do not enable ordinary apps
 prematurely. Developer Mode need not yet have full UI, but later components use
 safe structured diagnostic interfaces rather than ad hoc logging.
-
-**Canonical Audit Amendment refinement:** The capability model must represent
-advertising-related identifiers, power/battery surfaces, and other environmental
-categories without introducing one-off policy systems. Coverage records must
-support those categories and evidence states.
 
 ## PR 7 — Virtual Package Registry
 
@@ -89,7 +157,8 @@ artifact sets. Never import outside runtime data.
 Implement protected app-private namespaces, management-state isolation, required
 native restrictions, key and alias isolation where supported, temporary-data
 handling, initial quotas, backup exclusions, and removal primitives. Include
-management-only isolation for future Ledger and Developer Mode stores. Validate
+management-only isolation requirements for the future Privacy Access Ledger and
+Developer Mode diagnostics. Validate
 direct bypass attempts.
 
 ## PR 10 — Launch Gateway, Runtime Supervisor, and Crash-Safe Diagnostic Foundation
@@ -97,15 +166,17 @@ direct bypass attempts.
 Build the production execution gateway on the validated prototype. Add
 generation-scoped authorization, mandatory initialization, early-code control,
 process supervision, revocation, trusted-component death handling, and bounded
-recovery. Introduce a minimal bounded persistent diagnostic journal. Do not
-record prohibited sensitive contents. Unsupported configurations remain blocked.
+recovery. Introduce a minimal bounded persistent diagnostic journal for trusted
+runtime events and crash breadcrumbs. This journal forms the technical foundation
+for later Developer Mode. Do not record prohibited sensitive contents.
+Unsupported configurations remain blocked.
 
 ## PR 11 — Binder, Service, and Provider Mediation
 
 Expand validated brokerage into required Android services/providers. Enforce
 caller identity, request validation, least privilege, handle lifecycle,
 revocation, and host-service isolation. Block unsupported paths. Emit structured
-safe diagnostic events where useful.
+safe diagnostic events for internal failures where useful.
 
 ## PR 12 — Policy Engine and Package Visibility
 
@@ -113,33 +184,17 @@ Implement Real/Decoy/Empty/Deny capability checks, policy precedence,
 inheritance, overrides, safe transitions, and a virtual package universe. Cover
 broad enumeration, targeted probing, intent resolution, and UID relationships.
 
-**Canonical Amendment refinement:** Preserve explicit per-execution
-package-universe control. Persona sharing **MUST NOT** automatically grant mutual
-visibility. Targeted package probing remains mandatory package-visibility
-analysis.
-
 ## PR 13 — Synthetic Identifiers and Initial Device Profiles
 
 Implement scoped synthetic identifiers, an initial validated device catalog,
 constrained Custom Device, device/build/display coherence, capability validation,
 and unsupported-combination handling.
 
-**Canonical Amendment refinement:** Explicitly investigate and, where feasible,
-implement advertising-related identifiers, descriptive Android/build identity,
-battery/charging/power-state surfaces, and cross-property device coherence. Do
-**NOT** advertise Android platform versions or capabilities inconsistent with the
-actual protected runtime.
-
 ## PR 14 — Telephony, Regional, and Local Network Persona
 
 Implement supported SIM country, network country, carrier, MCC/MNC, locale,
 language, timezone, Wi-Fi metadata, and local connectivity metadata. Validate
 coherence. Do not claim public-IP spoofing.
-
-**Canonical Amendment refinement:** Include network transport/type information,
-local-network metadata, and cross-checking network persona against regional
-persona where technically meaningful. Do not infer public-IP protection from
-local values.
 
 ## PR 15 — Synthetic Location
 
@@ -151,8 +206,8 @@ independence, cached-value handling, and failure probes.
 
 Implement a minimized ledger schema, bounded storage, aggregation, retention,
 redaction, clear-history behavior, overload handling, and management/user views.
-Keep Ledger separate from Developer Mode diagnostics. Allow safe correlation
-identifiers where useful.
+Keep the Ledger conceptually and physically separate from Developer Mode
+diagnostics. Permit safe correlation identifiers where useful.
 
 ## PR 17 — Persona Management and Initial Onboarding
 
@@ -168,12 +223,6 @@ reconnection handling, explicit OFF warnings, split-routing handling, and
 supported protocol/client coverage. Privacy Decoy `VpnService` remains
 prohibited.
 
-**Canonical Amendment refinement:** Add conservative network-persona consistency
-diagnostics where reliable evidence exists. Any external exit-IP/geography lookup
-must be deliberate, user-authorized, privacy-conscious/minimized, approximate
-evidence, and nonessential to fail-closed enforcement. Unknown is preferable to
-guessed geography.
-
 ## PR 19 — Initial Multiprocess and Lifecycle Integration
 
 Validate identity, storage, policy, location, services, networking, and
@@ -182,20 +231,14 @@ supervisor failure, and stale work. Add initial resource measurements.
 
 ## PR 20 — Integrated Architecture and Privacy Checkpoint
 
-Audit containment, native boundaries, management isolation, package import,
+Audit the integrated supported configuration, including containment, native
+boundaries, management isolation, package import,
 personas, policy, storage, identity, services, location, networking, lifecycle,
 Ledger, diagnostic foundation, and baseline resource behavior. Demonstrate
 meaningful supported behavior with controlled probes and selected compatible apps
-where safe. Document unsupported paths and evidence.
+where safe. Document unsupported paths and evidence behind claims.
 
 **STOP. Do not proceed automatically. Obtain explicit user approval.**
-
-Acceptance requires an integrated demonstration including containment, native
-boundaries, management isolation, package import, personas, policy, storage,
-identity, services, location, networking, lifecycle, Ledger, and initial
-diagnostic infrastructure. There must be no hidden dependence on root,
-privileged installation, production-use ADB, routine APK re-signing, or Privacy
-Decoy `VpnService`.
 
 ## PR 21 — Sensor Mediation
 
@@ -203,17 +246,11 @@ Implement supported sensor modes, coherent synthetic streams, Java paths, native
 paths, availability metadata, lifecycle, background behavior, multiprocess
 consistency, and bounded sampling.
 
-**Canonical Amendment refinement:** Add explicit cross-API and
-temporal-coherence testing requirements.
-
 ## PR 22 — Personal-Data Mediation
 
 Implement mediation for accounts, contacts, calendars, clipboard, call metadata,
 SMS metadata, and related providers. Use safe defaults. Add synthetic content
 only where useful. Real only when safely mediated and deliberately authorized.
-
-**Canonical Amendment refinement:** Maintain preference for Empty where
-fictional data adds little benefit.
 
 ## PR 23 — Camera, Microphone, Credentials, and Other Hardware Policies
 
@@ -222,27 +259,24 @@ credentials, biometrics, Bluetooth, NFC, USB, and nearby devices. Validate
 permission separation/lifecycle. Unsupported features remain blocked.
 Hardware-attestation spoofing remains excluded.
 
-**Canonical Amendment refinement:** Synthetic camera/media injection is deferred
-advanced post-1.0 work. For 1.0 establish physical paths safely as supported,
-denied, unavailable, or Unsupported without requiring synthetic camera input.
-
 ## PR 24 — Protected Background Execution
 
-Implement jobs, alarms, deferred work, services, and broadcasts. Test stale
+Implement protected handling for jobs, alarms, deferred work, services, and
+broadcasts. Test stale
 generations, revocation, process death, scheduling limits, and background network
 safety.
 
 ## PR 25 — Protected Notifications and Push
 
 Implement Notification Broker behavior including protected indication,
-lock-screen policy, taps, actions, inline replies, push routing, stale-action
+lock-screen content policy, notification taps, actions, inline replies, push routing, stale-action
 invalidation, and safe deferral/drop.
 
 ## PR 26 — Entry Points, Sharing, and Authentication Handoffs
 
 Implement protected shortcuts, links, widgets, quick actions, incoming/outgoing
 shares, and supported authentication handoffs. Define explicit boundary
-crossings and safe return routing.
+crossings. Validate safe return routing.
 
 ## PR 27 — WebView and Browser-Surface Isolation
 
@@ -260,10 +294,6 @@ required native protection is not postponed until this PR.
 
 Implement supported pickers, selected-content import/proxy, explicit export,
 sharing grants, metadata controls, temporary cleanup, and interruption handling.
-
-**Canonical Amendment refinement:** Design bridges so they do not foreclose
-future synthetic-media input. Do **NOT** implement unrestricted synthetic camera
-injection merely because media bridging exists.
 
 ## PR 30 — Protected-App Update Pipeline
 
@@ -286,100 +316,126 @@ metadata, and safe failure.
 
 ## PR 33 — Coverage, Compatibility, and Developer Mode Diagnostics
 
-Expand full coverage/user/developer diagnostics. Implement user-controlled
-Developer Mode, warning, persistent enabled state, visible indicator, structured
-detailed diagnostics, bounded persistent sessions, crash-session detection,
-crash recovery, viewing, redaction, export, clear-log behavior, format
-versioning, safe environment metadata, pseudonymous app refs, and separation from
-Ledger. Scope reports appropriately. Unknown/Partial remain explicit.
+Expand coverage reporting into complete user/developer diagnostics.
 
-**Canonical Amendment refinement:** Expand reporting for advertising-related
-identity, battery/power, network-persona consistency, Java versus native sensor
-coverage, known SDK/library paths, and external protection dependencies. Maintain
-separation among coverage evidence, Privacy Access Ledger, and Developer Mode. No
-raw protected/persona/host values.
+Implement full Developer Mode behavior including:
+
+- User-controlled enable/disable.
+- Explicit warning.
+- Persistent enabled state.
+- Visible enabled indicator.
+- Structured detailed diagnostics.
+- Bounded persistent sessions.
+- Crash-session detection.
+- Recovery after Privacy Decoy crash.
+- Viewing diagnostic sessions.
+- Redaction.
+- Export.
+- Clear-log behavior.
+- Diagnostic format versioning.
+- Safe environment metadata.
+- Protected-app pseudonymous references where useful.
+- Separation from Privacy Access Ledger.
+
+Scope diagnostic reports to appropriate:
+
+- App version.
+- Runtime version.
+- Android version.
+- OEM environment.
+- Configuration.
+- Coverage state.
+
+Unknown and Partial remain explicit.
 
 ## PR 34 — Health Infrastructure and Resource Budgets
 
-Implement health metrics, Health UI, benchmark workloads, reference-device
-budgets, runtime/network/storage status, health checks, safe temporary cleanup,
-and Developer Mode storage status/overhead.
+Implement health metrics, Health UI, reproducible benchmark workloads,
+reference-device budgets, runtime status, network status, storage accounting,
+health checks, safe temporary cleanup, Developer Mode storage status, and
+Developer Mode overhead measurement.
 
 ## PR 35 — Memory, CPU, and Battery Hardening
 
-Investigate retained objects, lifecycle leaks, sampling, wake locks, supervisor
-efficiency, standby, restart loops, idle overhead, and Developer Mode overhead.
+Investigate retained objects, lifecycle leaks, sampling resources, wake locks, supervisor
+efficiency, long standby, restart loops, idle overhead, and Developer Mode overhead.
 Meet measured budgets without weakening protection.
 
 ## PR 36 — Low Storage, Backup/Transfer, and Deletion Hardening
 
 Expand quotas, staging cleanup, snapshot cleanup, diagnostic bounds, disk-full
-recovery, orphan detection, backup validation, transfer validation, and removal
-semantics.
+recovery, orphan detection, platform backup validation, platform transfer
+validation, and removal semantics.
+
+Verify:
+
+- Transactional state integrity.
+- Exported-file preservation.
+- Diagnostic-store exclusion from automatic backup.
 
 ## PR 37 — Multiprocess, Revocation, and Recovery Stress
 
 Stress concurrent policy changes, persona rotation, process death, broker
 failure, supervisor failure, queued work, generation changes, and Developer Mode
 crash persistence. Confirm no stale authorization, mixed-generation exposure, or
-diagnostic privacy downgrade.
+diagnostic behavior that weakens containment.
 
 ## PR 38 — Realistic Supported-App Compatibility Pass
 
 Test representative real apps within validated scope. Classify
-supported/unsupported/partial/compatibility failure. Make generalizable fixes
-only.
+supported/unsupported/partial/compatibility failure. Make generalizable fixes.
+Reject application-specific bypasses that weaken privacy.
 
-**Canonical Amendment refinement:** Look explicitly for alternative paths,
-including SDK/library-mediated behavior not exercised by earlier probes.
-Compatibility fixes must never weaken privacy for a specific app.
+Use Developer Mode diagnostics where useful, while preserving redaction
+requirements.
 
 ## PR 39 — Accessibility, OEM, and Error-State Finalization
 
 Harden TalkBack, large text, supported OEM behavior, onboarding, management
 screens, notifications, blocked networking, unsupported apps,
-storage/update/recovery errors, Developer Mode accessibility, and diagnostic
-export UX.
+storage failures, update failures, recovery explanations, Developer Mode warning
+and indicator accessibility, and diagnostic-export UX.
 
 ## PR 40 — Integrated Security Regression Suite
 
-Consolidate accumulated tests. Add cross-boundary adversarial cases, mutation
-checks, failure checks, diagnostic redaction, Developer Mode isolation, crash
-survival, and export-content tests.
+Consolidate accumulated tests. Add missing cross-boundary adversarial cases,
+mutation checks where useful, failure checks, diagnostic redaction tests,
+Developer Mode isolation tests, crash-survival tests, and export-content tests.
 
-**Canonical Amendment refinement:** Include regressions for advertising
-identifiers, battery/power where supported, cross-surface persona coherence,
-targeted package-probe isolation, network-persona consistency, diagnostic
-redaction, and coverage-state correctness.
+Enforce reproducible regression execution.
 
 ## PR 41 — Resource and Network Soak Suite
 
-Exercise sustained launches, Ledger, Developer Mode, sensors, notifications,
-package probes, VPN transitions, failures, updates, rotations, media, low
-memory/storage, and long idle. Verify bounded growth and no privacy downgrade.
-
-**Canonical Amendment refinement:** Where implemented, test long-running dynamic
-synthetic battery, sensors, network, and diagnostic models for bounded/coherent
-behavior.
+Exercise sustained launches, Ledger traffic, Developer Mode traffic, sensors,
+notifications, package probes, VPN transitions, runtime failures, updates, persona
+rotations, media operations, low
+memory/storage, and long idle. Verify bounded growth, bounded diagnostics,
+no restart storms, and no privacy downgrade.
 
 ## PR 42 — Independent Security Assessment and Remediation
 
-Arrange a real independent security assessment. Record reviewed revision, scope,
-evidence, findings, and remediation. Review management isolation, diagnostics,
-redaction/export, and crash behavior. Codex must not fabricate external
-assessment.
+Arrange an independent security assessment of the actual implementation and claims.
+Record reviewed revision, scope, evidence, findings, and remediation. Include
+review of management isolation, diagnostic logging, diagnostic redaction,
+diagnostic export, and crash-recovery behavior.
+
+Remediate release blockers.
+
+Obtain revalidation where appropriate.
+
+External assessment is a real dependency.
+
+Codex may not fabricate it.
+
+This milestone may require several cohesive remediation PRs.
 
 ## PR 43 — Final Privacy, Security, Compatibility, and Diagnostic Documentation
 
 Finalize the threat model, ADRs, supported matrix, persona semantics, policy
-modes, VPN responsibilities, backup/deletion/update/rollback limitations,
+modes, VPN responsibilities, backup behavior, deletion behavior, update
+limitations, rollback limitations,
 remote-inference limits, Developer Mode, diagnostic privacy/export, and user
 guidance.
-
-**Canonical Amendment refinement:** Document advertising-ID scope, power/battery
-coverage, descriptive Android identity versus actual runtime capability,
-network-persona consistency limits, external VPN responsibilities, and synthetic
-camera/media as future advanced work rather than a 1.0 guarantee.
 
 ## PR 44 — Release Engineering and Supply-Chain Validation
 
@@ -392,8 +448,8 @@ procedures. No release without explicit authorization.
 
 Verify clean installation, Privacy Decoy upgrades, persona/state migrations,
 protected-package updates, rollback limits, self-update, Developer Mode
-persistence, diagnostic migration, supported platform combinations, and
-realistic protected-app behavior. Use release candidates.
+persistence across Privacy Decoy upgrades, diagnostic migration, supported
+platform combinations, and realistic protected-app behavior. Use release candidates.
 
 ## PR 46 — 1.0 Release Candidate and Final Readiness
 
@@ -403,6 +459,53 @@ artifacts, repository structure, and supply chain. Resolve release blockers,
 record exact revisions/evidence, and produce a readiness recommendation.
 Readiness does not itself authorize merge, tag, publication, or release.
 
-**Canonical Amendment refinement:** Reject claims of coherent persona behavior
-where supported surfaces materially contradict one another. Release readiness
-remains evidence-based rather than feature-presence-based.
+## Canonical checkpoint acceptance
+
+### PR 5 acceptance
+
+Require evidence that the proposed architecture has a credible enforceable
+boundary under mandatory constraints.
+
+Evidence must address at minimum:
+
+* Protected-code containment.
+* Management isolation.
+* Native bypass risk.
+* Broker authorization.
+* Network-route feasibility.
+* External VPN interaction.
+* Ordinary non-rooted Android operation.
+
+### PR 20 acceptance
+
+Require an integrated demonstration of the supported core configuration.
+
+The demonstration must include:
+
+* Containment.
+* Native boundaries.
+* Management isolation.
+* Package import.
+* Personas.
+* Policy.
+* Storage.
+* Identity.
+* Services.
+* Location.
+* Networking.
+* Lifecycle.
+* Ledger.
+* Initial diagnostic infrastructure.
+
+There must be no hidden dependence on:
+
+* Root.
+* Privileged installation.
+* Production-use ADB.
+* Routine APK re-signing.
+* Privacy Decoy `VpnService`.
+
+Outside-versus-protected probes must use intentionally configured test permissions
+and environments.
+
+Do not assume the outside copy automatically has access to every genuine value.
