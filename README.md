@@ -29,15 +29,23 @@ mandatory parent Build identity fields in both managed-profile tenants. See the
 S1 remains **FALSIFIED**; its historical redesign/research Roadmap PR 9 networking/
 revocation follow-up remains blocked by its survival gate. **GitHub PR #10 records
 the completed supplemental S2 non-executing source/provenance audit**, historically
-labeled Roadmap PR 8A: VirtualSpace and Blacks-BlackBox
-each received **STOPPED_UNRESOLVED** at Gate 1, so deeper architecture review
-stopped for both. See the [S2 audit evidence](docs/evidence/pr8a-engine-source-provenance-audit.md).
-No engine was built, executed or integrated. S2 supplied no audit-cleared engine;
-no runtime prototype or integration is authorized. PR #10 is merged, and both
-candidates remain **STOPPED_UNRESOLVED**. On 2026-09-22, the project owner selected
+labeled Roadmap PR 8A: VirtualSpace and Blacks-BlackBox each received
+**STOPPED_UNRESOLVED** at Gate 1. See the
+[S2 audit evidence](docs/evidence/pr8a-engine-source-provenance-audit.md).
+The ADR-0006 discovery phase has since examined both pins further.
+Blacks-BlackBox remains **STOPPED_UNRESOLVED** after its
+[provenance-closure attempt](docs/evidence/architecture-discovery-blacks-blackbox-provenance.md).
+VirtualSpace is **DISQUALIFIED — exact pinned candidate** at
+`b1ff7988ac598b00b45c22003390ff43396c1c01` based on
+[positive static architecture evidence](docs/evidence/architecture-discovery-virtualspace-static-falsification.md)
+of mandatory placeholder/no-op mechanisms and unsafe host fallback; its earlier
+provenance uncertainty remains valid historical evidence. No engine was built,
+executed, or integrated, and no third-party engine is audit-cleared. On
+2026-09-22, the project owner selected
 **REDESIGN AGAIN**; [ADR-0006](docs/decisions/ADR-0006-redesign-again-architecture-discovery.md)
 records the decision and authorizes one bounded architecture-discovery phase.
-This selects no production architecture. **NO PRODUCTION ARCHITECTURE SELECTED**.
+These findings select no production architecture. **NO PRODUCTION ARCHITECTURE
+SELECTED**.
 Canonical production Roadmap PR 6 has not started, and canonical PR 20 has not
 occurred. The historical
 blocked follow-up is distinct from canonical PR 9 — Protected Storage and Key
