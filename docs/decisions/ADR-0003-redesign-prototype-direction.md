@@ -2,7 +2,27 @@
 
 - **Status:** Proposed — PROTOTYPE DIRECTIONS IDENTIFIED / NO PRODUCTION ARCHITECTURE SELECTED
 - **Date:** 2026-09-21
-- **Roadmap:** PR 7; S1 result recorded by Roadmap PR 8 and S2 disposition by Roadmap PR 8A on 2026-09-22
+- **Historical redesign/research sequence:** PR 7; S1 result recorded by Roadmap PR 8 and S2 disposition by Roadmap PR 8A on 2026-09-22
+
+## Current canonical governance
+
+Historical redesign labels Roadmap PR 7, PR 8, PR 8A and the historical PR 9
+networking/revocation follow-up are preserved as supplemental feasibility research.
+They are not the numbering of the restored [canonical 46-PR production
+roadmap](../canonical-roadmap-1.0.md) or inserted production stages. In particular,
+the blocked historical S1 follow-up is not canonical PR 9 — Protected Storage
+and Key Boundaries. See the [roadmap reconciliation](../roadmap-reconciliation.md)
+and [ADR-0005](ADR-0005-canonical-roadmap-source-restoration.md).
+
+Canonical production PR 6 has not begun; merging this evidence does not authorize
+it. Canonical PR 20 has not occurred, and this audit does not infer satisfaction
+of either canonical PR 5 or PR 20. PD-REQ-001 through PD-REQ-085 remain in force
+and unchanged; no requirement is marked satisfied by this static audit.
+
+The original S2 audit baseline remains
+`bc73884edb1af2fbd7dcbed18cc5af3ef1517b7a`; this documentation/governance
+reconciliation uses `4ed61bae6327fa62e37d154f8f45f675f36fa86e`. The third-party
+static inspection was not rerun and its findings are unchanged.
 
 ## Problem and context
 
@@ -28,8 +48,8 @@ neither is selected for production:
    identity in both managed-profile tenants. Its survival-gated networking/
    revocation follow-up is blocked; useful OS isolation/lifecycle properties do
    not establish Decoy Persona mediation.
-2. **S2: current open-source engine source/provenance audit — completed by Roadmap
-   PR 8A; no audit-cleared engine.** VirtualSpace and Blacks-BlackBox independently
+2. **S2: completed supplemental source/provenance audit under the historical
+   Roadmap PR 8A label; no audit-cleared engine.** VirtualSpace and Blacks-BlackBox independently
    received **STOPPED_UNRESOLVED** at Gate 1. Deeper architecture review stopped for
    both. The [canonical S2 evidence](../evidence/pr8a-engine-source-provenance-audit.md)
    records exact refs, grant/ancestry gaps and binary/dependency provenance limits.
@@ -98,10 +118,14 @@ another explicit decision must consider **REDESIGN AGAIN**, **NARROW SCOPE**, or
 **STOP** / the applicable explicit feasibility gate. This PR selects none of those
 decisions and does not initiate another candidate search.
 
-S1 remains **FALSIFIED**; its Roadmap PR 9 networking/revocation follow-up remains
+S1 remains **FALSIFIED**; its historical research Roadmap PR 9 networking/revocation follow-up remains
 **BLOCKED**. **NO PRODUCTION ARCHITECTURE SELECTED**. Product implementation,
 ordinary protected applications, real accounts and private data remain prohibited.
-PD-REQ-001 through PD-REQ-070 remain unchanged and none is satisfied by this audit.
+PD-REQ-001 through PD-REQ-085 remain in force and unchanged; no requirement is
+marked satisfied by this static audit. A future project-owner decision may
+investigate another compliant architecture, deliberately narrow supported scope
+while preserving every mandatory boundary, or stop under current goals. None of
+those decisions is selected here.
 
 ## Disqualified and deferred directions
 

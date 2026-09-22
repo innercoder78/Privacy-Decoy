@@ -26,12 +26,18 @@ planning. **Roadmap PR 8 falsified S1 managed-profile feasibility**: the tested
 slice retained useful OS isolation/lifecycle properties but exposed all seven
 mandatory parent Build identity fields in both managed-profile tenants. See the
 [completed S1 evidence](docs/evidence/pr8-managed-profile-boundary.md).
-S1's Roadmap PR 9 networking follow-up remains blocked. **Roadmap PR 8A completed
-the S2 non-executing source/provenance audit**: VirtualSpace and Blacks-BlackBox
+S1 remains **FALSIFIED**; its historical redesign/research Roadmap PR 9 networking/
+revocation follow-up remains blocked by its survival gate. **GitHub PR #10 records
+the completed supplemental S2 non-executing source/provenance audit**, historically
+labeled Roadmap PR 8A: VirtualSpace and Blacks-BlackBox
 each received **STOPPED_UNRESOLVED** at Gate 1, so deeper architecture review
 stopped for both. See the [S2 audit evidence](docs/evidence/pr8a-engine-source-provenance-audit.md).
 No engine was built, executed or integrated. S2 supplied no audit-cleared engine;
-another explicit architectural decision is required. **NO PRODUCTION ARCHITECTURE SELECTED**.
+no runtime prototype or integration is authorized. Another explicit architectural
+decision is required. **NO PRODUCTION ARCHITECTURE SELECTED**. Canonical production
+Roadmap PR 6 has not started, and canonical PR 20 has not occurred. The historical
+blocked follow-up is distinct from canonical PR 9 — Protected Storage and Key
+Boundaries; this audit does not imply that canonical PR 9 is blocked or has occurred.
 The test DPC and hostile tenants remain research fixtures only. Product
 implementation remains paused, no production architecture or engine is selected,
 and ordinary protected applications remain prohibited. The prior post-gate Core Domain/Persistence product-implementation
@@ -39,6 +45,18 @@ sequence is superseded and paused until a redesigned architecture passes another
 explicit feasibility gate; the current research prototype will not proceed
 unchanged as the product. No production architecture or engine has been selected.
 Ordinary protected apps, real accounts, and private user data remain prohibited.
+
+The project owner restored the original [canonical 46-PR roadmap](docs/canonical-roadmap-1.0.md)
+and [canonical amendment source](docs/canonical-audit-integration.md). Canonical
+Roadmap PR 5 and PR 20 remain mandatory STOP gates. The historical Roadmap PR 6
+REDESIGN event and S1 evidence remain valid and unchanged. S2 GitHub PR #10
+remains separate supplemental redesign research; it is not canonical production
+Roadmap PR 8/8A and was not modified by the restoration. [PD-REQ-001 through
+PD-REQ-085](docs/requirements.md) remain in force. See the [roadmap
+reconciliation](docs/roadmap-reconciliation.md) and [ADR-0005](docs/decisions/ADR-0005-canonical-roadmap-source-restoration.md).
+No production architecture has been selected, and product implementation remains
+paused pending a separate architecture decision.
+
 GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
 PR #6 was consumed by the earlier corrective stacked PR merged into PR #5. The
 [decision record](docs/decisions/ADR-0002-feasibility-stop-gate.md) contains the

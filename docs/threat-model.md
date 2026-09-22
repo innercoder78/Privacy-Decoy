@@ -8,9 +8,11 @@
 
 Privacy Decoy intends to run an explicitly selected application without silently
 exposing the host's real state. Protected assets are the host device identity and
-identifiers; location; telephony, carrier, network, and local-network metadata;
-package inventory; accounts and personal datasets; host files/storage; sensor
-readings; host services; other applications' state; and Privacy Decoy's own
+identifiers, including advertising/ad-tech identifiers; location; telephony,
+carrier, network, public-IP/geography, and local-network metadata; package
+inventory; accounts and personal datasets; host files/storage; sensor readings;
+battery, charging, and power state; host services; other applications' state;
+and Privacy Decoy's own
 management databases, persona secrets/state, policy state, broker credentials and
 capabilities, and coverage/evidence state. Availability matters only where its
 loss could trigger unsafe fallback; privacy takes precedence over compatibility.
@@ -32,6 +34,16 @@ packages, observe `/proc`, `/sys`, filesystems and processes, and use network si
 channels. It may interact with Play Services or other available host services.
 It can compare surfaces, persist observations, and deliberately trigger failure,
 death, restart, upgrade, or revocation paths.
+
+Material Play Services, embedded SDK/library and wrapper paths, browser-mediated
+WebView behavior, JNI/native libraries, and dynamically loaded code are distinct
+attack paths rather than evidence inherited from a direct framework API. An app
+may compare descriptive Android/build persona values with actual API/ABI,
+kernel/framework, OEM, hardware, and engine capabilities; compare sensor readings
+over time and across APIs; correlate local network-persona state with public IP or
+geography; treat granted permissions as an opportunity to request host personal
+data; and use Developer Mode or other diagnostics as an attempted disclosure
+path.
 
 Protected code is not trusted merely because its package was imported, its
 signature was checked, or it runs successfully. Collusion among protected apps
@@ -63,6 +75,12 @@ behavior are in scope alongside deliberate attack.
 9. **Privacy Decoy ↔ optional engine code:** third-party code enters the TCB only
    after provenance/license review and must remain behind a replaceable adapter.
 
+10. **Diagnostics ↔ protected/host/persona state:** Developer Mode is separate
+    from the Privacy Access Ledger and MUST NOT emit, record, or retain raw
+    protected/persona/host values. It uses only bounded, redacted, allowlisted
+    metadata/categories/status evidence, MUST NOT weaken policy or mediation,
+    and MUST NOT convert missing evidence into success.
+
 Browser, authentication, sharing, keyboard, autofill, accessibility, screen
 capture, notification, backup, device-transfer, and update handoffs are explicit
 boundaries—not implied extensions of protection.
@@ -91,6 +109,14 @@ it never returns a real privacy-sensitive value. Required but unverifiable routi
 blocks networking rather than falling back to the physical route. Corrupt persona
 state does not silently regenerate. Ledger failure does not open access, and an
 empty ledger is not evidence that no access occurred.
+
+A granted Android permission never by itself authorizes host personal-data
+disclosure. Unsupported sensor, battery/power, advertising-identifier, SDK, or
+library paths block rather than returning host values. Locally reported network
+metadata never supports a claim that public IP changed; optional public-IP or
+geography lookup is user-authorized, minimized, approximate, nonessential, and
+never guesses an Unknown result. Persona-reported Android/build descriptions do
+not alter or overstate actual runtime APIs, ABI, or capabilities.
 
 ## Assumptions, exclusions, and unknowns
 
@@ -128,9 +154,15 @@ host-service integrations, and background entry may initially be unsupported.
 Core unknowns are whether any root-free runtime can contain modern native and
 multiprocess apps on API 31–37 without rewriting; what OEM/hidden-API behavior
 breaks mediation; whether pre-code validation is achievable; and whether every
-traffic path can be attributed and fail closed with an external VPN. PR 4 owns
-containment investigation, and PR 5 owns networking investigation. PR 6 is the
-mandatory user STOP decision.
+traffic path can be attributed and fail closed with an external VPN. In the
+**historical repository research sequence**, PR 4 owned containment investigation,
+PR 5 owned networking investigation, and Roadmap PR 6 was the mandatory user
+STOP decision. The merged historical Roadmap PR 6 **A — REDESIGN** decision
+remains valid evidence and retains its label. The restored canonical roadmap
+independently requires mandatory STOP gates at Roadmap PR 5 and Roadmap PR 20.
+The exact canonical sequence and amendment refinements remain unavailable, and
+implementation remains blocked until their restoration and review; see
+[roadmap reconciliation](roadmap-reconciliation.md).
 
 ## Abuse cases and required evidence
 
@@ -144,6 +176,12 @@ mandatory user STOP decision.
 | Broker/engine crashes | Fault injection proving denial, bounded recovery, and no real fallback. |
 | OEM/API update changes behavior | Release-build matrix revalidation; scope marked Unknown meanwhile. |
 | App infers host package/account through Play Services | Virtual-universe and host-service probes, or explicit blocking. |
+| App reads advertising identifiers through an SDK/library alternative | Framework, Play Services, SDK/library and reset/scope probes; no persona-implied cross-app sharing. |
+| App correlates sensor or battery observations across time/APIs | Temporal, unit/rate/range, lifecycle, framework/native/SDK coherence tests, or explicit denial. |
+| App treats a granted permission as access to host personal data | Permission-by-policy tests proving controlled Real or deliberate Decoy/Empty/Deny behavior. |
+| Reported Android/build persona contradicts actual runtime | Descriptor-to-API/ABI/capability matrix and truthful UI/claim review. |
+| Network persona conflicts with public IP/geography | Cross-surface checks and independently observed, opt-in lookup behavior; Unknown stays Unknown. |
+| Developer diagnostics disclose values or overstate coverage | Separation, authorization, bounded-redaction and missing-evidence tests. |
 
 The normative obligations and evidence ownership are in the
 [requirements register](requirements.md); candidate feasibility is assessed in

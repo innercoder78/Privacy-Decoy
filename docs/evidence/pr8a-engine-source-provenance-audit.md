@@ -2,6 +2,23 @@
 
 Date: 2026-09-22. **Non-executing static research only.**
 
+**Documentation/governance reconciliation:** “Roadmap PR 8A” and this filename
+are historical redesign-research labels. This is supplemental feasibility
+evidence after the original architecture failed, not canonical production
+Roadmap PR 8, an inserted canonical PR 8A, or canonical PR 9. The restored
+[canonical 46-PR roadmap](../canonical-roadmap-1.0.md),
+[amendment](../canonical-audit-integration.md) and
+[roadmap reconciliation](../roadmap-reconciliation.md) now govern together with
+PD-REQ-001 through PD-REQ-085. Source restoration does not change the original
+S2 observations, pins, hashes, methods, limitations or independent outcomes.
+
+The **original audit execution baseline** was
+`bc73884edb1af2fbd7dcbed18cc5af3ef1517b7a`. The **current documentation/governance
+reconciliation baseline** is `4ed61bae6327fa62e37d154f8f45f675f36fa86e`.
+This revision reconciles the existing record without rerunning the third-party
+static inspection. Canonical production PR 6 has not started; canonical PR 20
+has not occurred. No production implementation or runtime prototype is authorized.
+
 | Candidate | Gate 1 | Deeper architecture audit | Final S2 disposition |
 | --- | --- | --- | --- |
 | chiyuan5/VirtualSpace | STOPPED_UNRESOLVED | Stopped at license/ancestry gate | STOPPED_UNRESOLVED |
@@ -31,7 +48,7 @@ Dependencies were not resolved or downloaded. No engine was installed, built,
 executed, integrated or vendored. No third-party source or binary was copied into
 Privacy Decoy. No Android implementation, workflow, dependency or requirement changed.
 
-## 2. Current project state
+## 2. Original audit project state and current reconciliation
 
 The clean local checkout at `C:\GitHub Projects\Privacy-Decoy` was fast-forwarded
 through its existing `origin` to verified main
@@ -41,8 +58,10 @@ no remotes were modified. Research branch: `codex/roadmap-pr-8a-s2-source-audit`
 [ADR-0002](../decisions/ADR-0002-feasibility-stop-gate.md) selected **A — REDESIGN**.
 [Roadmap PR 8](pr8-managed-profile-boundary.md), GitHub PR #9, validly **FALSIFIED
 S1**: both tenants exposed all seven mandatory parent Build identity fields.
-Roadmap PR 9 remains the **BLOCKED S1 networking/revocation follow-up**; this audit
-does not occupy or renumber that slot. **NO PRODUCTION ARCHITECTURE SELECTED**.
+Historical redesign/research Roadmap PR 9 remains the **BLOCKED S1 networking/
+revocation follow-up**; this audit does not occupy or renumber that historical
+slot. This does not imply that canonical PR 9 — Protected Storage and Key
+Boundaries — is blocked or has occurred. **NO PRODUCTION ARCHITECTURE SELECTED**.
 Product implementation remains paused. Ordinary protected applications, real
 accounts and private data remain prohibited. PR 4/5 results are bounded prior
 research, not inherited engine containment evidence.
@@ -383,7 +402,33 @@ This table is **PRIVACY DECOY ANALYSIS**; no requirement is marked satisfied.
 | PD-REQ-005, 019, 020, 057, 058, 059 | Static evidence is not runtime protection, complete coverage, independent packet/device evidence or specialist security review. |
 | PD-REQ-063 | No candidate passes; another explicit architectural/feasibility decision is required before product work. |
 
-PD-REQ-001 through PD-REQ-070 are unchanged. No existing requirement, including
+The original PD-REQ-001 through PD-REQ-070 implications above are preserved.
+The following additional traceability applies the restored PD-REQ-071 through
+PD-REQ-085 to the existing evidence; it does not represent new source inspection
+or runtime testing. Each row applies to both candidates independently and is
+**PRIVACY DECOY ANALYSIS**. Deferred technical coverage remains
+**UNKNOWN — REQUIRES EXPERIMENT**, with Gate 1 prerequisites still unresolved.
+
+| Requirement ID | Conservative implication for both candidates |
+| --- | --- |
+| PD-REQ-071 | Advertising/ad-tech identifier mediation across framework, Play Services, SDK and library paths was not architecture-qualified; scope/reset/rotation and host-real fallback prevention remain Unknown. |
+| PD-REQ-072 | Battery/power framework, broadcast, service and native mediation, including temporal coherence, was not architecture-qualified; Unknown. |
+| PD-REQ-073 | Descriptive spoofing and README claims cannot establish actual API/ABI/runtime/capability mediation or support; Unknown. |
+| PD-REQ-074 | No public-IP or network-persona consistency guarantee is established. External VPN and network-producer behavior remain Unknown; this audit authorizes no exit-IP/geolocation lookup. |
+| PD-REQ-075 | Java/native/SDK temporal and cross-path sensor mediation, capability consistency and lifecycle behavior were not reached; Unknown. |
+| PD-REQ-076 | Permission-versus-host-data policy mediation was not architecture-qualified; Unknown. Android permission grants do not establish controlled Real disclosure. |
+| PD-REQ-077 | Persistent persona/template versioning, isolation, assignment, migration and transactional failure behavior were not assessed; Unknown. |
+| PD-REQ-078 | S2 selects or evaluates no Privacy Decoy Developer Mode implementation. Evidence must remain free of raw protected/persona/host values; bounded diagnostics and Ledger separation remain unevidenced. |
+| PD-REQ-079 | No physical camera/media mediation is established. Synthetic camera/media remains post-1.0; Unknown mandatory physical paths cannot be treated as safe. |
+| PD-REQ-080 | Candidate popularity/features justify no root, patched kernel, routine rewriting/re-signing, convenience guest Android, duplicate VPN/tracker or other prohibited scope drift. S2 grants no exception. |
+| PD-REQ-081 | Embedded SDK/library/wrapper/WebView/native/dynamic path qualification was not reached because both candidates stopped at Gate 1; Unknown. |
+| PD-REQ-082 | This static audit produced no runtime enforcement/compatibility, persistence, coherence, lifecycle, physical-device or release-equivalent evidence. |
+| PD-REQ-083 | Not satisfied: static source/provenance screening is not Privacy Decoy 1.0 release/privacy acceptance evidence. The [acceptance criteria](../acceptance-criteria-1.0.md) remain applicable. |
+| PD-REQ-084 | Historical S2 labels are preserved as supplemental redesign research, distinct from canonical production numbering. Neither canonical PR 5 nor PR 20 is inferred satisfied; canonical production PR 6 has not started and PR 20 has not occurred. |
+| PD-REQ-085 | The repository, PR and evidence are treated as public: no secrets, credentials, private user data, raw protected/persona/host values or production signing material may be introduced. Artifact-level review does not satisfy project-wide release acceptance. |
+
+**PD-REQ-001 through PD-REQ-085 remain in force and unchanged. No requirement is
+marked satisfied by this static audit.** No existing requirement, including
 PD-REQ-009, is weakened or relabeled to admit a candidate.
 
 ## 12. Candidate outcomes
@@ -398,7 +443,8 @@ PD-REQ-009, is weakened or relabeled to admit a candidate.
 
 **PRIVACY DECOY ANALYSIS:** S2 produced no auditable candidate under its admission
 rules. Source visibility is not audit clearance. S1 remains FALSIFIED and Roadmap
-PR 9 remains BLOCKED. Choosing REDESIGN AGAIN, NARROW SCOPE or STOP is a subsequent
+PR 9 in the historical redesign/research sequence remains BLOCKED, distinct from
+canonical production PR 9. Choosing REDESIGN AGAIN, NARROW SCOPE or STOP is a subsequent
 explicit decision, not a decision silently made by this documentation PR.
 
 ## 13. Remaining Unknowns and limits
@@ -426,14 +472,19 @@ addition, runtime prototype, product resumption, ordinary protected application,
 real account/private data, S1 networking follow-up, merge or release is authorized.
 
 Local validation is documentation diff/whitespace/link/ref/scope inspection, not
-Android or upstream build/testing. Requirements, all `android/` files (including
+Android or upstream build/testing. Relative to the reconciliation baseline,
+requirements, all `android/` files (including
 production manifest and harnesses), and `.github/workflows/` remain unchanged.
 The Privacy Decoy wrapper remains Git blob
 `b1b8ef56b44f16b14dc800fa8103a6d89abb526f`, SHA-256
 `497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7`;
 `android/gradlew` remains mode `100755`. Only this evidence, README and ADR-0003
 are changed. No upstream clone, binary, cache or research log is committed.
-**CI pending after publication**; the Desktop task stops once the intended PR
+**Exact-head CI pending after publication**; old PR #10 workflows and merge
+verdicts are not evidence for the revised head. Under current main's unchanged
+docs-only CI policy, one pull_request workflow is expected with `changes` SUCCESS
+and validate/containment/network/managed-profile jobs SKIPPED; this is an
+expectation, not an observed result. The Desktop task stops once existing PR #10
 and its exact new head are confirmed, without waiting for or polling Actions.
 
 ## 15. References and provenance

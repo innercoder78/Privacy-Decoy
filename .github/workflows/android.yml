@@ -2,13 +2,77 @@ name: Android foundation
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      baseline: ${{ steps.classify.outputs.baseline }}
+      containment: ${{ steps.classify.outputs.containment }}
+      network: ${{ steps.classify.outputs.network }}
+      managed: ${{ steps.classify.outputs.managed }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Classify changed paths
+        id: classify
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          EVENT_BEFORE_SHA: ${{ github.event.before }}
+          TESTED_SHA: ${{ github.sha }}
+        run: |
+          # Fail safe: retain these broad defaults unless detection and
+          # classification both complete successfully.
+          printf '%s\n' \
+            'baseline=true' \
+            'containment=true' \
+            'network=true' \
+            'managed=true' >> "$GITHUB_OUTPUT"
+
+          case "$EVENT_NAME" in
+            pull_request) base_sha=$PR_BASE_SHA ;;
+            push) base_sha=$EVENT_BEFORE_SHA ;;
+            *)
+              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (unexpected event)'
+              exit 0
+              ;;
+          esac
+
+          sha_pattern='^[0-9a-f]{40}$'
+          if ! [[ "$base_sha" =~ $sha_pattern && "$TESTED_SHA" =~ $sha_pattern ]] ||
+             [[ "$base_sha" == 0000000000000000000000000000000000000000 ]]; then
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (unresolved comparison)'
+            exit 0
+          fi
+
+          changed_files=$(mktemp)
+          if ! git diff --name-only --diff-filter=ACDMRTUXB "$base_sha" "$TESTED_SHA" > "$changed_files"; then
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (diff failed)'
+            exit 0
+          fi
+
+          cat "$changed_files"
+          classification=$(mktemp)
+          if ! .github/scripts/classify-ci-changes.sh < "$changed_files" > "$classification"; then
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (classification failed)'
+            exit 0
+          fi
+          tee -a "$GITHUB_OUTPUT" < "$classification"
+
   validate:
+    needs: changes
+    if: needs.changes.outputs.baseline == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -65,6 +129,8 @@ jobs:
           echo 'Release manifest has no networking research capability'
 
   containment-prototype:
+    needs: changes
+    if: needs.changes.outputs.containment == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -95,6 +161,8 @@ jobs:
         run: bash tools/run-containment-emulator.sh
 
   network-feasibility:
+    needs: changes
+    if: needs.changes.outputs.network == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -125,6 +193,8 @@ jobs:
         run: bash tools/run-network-feasibility-emulator.sh
 
   managed-profile-feasibility:
+    needs: changes
+    if: needs.changes.outputs.managed == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
