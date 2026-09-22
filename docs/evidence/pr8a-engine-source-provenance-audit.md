@@ -79,7 +79,7 @@ The [merged study](../architecture-redesign-study.md) defines these exact labels
   documentary evidence, and this label never authorizes an experiment.
 
 The clones used `--no-checkout` in the external OS temporary workspace
-`C:\Users\anton\AppData\Local\Temp\privacy-decoy-pr8a-audit-20260922`, in separate
+`%LOCALAPPDATA%\Temp\privacy-decoy-pr8a-audit-20260922`, in separate
 `VirtualSpace` and `Blacks-BlackBox` directories. Evidence reads used the exact
 commit argument, not checked-out files or a substituted head. Git's temporary
 per-command `safe.directory` setting accommodated the Desktop sandbox identity;
