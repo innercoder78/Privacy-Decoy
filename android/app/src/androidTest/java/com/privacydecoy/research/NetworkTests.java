@@ -224,7 +224,11 @@ public final class NetworkTests {
             check("success".equals(b.request(s,g,"OPEN_CONTROLLED_TCP_CONNECTION",0).getString("result")),"reopened socket failed");
             s.revoke();check(b.state().getInt("owned")==0&&b.state().getInt("physicallyClosed")>0,"session revoke did not close Socket");
             try(ResearchSession dead=session()){
-                b.register(dead);check("success".equals(b.request(dead,g,"OPEN_CONTROLLED_TCP_CONNECTION",0).getString("result")),"death socket open failed");
+                b.register(dead);long deathGeneration=b.route("calibration-off");
+                Bundle deathOpen=b.request(dead,deathGeneration,"OPEN_CONTROLLED_TCP_CONNECTION",0);
+                String deathOpenResult=deathOpen.getString("result");
+                evidence("REGISTRY phase=death-open result="+deathOpenResult);
+                check("success".equals(deathOpenResult),"death socket open failed");
                 dead.killAndAwaitDeath();Thread.sleep(300);
                 check(b.state().getInt("owned")==0&&b.state().getInt("physicallyClosed")>=3,"session death did not close Socket");
             }
