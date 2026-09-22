@@ -6,6 +6,14 @@
 
 ## Current canonical governance
 
+> **Subsequent decision (2026-09-22):** S1 and S2 completed with the
+> dispositions recorded below. The project owner then made the explicit
+> architecture decision required by this ADR. [ADR-0006](ADR-0006-redesign-again-architecture-discovery.md)
+> records **REDESIGN AGAIN** and authorizes one bounded architecture-discovery
+> phase. It does not reverse S1's falsification or either S2 outcome, select a
+> production architecture, or start canonical production PR 6. Product
+> implementation remains paused.
+
 Historical redesign labels Roadmap PR 7, PR 8, PR 8A and the historical PR 9
 networking/revocation follow-up are preserved as supplemental feasibility research.
 They are not the numbering of the restored [canonical 46-PR production
@@ -53,8 +61,8 @@ neither is selected for production:
    received **STOPPED_UNRESOLVED** at Gate 1. Deeper architecture review stopped for
    both. The [canonical S2 evidence](../evidence/pr8a-engine-source-provenance-audit.md)
    records exact refs, grant/ancestry gaps and binary/dependency provenance limits.
-   No runtime prototype is proposed or authorized; another explicit architectural
-   decision is required.
+   No runtime prototype is proposed or authorized by S2; the subsequently required
+   architectural decision is recorded in ADR-0006.
 
 Independent PR review on 2026-09-21 revalidated the study's listed source refs and
 identified Black00Z/Blacks-BlackBox at
@@ -114,9 +122,10 @@ Unknowns. Neither candidate is AUDIT_PASS; neither is DISQUALIFIED on an assumed
 unresolvable defect. No engine was built, executed, installed, integrated or
 vendored, and no dependencies or binaries were added. No runtime prototype may
 be proposed on this evidence. S2 supplied no auditable candidate under its gate;
-another explicit decision must consider **REDESIGN AGAIN**, **NARROW SCOPE**, or
-**STOP** / the applicable explicit feasibility gate. This PR selects none of those
-decisions and does not initiate another candidate search.
+another explicit decision had to consider **REDESIGN AGAIN**, **NARROW SCOPE**, or
+**STOP** / the applicable explicit feasibility gate. This historical S2 work
+selected none of those decisions and did not initiate another candidate search;
+ADR-0006 records the later project-owner decision.
 
 S1 remains **FALSIFIED**; its historical research Roadmap PR 9 networking/revocation follow-up remains
 **BLOCKED**. **NO PRODUCTION ARCHITECTURE SELECTED**. Product implementation,
@@ -198,7 +207,7 @@ The sequence now records:
    license/ancestry/provenance gates stopped both before deeper architecture
    review. No third-party engine execution, integration or runtime prototype
    proposal is authorized. Neither candidate is established viable or selected
-   for production; another explicit architectural decision is required.
+   for production; ADR-0006 records the architectural decision subsequently made.
 
 Roadmap PR 8A records S2 for review. Existing hostile probe, native library, sentinel,
 lifecycle, Binder/session, revocation, external-VPN, provider-replacement and pcap
@@ -222,5 +231,6 @@ LSPosed, custom ROM/kernel, guest root, Privacy Decoy `VpnService`, routine
 re-signing without the PD-REQ-009 decision, opaque native TCB, unsafe shared
 management identity, or fail-open behavior immediately invalidates a direction.
 
-Another explicit feasibility decision is mandatory before product implementation.
+ADR-0006 is the subsequent governance decision, not a feasibility pass; another
+explicit feasibility decision remains mandatory before product implementation.
 The prior post-gate implementation roadmap remains superseded and paused.
