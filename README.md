@@ -44,8 +44,13 @@ executed, or integrated, and no third-party engine is audit-cleared. On
 2026-09-22, the project owner selected
 **REDESIGN AGAIN**; [ADR-0006](docs/decisions/ADR-0006-redesign-again-architecture-discovery.md)
 records the decision and authorizes one bounded architecture-discovery phase.
-These findings select no production architecture. **NO PRODUCTION ARCHITECTURE
-SELECTED**.
+The [remaining-architecture synthesis](docs/evidence/architecture-discovery-synthesis.md)
+is now complete. After reconciling current platform primitives and every
+remaining family, its evidence-backed recommended ADR-0006 exit outcome is
+**STOP UNDER CURRENT GOALS**. This is a research recommendation pending the
+project owner's response, not owner acceptance or a claim of universal
+impossibility. These findings select no production architecture. **NO
+PRODUCTION ARCHITECTURE SELECTED**.
 Canonical production Roadmap PR 6 has not started, and canonical PR 20 has not
 occurred. The historical
 blocked follow-up is distinct from canonical PR 9 — Protected Storage and Key
@@ -69,7 +74,9 @@ is not canonical production Roadmap PR 8 or a canonical inserted PR 8A.
 PD-REQ-085](docs/requirements.md) remain in force. See the [roadmap
 reconciliation](docs/roadmap-reconciliation.md) and [ADR-0005](docs/decisions/ADR-0005-canonical-roadmap-source-restoration.md).
 No production architecture has been selected, canonical production PR 6 has not
-begun, and product implementation remains paused during the bounded discovery.
+begun, and product implementation remains paused pending the project-owner
+response or a separately authorized next step. The bounded ADR-0006 discovery
+is complete.
 
 GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
 PR #6 was consumed by the earlier corrective stacked PR merged into PR #5. The

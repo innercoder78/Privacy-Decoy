@@ -165,3 +165,20 @@ valid historical evidence; this later architecture finding neither repairs nor
 waives it. No production architecture is selected, no third-party engine is
 audit-cleared, and no product implementation or canonical production PR 6 is
 authorized. S1 remains **FALSIFIED** and its follow-up remains **BLOCKED**.
+
+## Final synthesis status (2026-09-22)
+
+The bounded remaining-architecture reconciliation is complete. The
+[final synthesis](../evidence/architecture-discovery-synthesis.md) reviews the
+managed-profile, user-space virtualization, bespoke runtime, isolated-process,
+SDK Sandbox, AVF/Microdroid, and full-guest families against every mandatory
+boundary. Its evidence-backed recommended ADR-0006 exit outcome is **STOP UNDER
+CURRENT GOALS**: no concrete permitted current architecture has a credible route
+through every boundary under the ordinary non-rooted-device product model.
+
+This is a research recommendation, not recorded project-owner acceptance or a
+universal impossibility claim. It alters neither the original ADR decision nor
+the subsequent S2 candidate status. No production architecture is selected;
+canonical production PR 6 remains unstarted; and implementation remains paused
+pending the owner's response or a separately authorized future step based on
+materially new evidence.
