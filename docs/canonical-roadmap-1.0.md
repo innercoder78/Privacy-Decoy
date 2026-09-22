@@ -509,3 +509,67 @@ Outside-versus-protected probes must use intentionally configured test permissio
 and environments.
 
 Do not assume the outside copy automatically has access to every genuine value.
+
+## Post-ADR-0007 supplemental checkpoint
+
+### AG-1 — Admission-Gated Controlled Runtime Feasibility Checkpoint
+
+AG-1 is **not** a renumbered canonical PR. It is supplemental work inserted by
+ADR-0007 before canonical production Roadmap PR 6. Canonical PR 6 remains
+unstarted until AG-1 succeeds, and passing AG-1 does not itself establish
+production privacy or authorize broad implementation.
+
+Using controlled fixtures only, AG-1 must answer:
+
+1. Can import analysis classify complete base/split artifact sets before guest
+   code runs?
+2. Can it detect native libraries, executable splits, dynamic-code mechanisms,
+   and opaque/packed cases sufficiently to report honest Protected,
+   Experimental, Unsupported/known-unsafe, and Incompatible outcomes?
+3. Can all mandatory Protected mediation be established before providers,
+   `Application`, native initializers, or target code?
+4. Can unexpected dynamic executable content be blocked or demoted from
+   Protected before execution?
+5. Can a controlled hostile Java/Kotlin fixture attempt unexpected DEX/native
+   loading and be stopped?
+6. Can ByteHook/ShadowHook-style mechanisms be evaluated only as trusted-runtime
+   interception without claiming syscall confinement?
+7. Can Protected and Experimental execution remain technically and visibly distinct?
+8. Can every Protected failure remain fail-closed?
+9. Can the design remain non-root, non-privileged, non-ADB in production, without
+   a PD `VpnService` or routine rewriting/re-signing?
+
+Initial AG-1 Protected fixture scope SHOULD exclude arbitrary app-controlled
+native machine code unless the experiment explicitly proves a bounded native
+execution class. AG-1 uses no ordinary private user data or real accounts.
+Failure of the hypothesis favors STOP over weakening Protected Mode.
+
+### ADR-0007 refinements to canonical PRs (numbers unchanged)
+
+* **PR 6:** models include admission results, immutable artifact-generation
+  identity, execution class, exact consent state, and capability evidence.
+* **PR 7:** the registry stores admission by package version and artifact set.
+* **PR 8:** import invokes admission analysis and records an immutable analysis
+  generation before authorization.
+* **PR 10:** the launch gateway enforces Protected, Experimental, known-unsafe,
+  and Incompatible outcomes plus the runtime executable-code gate.
+* **PR 11:** Binder/service mediation remains mandatory; Protected Mode permits
+  no pass-through fallback.
+* **PR 12:** policy understands execution class, but Experimental is not a
+  capability-mode shortcut and does not authorize Real data.
+* **PR 18:** Experimental mode does not disable external-VPN policy.
+* **PR 20:** the integrated STOP checkpoint separately demonstrates Protected
+  admission and Experimental separation.
+* **PR 33:** coverage reports admission/execution class without implying that
+  Experimental execution is protected.
+* **PR 38:** representative compatibility work includes classifier false-positive
+  and false-negative analysis plus dynamic/native cases.
+* **PR 40:** regressions cover admission generation, update invalidation,
+  unexpected executable code, known-unsafe hard stop, and Experimental consent.
+* **PR 43:** documentation explains Protected eligible, Experimental eligible,
+  Unsupported/known unsafe, and Incompatible outcomes.
+* **PR 46:** final readiness rejects every claim that mixes Experimental-only
+  compatibility with Protected support.
+
+These refinements neither renumber nor delete canonical PRs 1–46. In particular,
+canonical PR 5 and PR 20 retain their mandatory STOP instructions.

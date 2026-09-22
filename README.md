@@ -7,99 +7,46 @@ subject to another explicit gate. Privacy takes precedence over compatibility.
 
 ## Current status
 
-This repository contains the PR 1 development foundation, PR 2 clean Android
-project layout, PR 3 security/design evidence, and the PR 4 adversarial research
-harness. PR 5's controlled networking feasibility research is merged: a debug-only
-trusted broker, fail-closed gate model, and a separate external-VPN test fixture.
-It does **not** provide production protected networking. The fixture's
-`VpnService` belongs to `com.privacydecoy.externalvpnfixture`, is not included in
-Privacy Decoy, and never forwards traffic. **Privacy containment and
-spoofing are not implemented or verified.** There is no protected-app execution,
-virtualization, Decoy Persona, VPN enforcement, or verified privacy/security
-boundary. Version `0.1.0-dev` (version code 1) is a development identifier; this
-work does not represent a public or production release. PR 3's analysis is not
-protection and selects no production containment engine.
+Privacy Decoy has **no proven production privacy boundary** and no production
+protected-app execution. The ADR-0006 architecture synthesis recommended **STOP
+UNDER CURRENT GOALS** for unrestricted arbitrary hostile-app execution under the
+families it evaluated. That recommendation remains valid historical evidence.
 
-The **Roadmap PR 6** gate decision is **A — REDESIGN**, selected on 2026-09-21.
-Roadmap PR 7 begins architecture-redesign research and controlled prototype
-planning. **Roadmap PR 8 falsified S1 managed-profile feasibility**: the tested
-slice retained useful OS isolation/lifecycle properties but exposed all seven
-mandatory parent Build identity fields in both managed-profile tenants. See the
-[completed S1 evidence](docs/evidence/pr8-managed-profile-boundary.md).
-S1 remains **FALSIFIED**; its historical redesign/research Roadmap PR 9 networking/
-revocation follow-up remains blocked by its survival gate. **GitHub PR #10 records
-the completed supplemental S2 non-executing source/provenance audit**, historically
-labeled Roadmap PR 8A: VirtualSpace and Blacks-BlackBox each received
-**STOPPED_UNRESOLVED** at Gate 1. See the
-[S2 audit evidence](docs/evidence/pr8a-engine-source-provenance-audit.md).
-The ADR-0006 discovery phase has since examined both pins further.
-Blacks-BlackBox remains **STOPPED_UNRESOLVED** after its
-[provenance-closure attempt](docs/evidence/architecture-discovery-blacks-blackbox-provenance.md).
-VirtualSpace is **DISQUALIFIED — exact pinned candidate** at
-`b1ff7988ac598b00b45c22003390ff43396c1c01` based on
-[positive static architecture evidence](docs/evidence/architecture-discovery-virtualspace-static-falsification.md)
-of mandatory placeholder/no-op mechanisms and unsafe host fallback; its earlier
-provenance uncertainty remains valid historical evidence. No engine was built,
-executed, or integrated, and no third-party engine is audit-cleared. On
-2026-09-22, the project owner selected
-**REDESIGN AGAIN**; [ADR-0006](docs/decisions/ADR-0006-redesign-again-architecture-discovery.md)
-records the decision and authorizes one bounded architecture-discovery phase.
-The [remaining-architecture synthesis](docs/evidence/architecture-discovery-synthesis.md)
-is now complete. After reconciling current platform primitives and every
-remaining family, its evidence-backed recommended ADR-0006 exit outcome is
-**STOP UNDER CURRENT GOALS**. This is a research recommendation pending the
-project owner's response, not owner acceptance or a claim of universal
-impossibility. These findings select no production architecture. **NO
-PRODUCTION ARCHITECTURE SELECTED**.
-Canonical production Roadmap PR 6 has not started, and canonical PR 20 has not
-occurred. The historical
-blocked follow-up is distinct from canonical PR 9 — Protected Storage and Key
-Boundaries; this audit does not imply that canonical PR 9 is blocked or has occurred.
-The test DPC and hostile tenants remain research fixtures only. Product
-implementation remains paused, no production architecture or engine is selected,
-and ordinary protected applications, real accounts, and private user data remain
-prohibited. The prior post-gate Core Domain/Persistence product-implementation
-sequence is superseded and paused until a redesigned architecture passes another
-explicit feasibility gate; the current research prototype will not proceed
-unchanged as the product. No production architecture or engine has been selected.
-Ordinary protected apps, real accounts, and private user data remain prohibited.
+After a ten-project source/reference review identified a narrower admission-gated
+hypothesis, the project owner explicitly chose **CONTINUE** on 2026-09-22 through
+[ADR-0007](docs/decisions/ADR-0007-admission-gated-controlled-runtime.md). The
+selected investigation is a PD-owned admission engine and controlled runtime with
+fail-closed Protected Mode plus a separately labeled Experimental & Unproven
+Compatibility Mode. Read the [technical architecture handoff](docs/architecture-admission-gated-runtime.md)
+and [open-source reference catalog](docs/open-source-reference-catalog.md) before
+architecture or reuse work. No third-party engine is selected wholesale.
 
-The project owner restored the original [canonical 46-PR roadmap](docs/canonical-roadmap-1.0.md)
-and [canonical amendment source](docs/canonical-audit-integration.md). Canonical
-Roadmap PR 5 and PR 20 remain mandatory STOP gates. The historical Roadmap PR 6
-REDESIGN event and S1 evidence remain valid and unchanged. S2 GitHub PR #10
-remains separate supplemental redesign research even though it is now merged; it
-is not canonical production Roadmap PR 8 or a canonical inserted PR 8A.
-[PD-REQ-001 through
-PD-REQ-085](docs/requirements.md) remain in force. See the [roadmap
-reconciliation](docs/roadmap-reconciliation.md) and [ADR-0005](docs/decisions/ADR-0005-canonical-roadmap-source-restoration.md).
-No production architecture has been selected, canonical production PR 6 has not
-begun, and product implementation remains paused pending the project-owner
-response or a separately authorized next step. The bounded ADR-0006 discovery
-is complete.
+**AG-1 — Admission-Gated Controlled Runtime Feasibility Checkpoint** is next.
+Canonical production Roadmap PR 6 remains unstarted and pending AG-1; passing
+AG-1 would not itself prove production privacy. Only controlled fixtures and test
+applications are authorized during AG-1. Ordinary private user data and real
+accounts remain prohibited.
 
-GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
-PR #6 was consumed by the earlier corrective stacked PR merged into PR #5. The
-[decision record](docs/decisions/ADR-0002-feasibility-stop-gate.md) contains the
-rationale, preserved constraints, and roadmap consequences. The
-[architecture-redesign study](docs/architecture-redesign-study.md) and
-[ADR-0003](docs/decisions/ADR-0003-redesign-prototype-direction.md) compare
-candidate families and define proposed experiments without selecting or
-implementing a production architecture.
+Historical evidence is preserved: S1 is **FALSIFIED**, its follow-up is
+**BLOCKED**, Blacks-BlackBox is **STOPPED_UNRESOLVED**, and the exact reviewed
+VirtualSpace pin is **DISQUALIFIED — exact pinned candidate**. The ADR-0006 STOP
+synthesis is not retroactively rewritten. The restored [canonical 46-PR
+roadmap](docs/canonical-roadmap-1.0.md) retains mandatory STOP gates at PR 5 and
+PR 20. Requirements [PD-REQ-001 through PD-REQ-095](docs/requirements.md) govern
+future work.
 
-PR 4 builds a controlled, uninstalled probe APK and a debug-only isolated-service
-experiment. Artifact-derived DEX execution is not full Android app execution.
-The harness investigates UID/storage isolation, Binder authority, native syscalls,
-host-state leakage and missing lifecycle semantics; it is not a functioning
-privacy container. See the [scoped evidence and validation status](docs/evidence/pr4-containment-prototype.md).
-Never use this prototype with ordinary protected apps, private data, or accounts.
-The same restriction applies to the PR 5 networking harness. Route experiments
-without independent device/pcap evidence remain Unknown; green unit tests are not
-route evidence.
+Privacy Decoy remains Android-only, root-free and non-privileged: no production
+Magisk/Xposed/LSPosed, custom ROM, production ADB, guest root, routine APK
+rewriting/re-signing, or built-in PD `VpnService`. An external VPN remains the
+policy model. Arbitrary hostile native containment is unresolved; ByteHook or
+ShadowHook-style function interception is not a kernel sandbox. Compatibility,
+static scan success, and Experimental execution are not Protected evidence.
 
-The production design goal requires no root, Magisk, Xposed, LSPosed, custom ROM,
-or ordinary dependence on ADB. Privacy Decoy itself must not use Android
-`VpnService`. These constraints do not establish feasibility or protection.
+The existing repository contains foundation and controlled research harnesses,
+not a privacy product. The PR 4 containment and PR 5 networking fixtures remain
+research-only; the separate external-VPN fixture never forwards traffic and is
+not part of Privacy Decoy. Version `0.1.0-dev` is a development identifier, not a
+public or production release.
 
 ## Build and validate
 

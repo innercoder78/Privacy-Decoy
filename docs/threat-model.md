@@ -186,3 +186,19 @@ implementation remains blocked until their restoration and review; see
 The normative obligations and evidence ownership are in the
 [requirements register](requirements.md); candidate feasibility is assessed in
 [the engine assessment](engine-assessment.md).
+
+## Admission execution classes (ADR-0007)
+
+The adversarial-app model is unchanged. Protected Mode treats every protected
+code path as adversarial and requires the normal mandatory, scoped evidence;
+PD-REQ-021 still makes mandatory Unknown coverage launch-blocking. An app is not
+“trusted” merely because static analysis found no obvious malicious behavior.
+Static analysis can find risk but cannot prove absent dynamic behavior.
+
+Experimental & Unproven Compatibility Mode knowingly carries unresolved
+coverage and therefore carries no complete protection guarantee. Experimental
+operation does not transform Unknown into Partially or Fully mediated, and it
+cannot support a Protected claim. It is available only for Unknown/unproven
+coverage when no mandatory bypass is positively known and the app is not
+incompatible. Known-unsafe paths and incompatible applications remain blocked.
+A later known-unsafe discovery terminates the affected session.

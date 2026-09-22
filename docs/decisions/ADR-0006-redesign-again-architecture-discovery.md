@@ -182,3 +182,12 @@ the subsequent S2 candidate status. No production architecture is selected;
 canonical production PR 6 remains unstarted; and implementation remains paused
 pending the owner's response or a separately authorized future step based on
 materially new evidence.
+
+## Historical follow-up: superseding forward decision
+
+Discovery completed and its synthesis recommended **STOP UNDER CURRENT GOALS**.
+After later source and architecture review, the project owner did not accept STOP
+as the current disposition. [ADR-0007](ADR-0007-admission-gated-controlled-runtime.md)
+is the superseding forward decision and authorizes a bounded admission-gated
+checkpoint. ADR-0006, its synthesis, and all underlying findings remain unchanged
+historical evidence.
