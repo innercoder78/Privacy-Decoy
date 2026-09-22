@@ -143,3 +143,25 @@ This ADR does **not** authorize:
 
 Product implementation remains paused. Ordinary protected apps, real accounts,
 and private user data remain prohibited.
+
+## Subsequent discovery status (2026-09-22)
+
+This status note records later evidence without rewriting the facts known when
+this ADR was accepted. The discovery phase examined both prior S2 candidates
+further. Blacks-BlackBox remains **STOPPED_UNRESOLVED** after its
+[provenance-closure attempt](../evidence/architecture-discovery-blacks-blackbox-provenance.md).
+VirtualSpace's exact S2 pin,
+`b1ff7988ac598b00b45c22003390ff43396c1c01`, received a bounded,
+non-executing [static architecture falsification review](../evidence/architecture-discovery-virtualspace-static-falsification.md)
+and is **DISQUALIFIED — exact pinned candidate**. Positive immutable source
+evidence shows placeholder/no-op implementations in mandatory native and service
+enforcement areas, a Binder path that restores original service objects, and an
+unsafe genuine-host-context fallback. Satisfying the mandatory boundary would
+require replacing or implementing core containment and mediation mechanisms,
+not merely configuring or validating that pin.
+
+VirtualSpace's earlier Gate 1 **STOPPED_UNRESOLVED** provenance result remains
+valid historical evidence; this later architecture finding neither repairs nor
+waives it. No production architecture is selected, no third-party engine is
+audit-cleared, and no product implementation or canonical production PR 6 is
+authorized. S1 remains **FALSIFIED** and its follow-up remains **BLOCKED**.
