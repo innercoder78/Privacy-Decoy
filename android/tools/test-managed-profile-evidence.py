@@ -193,5 +193,99 @@ class ClassifierTests(unittest.TestCase):
             self.assertEqual((report["harness"], report["outcome"]), expected)
 
 
+    def cli_output(self, harness="PASS", outcome="FALSIFIED"):
+        result = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root),
+                                 "--output", str(self.root / "report.json")], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0 if harness == "PASS" else 1)
+        self.assertEqual(result.stderr, "")
+        lines = result.stdout.splitlines()
+        self.assertEqual(lines[:2], ["PD_S1_HARNESS=" + harness, "PD_S1_OUTCOME=" + outcome])
+        self.assertTrue(result.stdout.isascii())
+        for line in lines:
+            self.assertRegex(line, r"^PD_S1_(HARNESS|OUTCOME|REASON|SAME_AS_PARENT)=[A-Za-z_:]+$")
+        reasons = [line.removeprefix("PD_S1_REASON=") for line in lines if line.startswith("PD_S1_REASON=")]
+        self.assertEqual(reasons, sorted(set(reasons)))
+        self.assertLessEqual(len(reasons), evidence.MAX_REASON_LINES)
+        self.assertTrue(set(reasons) <= evidence.REASON_VOCABULARY)
+        same = [line for line in lines if line.startswith("PD_S1_SAME_AS_PARENT=")]
+        self.assertLessEqual(len(same), 14)
+        self.assertEqual(len(same), len(set(same)))
+        for line in same:
+            self.assertIn(line, {"PD_S1_SAME_AS_PARENT=" + tenant + ":" + surface
+                                for tenant in evidence.TENANTS for surface in evidence.SURFACE_NAMES[:7]})
+        for group in evidence.GROUPS:
+            record = evidence.read(self.root / group / "evidence-provider")
+            for key in evidence.SURFACES + ("nonce_hash", "uid", "pid", "user_serial"):
+                self.assertNotIn(record[key], result.stdout)
+        for secret in ("synthetic-test-nonce", "SYNTHETIC_SENTINEL_CONTENT", "a" * 64, "b" * 64, str(self.root)):
+            self.assertNotIn(secret, result.stdout)
+        return lines, json.loads((self.root / "report.json").read_text())
+
+    def test_cli_mandatory_build_reasons_and_semantic_surfaces(self):
+        for tenant in evidence.TENANTS:
+            self.all_events(tenant, **{key: digest("parent" + key) for key in evidence.SURFACES})
+        lines, report = self.cli_output()
+        expected_names = ["build_fingerprint", "build_model", "build_manufacturer", "build_brand",
+                          "build_device", "build_product", "build_hardware", "android_id", "locale", "timezone"]
+        for tenant in evidence.TENANTS:
+            self.assertIn("PD_S1_REASON=" + tenant + "_mandatory_build_same", lines)
+            self.assertEqual(report["same_as_parent_surface_names"][tenant], expected_names)
+            self.assertEqual(report["same_as_parent_surfaces"][tenant], list(range(10)))
+            for surface in expected_names[:7]:
+                self.assertIn("PD_S1_SAME_AS_PARENT=" + tenant + ":" + surface, lines)
+            for surface in expected_names[7:]:
+                self.assertNotIn("PD_S1_SAME_AS_PARENT=" + tenant + ":" + surface, lines)
+
+    def test_cli_java_management_read_reason(self):
+        self.edit("tenant_a/evidence-activity", java_management_read="ACCESSIBLE")
+        lines, _ = self.cli_output()
+        self.assertIn("PD_S1_REASON=tenant_a_activity_java_management_read_accessible", lines)
+
+    def test_cli_native_peer_write_reason(self):
+        self.edit("tenant_b/evidence-provider", native_peer_write="ACCESSIBLE")
+        lines, _ = self.cli_output()
+        self.assertIn("PD_S1_REASON=tenant_b_provider_native_peer_write_accessible", lines)
+
+    def test_cli_fixture_mutation_reason(self):
+        self.edit("fixture-management", after_hash="b" * 64)
+        lines, _ = self.cli_output()
+        self.assertIn("PD_S1_REASON=management_fixture_changed", lines)
+
+    def test_cli_survived_has_no_architecture_reasons(self):
+        # Equality of nonmandatory scoped/platform surfaces does not change the rule.
+        self.all_events("tenant_a", **{key: digest("parent" + key) for key in evidence.SURFACES[7:]})
+        lines, _ = self.cli_output(outcome="SURVIVED_CURRENT_SLICE")
+        self.assertEqual(len(lines), 2)
+
+    def test_cli_inconclusive_has_no_architecture_reasons(self):
+        self.edit("tenant_a/evidence-activity", java_management_read="ACCESSIBLE")
+        self.edit("fixture-tenant_b", nonce_seeded="false")
+        lines, _ = self.cli_output(harness="FAIL", outcome="INCONCLUSIVE")
+        self.assertEqual(len(lines), 2)
+
+    def test_cli_maximum_reason_vocabulary_is_bounded(self):
+        uid = evidence.read(self.root / "fixture-tenant_a")["package_uid"]
+        self.edit("fixture-tenant_b", package_uid=uid)
+        self.all_events("tenant_b", uid=uid, native_uid=uid, native_gid=uid)
+        for tenant in evidence.TENANTS:
+            self.all_events(tenant, **{key: digest("parent" + key) for key in evidence.SURFACES[:7]},
+                            **{key: "ACCESSIBLE" for key in evidence.ACCESS})
+        for fixture in evidence.FIXTURES:
+            self.edit("fixture-" + fixture, after_hash="b" * 64)
+        lines, report = self.cli_output()
+        reasons = [line.removeprefix("PD_S1_REASON=") for line in lines if line.startswith("PD_S1_REASON=")]
+        self.assertEqual(len(reasons), 87)
+        self.assertEqual(set(reasons), evidence.REASON_VOCABULARY)
+        self.assertEqual(report["reasons"], reasons)
+
+    def test_reason_renderer_rejects_arbitrary_text_and_deduplicates(self):
+        report = {"harness": "PASS", "outcome": "FALSIFIED",
+                  "reasons": ["unsafe_shared_uid"] * 200 + ["PRIVATE_nonce", "/private/path", "bad\nINJECTED"],
+                  "same_as_parent_surface_names": {"tenant_a": ["build_model"] * 200 + ["PRIVATE"],
+                                                   "tenant_b": []}}
+        self.assertEqual(evidence.safe_reason_lines(report), ["PD_S1_REASON=unsafe_shared_uid",
+                         "PD_S1_SAME_AS_PARENT=tenant_a:build_model"])
+
+
 if __name__ == "__main__":
     unittest.main()

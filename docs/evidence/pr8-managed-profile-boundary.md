@@ -16,8 +16,57 @@ validated first, and architecture is evaluated only when that evidence is valid.
 - `SURVIVED_CURRENT_SLICE` credits only this bounded slice; it neither selects a
   production architecture nor satisfies any requirement.
 
-Revised exact-head emulator evidence is pending. No S1 runtime outcome is claimed
-by this document or by the synthetic classifier unit tests.
+## Verified predecessor result and reason preservation
+
+Tested source head: `919a64e4624d7926f311ab27aabf00ad022ae8e5`.
+The independently verified **Android foundation #98 (push)** and **#99
+(pull_request)** suites both completed successfully. In each suite, `validate`,
+`containment-prototype`, `managed-profile-feasibility`, and `network-feasibility`
+all returned SUCCESS. Both managed-profile logs recorded:
+
+```text
+PD_S1_PROFILE_STOP=PROCESS_DEATH_OBSERVED
+PD_S1_HARNESS=PASS
+PD_S1_OUTCOME=FALSIFIED
+```
+
+This is a valid adverse S1 architectural result, not a failed CI job or an
+inconclusive harness. The predecessor logs did **not** retain the specific
+falsification reason: it existed only in the generated, unretained `report.json`.
+The cause is therefore not asserted here; in particular, Build equality must not
+be assumed to have caused the observed result.
+
+This evidence-output-only revision preserves that result and adds permanent,
+bounded log tokens for new exact-head CI. Reasons are internally constructed from
+a fixed vocabulary, sorted and deduplicated, and capped at 87 lines: one shared-UID
+reason, two mandatory-Build summaries, 80 tenant/event/access reasons and four
+fixture-mutation reasons. Examples of the format (not predecessor observations):
+
+```text
+PD_S1_REASON=tenant_a_mandatory_build_same
+PD_S1_REASON=tenant_a_activity_java_management_read_accessible
+PD_S1_REASON=tenant_b_provider_native_peer_write_accessible
+PD_S1_REASON=management_fixture_changed
+PD_S1_SAME_AS_PARENT=tenant_a:build_fingerprint
+```
+
+Only a valid FALSIFIED report emits these lines. SURVIVED_CURRENT_SLICE and
+FAIL/INCONCLUSIVE emit no architectural reasons. Mandatory Build equality lines
+use only the two fixed tenant names and seven fixed Build names (at most 14 lines).
+The safe report supplements existing indexes with the exact semantic mapping:
+`build_fingerprint`, `build_model`, `build_manufacturer`, `build_brand`,
+`build_device`, `build_product`, `build_hardware`, `android_id`, `locale`, `timezone`.
+No raw value, hash, UID/PID, user serial, path, nonce, fixture content or property
+content is printed. No Android ID/locale/timezone difference is called synthetic.
+The decision rule remains unchanged: equality of any mandatory Build index 0-6
+falsifies S1.
+
+New exact-head reason evidence remains pending. Synthetic unit tests are not
+emulator observations. S1 remains FALSIFIED; its survival-gated networking follow-up
+is currently **BLOCKED**. Architecture consequences await review of the new safe
+reason output. ADR-0003 is not rewritten around an inferred cause; S2 remains the
+independently authorized, non-executing source/provenance audit direction. No
+production architecture or ordinary protected-app support is selected.
 
 ## Bounded emulator startup and cleanup
 
@@ -46,7 +95,8 @@ polling with three-second command limits; measured component/access execution is
 not retried. Cleanup skips device operations before successful boot, bounds profile
 removal and emulator shutdown, retains local PID termination with a bounded grace
 period, and bounds local AVD deletion. No unbounded child wait remains. The existing
-45-minute CI job limit is unchanged. New exact-head runtime evidence remains pending.
+45-minute CI job limit is unchanged. The verified predecessor result is recorded
+above; new exact-head reason evidence remains pending.
 
 ## Engineering setup and pre-code ordering
 
@@ -154,13 +204,13 @@ descriptors and a joined native worker do not prove persistent-resource revocati
 
 ## Validation provenance and limits
 
-The revision starts from reviewed PR #9 head
-`0674bf63b6f1c451a1c3b5e9220472ff6692f74a`. Local classifier/regression tests and shell
-syntax checks are recorded in the PR body. Android compile/lint and emulator results
-must be taken from the revised exact-head checks; they are not fabricated here.
-The workflow uses explicit controller and tenant-flavor tasks.
+This evidence-preservation revision starts from verified PR #9 head
+`919a64e4624d7926f311ab27aabf00ad022ae8e5`. Its predecessor runtime results are
+recorded above. Local classifier/regression tests and shell syntax checks are
+recorded in the PR body; new exact-head reason output remains pending. The workflow
+uses explicit controller and tenant-flavor tasks.
 
-Primary planned runtime scope remains API 35 Google APIs x86_64 debug signing.
+The observed predecessor scope is API 35 Google APIs x86_64 debug signing.
 Physical non-rooted ARM64, Samsung/other OEM, release-equivalent builds, API 31-37
 coverage, distribution/provisioning and production recovery remain Unknown. No
 API 35 outcome establishes API 37 behavior. API 37 image availability is Unknown.
@@ -168,7 +218,7 @@ API 35 outcome establishes API 37 behavior. API 37 image availability is Unknown
 Long-lived FDs, persistent native workers, jobs, alarms, sockets, full restart and
 re-execution validation, networking attribution/revocation, split APKs, multidex,
 dynamic code and secondary processes remain **Unknown / not reached**. Roadmap PR 9
-network work proceeds only if S1 survives Stage A. The unrelated CMake SDK-download
+network work is currently BLOCKED because S1 was FALSIFIED in Stage A. The unrelated CMake SDK-download
 failure does not justify changing the network prototype or its analyzer/harness.
 
 ## Production safety and requirements

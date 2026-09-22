@@ -13,6 +13,18 @@ ACCESS = tuple(f"{language}_{target}_{mode}" for language in ("java", "native")
                for target in ("management", "peer") for mode in ("read", "write"))
 CATEGORIES = {"ACCESSIBLE", "PERMISSION_DENIED", "ABSENT", "OTHER_ERROR"}
 SURFACES = tuple(f"surface_{i}_hash" for i in range(10))
+# Fixed Evidence.java index mapping; never use probe text as a semantic label.
+SURFACE_NAMES = ("build_fingerprint", "build_model", "build_manufacturer", "build_brand",
+                 "build_device", "build_product", "build_hardware", "android_id", "locale", "timezone")
+TENANTS = ("tenant_a", "tenant_b")
+REASON_VOCABULARY = frozenset(
+    {"unsafe_shared_uid"}
+    | {name + "_mandatory_build_same" for name in TENANTS}
+    | {f"{name}_{event}_{access}_accessible" for name in TENANTS for event in EVENTS for access in ACCESS}
+    | {name + "_fixture_changed" for name in FIXTURES}
+)
+# 1 shared UID + 2 Build summaries + 2 tenants * 5 events * 8 accesses + 4 fixtures.
+MAX_REASON_LINES = 1 + 2 + 2 * 5 * 8 + 4
 OBSERVATIONS = ("proc_self", "proc_host", "sys")
 BOOLS = ("native_pid_present", "native_thread", "property_available", "property_matches_java_build")
 HASH = re.compile(r"[A-Za-z0-9_-]{43}")
@@ -137,12 +149,14 @@ def classify(root):
         for r in groups[name]:
             for key in ACCESS:
                 if r[key] == "ACCESSIBLE":
-                    reasons.append(name + "_" + r["event"] + "_" + key)
+                    reasons.append(name + "_" + r["event"] + "_" + key + "_accessible")
     for name, fixture in fixtures.items():
         if fixture["before_hash"] != fixture["after_hash"]:
             reasons.append(name + "_fixture_changed")
     return {"schema": 2, "harness": "PASS", "outcome": "FALSIFIED" if reasons else "SURVIVED_CURRENT_SLICE",
-            "reasons": reasons, "same_as_parent_surfaces": comparisons,
+            "reasons": sorted(set(reasons)), "same_as_parent_surfaces": comparisons,
+            "same_as_parent_surface_names": {name: [SURFACE_NAMES[i] for i in indexes]
+                                             for name, indexes in comparisons.items()},
             "observations": {n: {k: ("Unknown" if r[k] == "OTHER_ERROR" else r[k])
                                   for k in OBSERVATIONS + BOOLS[2:]} for n, r in representative.items()},
             "raw_values_recorded": False,
@@ -154,6 +168,22 @@ def evaluate(root):
         return classify(root)
     except (OSError, ValueError, KeyError, UnicodeError):
         return {"schema": 2, "harness": "FAIL", "outcome": "INCONCLUSIVE"}
+
+
+
+def safe_reason_lines(report):
+    """Render only fixed vocabulary; no values, hashes, identities or paths reach stdout."""
+    if report["harness"] != "PASS" or report["outcome"] != "FALSIFIED":
+        return []
+    reasons = sorted(REASON_VOCABULARY.intersection(report["reasons"]))[:MAX_REASON_LINES]
+    lines = ["PD_S1_REASON=" + reason for reason in reasons]
+    # At most 14 mandatory Build equality lines; scoped Android ID/locale/timezone
+    # comparisons remain in the semantic report and are never described as synthetic.
+    for tenant in TENANTS:
+        for surface in SURFACE_NAMES[:7]:
+            if surface in report["same_as_parent_surface_names"][tenant]:
+                lines.append("PD_S1_SAME_AS_PARENT=" + tenant + ":" + surface)
+    return lines
 
 
 def main():
@@ -174,6 +204,8 @@ def main():
         pathlib.Path(args.output).write_text(json.dumps(report, sort_keys=True) + "\n", encoding="ascii")
     print("PD_S1_HARNESS=" + report["harness"])
     print("PD_S1_OUTCOME=" + report["outcome"])
+    for line in safe_reason_lines(report):
+        print(line)
     return 0 if report["harness"] == "PASS" else 1
 
 
