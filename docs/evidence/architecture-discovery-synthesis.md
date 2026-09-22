@@ -28,8 +28,11 @@ unchanged. Privacy precedes compatibility; mandatory Unknown coverage blocks
 execution; genuine-host fallback and fail-open behavior are forbidden.
 Production cannot depend on root, guest root, Magisk, Xposed, LSPosed, custom
 ROM, patched kernel, privileged/system installation, production ADB, or a
-Privacy Decoy `VpnService`. Routine rewriting/re-signing has no exception, and
-an opaque/unreviewable engine or native TCB cannot be trusted.
+Privacy Decoy `VpnService`. Routine APK rewriting/re-signing remains disfavored.
+No exception is authorized by this synthesis; any narrow future exception
+requires a dedicated ADR and explicit project-owner approval under PD-REQ-009.
+There is no blanket exception. An opaque/unreviewable engine or native TCB
+cannot be trusted.
 
 The original PR4/5 architecture remains **REDESIGN**. No production architecture
 is selected; canonical production Roadmap PR 6 has not started; canonical PR 20
@@ -72,35 +75,58 @@ candidate count—the decisive question.
 
 ## 4. Current Android-platform primitives
 
-Official-document retrieval was attempted but failed with HTTP 401. This
-synthesis does **not** claim independent retrieval on 2026-09-22. It uses the
-independently reviewer-verified Android/AOSP facts supplied for this review,
-official references below, and repository-canonical evidence.
+The original synthesis's official-document retrieval attempt failed with HTTP
+401; its platform facts used independently reviewer-verified sources and
+repository-canonical evidence. During this correction on 2026-09-22, the AOSP
+AVF overview, AVF Security, and Microdroid pages were successfully retrieved
+and checked, corroborating the independent PR review. Other platform facts
+below retain their reviewer-verified provenance.
 
 * **Official Android platform fact:** the [application sandbox][app-sandbox]
-  assigns each installed app an OS UID/process boundary. It does not let one
-  ordinary app create arbitrary installed identities or interpose on another's
-  syscalls/Binder calls.
+  assigns application UIDs and uses kernel-enforced process sandboxing to
+  isolate applications. **PRIVACY DECOY ANALYSIS:** the documented ordinary
+  third-party-app model supplies no authority to create arbitrary protected-package
+  kernel identities or interpose all another app's syscalls and Binder traffic.
 * **Official Android platform fact:** [work profiles][work-profile] provide
   platform-managed user separation, app data/instances, policy, and lifecycle.
-  They do not replace device surfaces with a Persona; S1 falsified that claim.
-* **Official Android platform fact:** package components are installed and
-  instantiated by Android. [Application fundamentals][app-fundamentals] expose
-  no ordinary-app API to become Package/Activity Manager for arbitrary APKs.
-* **Official Android platform fact:** a declared `isolatedProcess` service gets
-  a restricted identity, not arbitrary-package installation or a complete
-  Activity/provider/job/alarm/application runtime.
-* **Official Android platform fact:** [non-SDK restrictions][non-sdk] constrain
-  private interfaces; hidden-API hooks are not stable supported enforcement.
+  **Prior evidence:** completed S1 observed genuine device fields in both
+  tenants. **PRIVACY DECOY ANALYSIS:** profiles do not supply the required Decoy
+  Persona; this conclusion rests on S1, not a platform-documentation claim.
+* **Official Android platform fact:** [application fundamentals][app-fundamentals]
+  describe Android-managed application processes and components, including
+  Activities, services, broadcast receivers, and content providers.
+  **PRIVACY DECOY ANALYSIS:** no reviewed supported ordinary-app mechanism in
+  that public API/platform model lets Privacy Decoy become Package Manager or
+  Activity Manager for arbitrary protected APKs.
+* **Official Android platform fact:** a declared `isolatedProcess` service runs
+  in a restricted isolated process/identity. **PRIVACY DECOY ANALYSIS:** this
+  primitive does not itself provide arbitrary-package installation or a complete
+  Activity/provider/job/alarm/Application lifecycle for ordinary protected apps.
+* **Official Android platform fact:** [non-SDK restrictions][non-sdk] restrict
+  access to private interfaces. **PRIVACY DECOY ANALYSIS:** hidden/private-interface
+  hooks cannot be accepted as stable, supported enforcement without separate evidence.
 * **Official platform fact (reviewer-verified):** [SDK Sandbox][sdk-sandbox]
-  loads host-declared SDKs in a separate UID range/process, not arbitrary apps.
+  loads host-declared SDKs in a separate UID range/process.
   `SdkSandboxManager` is deprecated in API 37 and the sandbox is unsupported there.
-* **Official AOSP fact (reviewer-verified; documentation updated 2026-06-25):**
-  [AVF][avf] provides pVMs stronger than the app sandbox, is ARM64-only, and has
-  optional VirtualizationService APIs only on AVF devices.
-  [Microdroid][microdroid] is a Google mini-Android OS in a pVM.
+  **PRIVACY DECOY ANALYSIS:** SDK loading does not provide arbitrary-app execution.
+* **OFFICIAL AOSP FACT:** [AVF][avf] provides stronger isolation than the app
+  sandbox, supports ARM64 devices only, and exposes optional VirtualizationService
+  Java APIs only on AVF-capable devices. Microdroid is Google's mini-Android pVM OS.
+* **OFFICIAL AOSP FACT:** [AVF Security][avf-security] requires pVM permissions
+  for creation or inspection; requesting permission to create, own, or interact
+  with pVMs is restricted to platform-signed apps. Host VirtualizationService
+  alone establishes pVM communication channels and can pass them to others.
+  **PRIVACY DECOY ANALYSIS:** this authority is unavailable to the current
+  ordinary third-party-app product, which prohibits privileged/system deployment.
+* **OFFICIAL AOSP FACT:** [Microdroid][microdroid] primarily isolates part of an
+  app. It supports APK-embedded binaries/shared libraries, a subset of NDK APIs,
+  Binder RPC over vsock, Verified Boot, and SELinux. It lacks Android `android.*`
+  Java APIs, SystemServer/Zygote, graphics/UI, and HALs.
+  **PRIVACY DECOY ANALYSIS:** these documented limitations prevent Microdroid
+  itself from supplying the full ordinary Android runtime needed for Activities,
+  providers, framework APIs, UI, services, and package lifecycle.
 
-**Analysis:** UID, profile, and isolated-process primitives offer real isolation,
+**PRIVACY DECOY ANALYSIS:** UID, profile, and isolated-process primitives offer real isolation,
 not general hostile-app interposition. AVF adds a stronger hypervisor boundary;
 that alone does not establish a general Android app runtime or deployable product.
 
@@ -165,19 +191,21 @@ investigation baseline. This is a **positive architectural contradiction** plus
 
 ### AVF / pKVM / Microdroid
 
-AVF is strongest because a pVM can contain hostile native code below syscalls.
-The facts establish optional ARM64 AVF and mini-Android Microdroid. They do not
-establish a root-free ordinary-app route for arbitrary APKs with full framework,
-UI, resources, providers, jobs, alarms, services, background/Play/OEM services,
-package lifecycle, and multiprocess semantics. Guest distribution/maintenance,
-UI integration, and external-VPN verification for all host/pVM producers are
-also unestablished.
+**PRIVACY DECOY ANALYSIS:** AVF remains technically interesting because a pVM
+can contain hostile native code below syscalls. Under the current AOSP permission
+model in section 4, permission to create, own, or interact with pVMs is restricted
+to platform-signed apps. For the current ordinary third-party-app product, this
+is **unavailable required platform authority**, independently of runtime and
+networking questions. Privileged/system deployment is prohibited.
 
-pVM isolation exists on a subset, but application semantics and VPN integration
-remain **Unknown**; availability is **unsupported deployment scope**; and the
-required general-app facility is **unavailable required platform authority**
-under current evidence. A prototype cannot test an unspecified
-facility into existence; positive platform evidence must identify it first.
+Microdroid's documented omissions are a separate **positive architectural
+contradiction** to treating it as the full ordinary Android app runtime. A
+different general-app guest, its distribution/maintenance, UI/lifecycle
+integration, and external-VPN routing for every host/pVM producer remain
+**Unknown**. Optional ARM64 availability also limits deployment scope. These
+findings concern current AOSP and current product constraints, not every future
+Android or OEM design. A prototype cannot supply missing authority; a new
+permitted platform capability would need positive evidence first.
 
 ### Full Android guest / VM
 
@@ -207,7 +235,7 @@ predict future Android capability.
 | Bespoke ordinary runtime | Unavailable required platform authority | Reimplementation grants no kernel/framework control. |
 | Isolated service | Positive architectural contradiction | Selected code is not arbitrary app execution. |
 | SDK Sandbox | Positive contradiction; unsupported deployment scope | SDK model is not app model; unsupported at API 37. |
-| AVF/Microdroid | Unsupported deployment scope; Unknown | Isolation exists; general-app semantics/integration do not. |
+| AVF/Microdroid | Unavailable required platform authority; positive architectural contradiction | Platform signing gates pVM permission; Microdroid omits the full app runtime. Other guest integration/VPN routing remain Unknown; ARM64/optional APIs limit scope. |
 | Full guest | Unsupported deployment scope; unavailable authority | No permitted ordinary-user route is evidenced. |
 
 Implementable support pieces cannot repair structural authority. Unknown is not
@@ -219,8 +247,9 @@ credible route.
 Installed UIDs, profiles, and pVMs are genuine separation; synthetic identities
 and directories are not. Isolated processes protect a narrow manager only if a
 worker has no other authority; they do not create an application tenant.
-Profiles fail Persona mediation, ordinary runtimes fail kernel identity, and AVF
-lacks evidenced application semantics. No family combines all requirements.
+Profiles fail Persona mediation and ordinary runtimes fail kernel identity.
+Current AOSP denies the required AVF authority to ordinary third-party apps;
+Microdroid separately lacks the full app runtime. No family combines all requirements.
 
 ## 8. Native/syscall/Binder/filesystem analysis
 
@@ -228,8 +257,9 @@ Protection after `Application` begins is too late for providers, initializers,
 SDKs, loading, and secondary processes. Proxies cannot be assumed to cover JNI,
 direct syscalls, `/proc`, `/sys`, properties, sockets, descriptors, or raw
 Binder. A VM can contain these only with a mediated coherent service universe.
-Profiles expose real state; hooks lack authority; Microdroid has no evidenced
-arbitrary-app universe. Host-value fallback remains forbidden.
+Profiles expose real state; hooks lack authority; Microdroid's documented runtime
+omissions preclude a complete arbitrary-app service universe. Current AOSP pVM
+permission also requires platform signing. Host-value fallback remains forbidden.
 
 ## 9. Application-semantics analysis
 
@@ -237,7 +267,11 @@ The unit is an ordinary signed package with splits, multidex, resources, native
 libraries, components, jobs, background work, and multiprocess lifecycle. DEX
 dispatch, isolated code, SDK loading, and mini-Android workloads differ. Hooks
 emulate pieces without an enforceable boundary; a full guest lacks permitted
-deployment. Routine rewriting/re-signing cannot close the gap.
+deployment. Microdroid's documented runtime omissions are a positive limitation,
+separate from the current AOSP pVM permission barrier. Routine rewriting/re-signing
+does not supply that authority or runtime; no exception is authorized here, and
+any narrow future exception remains subject to PD-REQ-009's ADR and explicit
+project-owner approval process.
 
 ## 10. External-VPN/networking analysis
 
@@ -250,7 +284,9 @@ implement `VpnService`.
 PR5 offers methods, not universal enforcement. Hooks cannot attribute hostile
 native traffic sharing a host UID. Profiles do not solve Persona mediation.
 AVF/full guests add VM networking/helpers whose host-VPN interaction is
-**Unknown**. VPN presence rescues no family.
+**Unknown**. This uncertainty is separate from the documented platform-signing
+restriction: resolving routing alone would not supply current AOSP pVM authority
+to the ordinary-app product. VPN presence rescues no family.
 
 ## 11. Supply-chain/provenance implications
 
@@ -275,8 +311,10 @@ and required owner approval.
   protected-app product and not meaningfully the current product.
 * **Managed-profile-compatible apps:** installation constraints do not repair
   genuine device exposure.
-* **ARM64 AVF devices/APIs/OEMs:** capability is plausibly detectable, but no
-  general app runtime, lifecycle/UI, or VPN boundary exists in evidence.
+* **ARM64 AVF devices/APIs/OEMs:** detecting AVF capability does not remove the
+  current AOSP platform-signing permission restriction. Microdroid still omits
+  the full app runtime; other guest lifecycle/UI and VPN integration remain
+  Unknown. A different OEM authority model would need separate positive evidence.
 * **One device/full guest:** no supported nonprivileged ordinary-user deployment
   is evidenced; developer-only operation is not the product.
 
@@ -287,8 +325,9 @@ AVF subset could justify a new decision; it is not current evidence or approval.
 ## 13. Surviving hypotheses, if any
 
 None survives ADR-0006 admission. AVF is an area of platform interest, not a
-surviving Privacy Decoy architecture: isolation is supported, while general-app
-runtime, deployment, and networking are not. A hypothetical engine/rewrite/guest
+surviving Privacy Decoy architecture: current AOSP platform-signing restrictions
+independently block ordinary-app authority, Microdroid omits the required full
+runtime, and other guest integration/networking remain Unknown. A hypothetical engine/rewrite/guest
 is not credible without a concrete permitted primitive.
 
 ## 14. Remaining Unknowns
@@ -297,6 +336,8 @@ Unknowns remain: whether future Android exposes a general-app guest or stronger
 mediation API; whether a future narrowed AVF matrix supplies full UI/lifecycle
 and verifiable VPN routing; future materially different engines after provenance
 admission; untested OEM paths; and cost/performance after a new capability.
+These Unknowns do not make the documented current AOSP signing restriction or
+Microdroid omissions Unknown, nor establish that future OEM designs must match.
 None supplies a current mechanism or falsifiable experiment meeting **PROCEED TO
 BOUNDED PROTOTYPE**.
 
@@ -315,6 +356,7 @@ capability can justify a new decision; this is not universal impossibility.
 [sdk-sandbox]: https://developer.android.com/design-for-safety/privacy-sandbox/sdk-runtime
 [avf]: https://source.android.com/docs/core/virtualization
 [microdroid]: https://source.android.com/docs/core/virtualization/microdroid
+[avf-security]: https://source.android.com/docs/core/virtualization/security
 
 ## 16. Final recommended ADR-0006 exit outcome
 
@@ -324,8 +366,12 @@ Under current Android mechanisms/evidence, current goals/constraints, and the
 ordinary non-rooted-device model, no permitted architecture has a credible route
 through every boundary. Ordinary profile/hook designs lack kernel/framework
 authority; SDK Sandbox and isolated processes are not arbitrary app runtimes; no
-reviewed engine is trustworthy; and AVF/full guests lack an evidenced root-free
-general-app facility, supported matrix, and VPN integration.
+reviewed engine is trustworthy; current AOSP restricts required pVM authority to
+platform-signed apps; and Microdroid lacks full Android application semantics.
+Other full-guest deployment/integration and external-VPN routing remain
+unestablished or Unknown as classified above. This is a research recommendation,
+not project-owner acceptance or a universal/mathematical impossibility claim;
+materially new Android platform capability could justify another decision.
 
 The decisive conjunction is positive S1 and pinned-VirtualSpace failures,
 unresolved/disqualifying engine evidence, and no concrete permitted primitive
