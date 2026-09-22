@@ -23,13 +23,37 @@ jobs:
           java-version: '17'
       - name: Test independent capture analyzer
         run: python3 android/tools/test-network-evidence.py
+      - name: Test managed-profile evidence classifier
+        run: python3 android/tools/test-managed-profile-evidence.py
       - name: Verify wrapper JAR
         run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
         working-directory: android
       - name: Install Android SDK packages
         run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"'
       - name: Lint, unit-test task, and debug build
-        run: ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug :test-apps:external-vpn-fixture:assembleDebug
+        run: >-
+          ./gradlew --no-daemon
+          :app:lintDebug
+          :app:testDebugUnitTest
+          :app:assembleDebug
+          :probe-app:lintDebug
+          :probe-app:testDebugUnitTest
+          :probe-app:assembleDebug
+          :research-native:lintDebug
+          :research-native:testDebugUnitTest
+          :research-native:assembleDebug
+          :test-apps:external-vpn-fixture:lintDebug
+          :test-apps:external-vpn-fixture:testDebugUnitTest
+          :test-apps:external-vpn-fixture:assembleDebug
+          :test-apps:managed-profile-controller:lintDebug
+          :test-apps:managed-profile-controller:testDebugUnitTest
+          :test-apps:managed-profile-controller:assembleDebug
+          :test-apps:managed-profile-probe:lintTenantADebug
+          :test-apps:managed-profile-probe:assembleTenantADebug
+          :test-apps:managed-profile-probe:lintTenantBDebug
+          :test-apps:managed-profile-probe:assembleTenantBDebug
+          :test-apps:managed-profile-probe:testTenantADebugUnitTest
+          :test-apps:managed-profile-probe:testTenantBDebugUnitTest
         working-directory: android
       - name: Verify release manifest remains network-free
         working-directory: android
@@ -99,3 +123,30 @@ jobs:
       - name: Run independent network feasibility experiment
         working-directory: android
         run: bash tools/run-network-feasibility-emulator.sh
+
+  managed-profile-feasibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up JDK 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify wrapper JAR
+        working-directory: android
+        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
+      - name: Install pinned toolchain and API 35 emulator
+        run: >-
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
+          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+      - name: Free space and enable KVM
+        run: sudo rm -rf -- /usr/share/dotnet && sudo chmod a+rw /dev/kvm
+      - name: Run managed-profile falsification experiment
+        working-directory: android
+        run: bash tools/run-managed-profile-feasibility-emulator.sh
