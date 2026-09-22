@@ -36,6 +36,23 @@ sequence is superseded and paused until a redesigned architecture passes another
 explicit feasibility gate; the current research prototype will not proceed
 unchanged as the product. No production architecture or engine has been selected.
 Ordinary protected apps, real accounts, and private user data remain prohibited.
+
+The currently recoverable canonical audit amendment obligations have been
+integrated into repository documentation; the full amendment remains authoritative.
+The exact roadmap/refinement source gap remains recorded and blocks later
+implementation. [PD-REQ-001 through PD-REQ-070 remain preserved and additive
+PD-REQ-071 through PD-REQ-085 are recorded](docs/requirements.md), without
+upgrading existing evidence. See the [canonical amendment integration](docs/canonical-audit-integration.md),
+[Privacy Decoy 1.0 acceptance criteria](docs/acceptance-criteria-1.0.md),
+[roadmap reconciliation](docs/roadmap-reconciliation.md), and
+[ADR-0004](docs/decisions/ADR-0004-canonical-audit-reconciliation.md).
+Implementation remains paused; no production architecture is selected and S1
+remains falsified. S2 GitHub PR #10 remains separate and open, not canonical main
+state. The exact canonical 46-PR roadmap sequence is not recoverable from current
+repository evidence, so later roadmap implementation remains blocked until that
+exact source and its amendment refinements are restored and reviewed. Canonical
+Roadmap PR 5 and PR 20 remain mandatory STOP gates; the historical Roadmap PR 6
+REDESIGN event retains its actual label.
 GitHub **PR #7** corresponds to Roadmap PR 6 because GitHub
 PR #6 was consumed by the earlier corrective stacked PR merged into PR #5. The
 [decision record](docs/decisions/ADR-0002-feasibility-stop-gate.md) contains the

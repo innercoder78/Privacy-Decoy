@@ -3,6 +3,21 @@
 This matrix scopes prototypes; it is **not** a support promise. The build remains
 `minSdk 31`, `targetSdk 37`, and `compileSdk 37`; PR 3 changes none of them.
 
+## Persona descriptions are not platform support
+
+A persona may report synthetic/descriptive Android version, build/device, model,
+manufacturer, product, and other supported descriptors. Those reported values do
+**not** change or establish actual API availability or behavior, API level, ABI,
+kernel behavior, hardware capability, runtime feature, OEM behavior, or
+engine/containment support. The real protected runtime remains controlling. A
+descriptive Android/build value must never support a claim for a capability that
+the actual runtime does not provide.
+
+Supported platform scope remains evidence-based per actual API/OEM/device/ABI and
+release configuration. Existing Unknown states remain Unknown until scoped
+physical, release-equivalent evidence establishes otherwise; persona coherence
+and application compatibility do not upgrade them.
+
 | Dimension | Prototype target | Evidence rule / open decision |
 |---|---|---|
 | Device/ABI | ARM64 physical, non-rooted device is primary | Required for release evidence; native dependencies must expose reviewed arm64-v8a provenance and behavior. |
