@@ -56,5 +56,6 @@ mandatory row has reviewed evidence, all relevant capability paths use the
 canonical coverage vocabulary, no mandatory row remains Unknown, every
 Unsupported path demonstrably fails closed, and PD-REQ-083 is accepted as a
 whole. Evidence and compatibility are both required; neither substitutes for the
-other. The missing canonical roadmap source independently keeps implementation
-paused even before this acceptance gate can be completed.
+other. The restored [canonical roadmap](canonical-roadmap-1.0.md) culminates in
+the PR 46 release-candidate and final-readiness gate. Source restoration does not
+satisfy any checklist item. No item is satisfied by this document's existence.
