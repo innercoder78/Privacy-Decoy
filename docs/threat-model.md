@@ -76,8 +76,10 @@ behavior are in scope alongside deliberate attack.
    after provenance/license review and must remain behind a replaceable adapter.
 
 10. **Diagnostics ↔ protected/host/persona state:** Developer Mode is separate
-    from the Privacy Access Ledger and must expose only bounded, redacted support
-    information without weakening policy or changing evidence status.
+    from the Privacy Access Ledger and MUST NOT emit, record, or retain raw
+    protected/persona/host values. It uses only bounded, redacted, allowlisted
+    metadata/categories/status evidence, MUST NOT weaken policy or mediation,
+    and MUST NOT convert missing evidence into success.
 
 Browser, authentication, sharing, keyboard, autofill, accessibility, screen
 capture, notification, backup, device-transfer, and update handoffs are explicit
@@ -152,9 +154,15 @@ host-service integrations, and background entry may initially be unsupported.
 Core unknowns are whether any root-free runtime can contain modern native and
 multiprocess apps on API 31–37 without rewriting; what OEM/hidden-API behavior
 breaks mediation; whether pre-code validation is achievable; and whether every
-traffic path can be attributed and fail closed with an external VPN. PR 4 owns
-containment investigation, and PR 5 owns networking investigation. PR 6 is the
-mandatory user STOP decision.
+traffic path can be attributed and fail closed with an external VPN. In the
+**historical repository research sequence**, PR 4 owned containment investigation,
+PR 5 owned networking investigation, and Roadmap PR 6 was the mandatory user
+STOP decision. The merged historical Roadmap PR 6 **A — REDESIGN** decision
+remains valid evidence and retains its label. The restored canonical roadmap
+independently requires mandatory STOP gates at Roadmap PR 5 and Roadmap PR 20.
+The exact canonical sequence and amendment refinements remain unavailable, and
+implementation remains blocked until their restoration and review; see
+[roadmap reconciliation](roadmap-reconciliation.md).
 
 ## Abuse cases and required evidence
 

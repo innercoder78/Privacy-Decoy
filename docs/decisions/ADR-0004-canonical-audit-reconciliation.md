@@ -25,17 +25,20 @@ historical labels would fabricate canonical content.
 1. The new Project Instructions and Canonical Audit Integration Amendment govern
    where prior working assumptions conflict or are incomplete.
 2. PD-REQ-001 through PD-REQ-070 retain their identifiers and historical meaning.
-   PD-REQ-071 through PD-REQ-084 are deliberate additive obligations covering
+   PD-REQ-071 through PD-REQ-085 are deliberate additive obligations covering
    advertising identifiers, battery/power, descriptive-versus-runtime Android
    identity, network-persona/public-IP rules, sensor coherence, permission and
    personal-data separation, persona templates, diagnostic separation, 1.0 media
    scope, competitive drift, SDK/library paths, expanded testing, the 1.0 gate,
-   and roadmap governance.
+   roadmap governance, and repository/publication privacy.
 3. The normalized [canonical integration](../canonical-audit-integration.md),
    [1.0 acceptance checklist](../acceptance-criteria-1.0.md), and
    [roadmap reconciliation](../roadmap-reconciliation.md) are accepted as the
    repository representation of currently available authoritative obligations.
-   They are not falsely described as verbatim copies of unavailable source text.
+   The currently recoverable obligations have been integrated; the full amendment
+   remains authoritative. Exact roadmap/refinement source gaps remain explicitly
+   recorded and block later implementation until restoration and review. These
+   documents are not verbatim copies of unavailable source text.
 4. Historical evidence and ADRs remain scoped and unchanged. ADR-0002's
    **Roadmap PR 6 — A REDESIGN** event is not renamed or reversed. ADR-0003's
    **NO PRODUCTION ARCHITECTURE SELECTED** decision and S1 falsification are not

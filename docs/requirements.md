@@ -1,6 +1,7 @@
 # Privacy Decoy requirements register
 
-This is the canonical normative register as of 2026-09-19. An entry is a design
+This is the canonical normative register as amended on 2026-09-22.
+An entry is a design
 obligation, **not** evidence that it is implemented. IDs are permanent and
 monotonic; superseded entries remain in the register. `MUST`, `SHOULD`, and `MAY`
 have their usual normative force. Status `Required` means accepted but generally
@@ -8,8 +9,16 @@ unimplemented; `Gate` means evidence is required before the named gate.
 
 Evidence must identify the protected app/version/artifacts, runtime build,
 Android/API, OEM/device, ABI, persona, policy, and relevant external dependencies.
-Roadmap ownership is PR 4 (containment), PR 5 (networking), PR 6 (mandatory early
-feasibility decision), or Later. “Test” below means reproducible positive,
+The PR 4 (containment), PR 5 (networking), PR 6 (early feasibility decision),
+and Later ownership annotations in PD-REQ-001..070 retain their historical
+repository research-sequence meaning. They do not reconstruct the canonical
+46-PR roadmap. Canonical Roadmap PR 5 and PR 20 remain mandatory STOP gates;
+the historical Roadmap PR 6 REDESIGN decision retains its PR 6 label. The exact
+canonical 46-PR sequence is unavailable and blocks later implementation pending
+source restoration and review. Roadmap numbers remain separate from GitHub PR
+numbers; see [roadmap reconciliation](roadmap-reconciliation.md).
+
+
 negative, adversarial, lifecycle, and failure evidence where applicable.
 
 | ID | Category | Normative requirement | Rationale | Owner / enforcement boundary | Required evidence | Roadmap / status | Notes / limitations |
@@ -92,22 +101,33 @@ negative, adversarial, lifecycle, and failure evidence where applicable.
 | PD-REQ-075 | Sensors | Supported synthetic/dynamic sensor observations MUST demonstrate temporal plausibility, expected stability, coherent rates/ranges/units, consistency across supported Java/framework/native/SDK paths and device capability declarations, and coherent pause/resume/restart/rotation behavior. | Prevent real readings and cross-surface contradictions. | Sensor brokers/engine | Cross-API temporal, lifecycle, and rotation probes | Later / Required | Unsupported paths MUST be denied or Unsupported, never host passthrough. Complements PD-REQ-035. |
 | PD-REQ-076 | Personal data | Android permission state MUST NOT by itself authorize real host personal-data disclosure; granted permissions for contacts, calendar, messages, call history, media, accounts, clipboard, and similar data still require explicit controlled Real mediation or deliberate Decoy/Empty/Deny policy. | Permission is not a privacy-boundary decision. | Dataset brokers/policy/storage | Permission-by-policy and absent/Unknown-policy tests | Later / Required | Absent policy or Unknown mandatory coverage MUST NOT expose host data; complements PD-REQ-036 and PD-REQ-041. |
 | PD-REQ-077 | Persona templates | Persistent/reusable persona templates, if supported, MUST define explicit versioning, persistence, assignment, controlled update/migration, and transactional failure semantics while preserving identifier scope and package-visibility and storage/session isolation. | Keep reusable identity policy from becoming shared app state. | Persona store/UX | Version, assignment, migration, isolation, and fault tests | Later / Required | A template is configuration/identity policy, not shared storage or login/session state; automatic selection MUST NOT be invented and PD-REQ-064 controls selection. |
-| PD-REQ-078 | Diagnostics | Developer Mode diagnostics MUST remain separate from the Privacy Access Ledger and MUST NOT weaken policy, mediation, or evidence status; output MUST be bounded and redacted, avoid unnecessary raw protected/persona/host values, and identify evidence scope and Unknown/Unsupported/Partial states. | Prevent diagnostics from becoming a leak or false proof. | Diagnostics/ledger/UX | Separation, redaction, bounds, failure, and state-label tests | Later / Required | The Ledger remains local, bounded, clearable, metadata-only mediation metadata and not proof of non-access; missing evidence never becomes success. |
+| PD-REQ-078 | Diagnostics | Developer Mode diagnostics MUST remain separate from the Privacy Access Ledger and MUST NOT emit, record, or retain raw protected/persona/host values; diagnostics MUST use only bounded, redacted, allowlisted metadata/categories/status evidence, identify evidence scope and Unknown/Unsupported/Partial states, MUST NOT weaken policy or mediation, and MUST NOT convert missing evidence into success. | Prevent diagnostics from becoming a leak or false proof. | Diagnostics/ledger/UX | Separation, redaction, bounds, failure, and state-label tests | Later / Required | The Ledger remains local, bounded, clearable, redacted, metadata-only mediation metadata and not proof of non-access; missing evidence never becomes success. |
 | PD-REQ-079 | Camera/media | Synthetic camera/media input MUST remain deferred beyond Privacy Decoy 1.0 unless a later canonical decision explicitly reprioritizes it; in 1.0, physical capture paths MUST still be explicitly mediated, denied, or Unsupported. | Avoid unsupported media claims and physical-input leaks. | Hardware/media policy | Physical-path and claim review | 1.0 / Required | Unknown mandatory paths cannot expose physical input; blocking or absence is not synthetic-media support and PD-REQ-037 is not weakened. |
-| PD-REQ-080 | Product scope | Privacy Decoy MUST NOT adopt features solely because competitors provide them where they conflict with the canonical architecture, including root/guest-root, Magisk/Xposed/LSPosed/custom-ROM dependence, routine APK rewriting/re-signing, cosmetic cloning as privacy mediation, a convenience full guest Android, or a duplicate built-in tracker/VPN system. | Prevent competitive-feature drift from weakening the boundary. | Product governance/architecture | Scope and architecture review | All / Required | Any future exception remains subject to applicable ADR and explicit user-decision rules. |
+| PD-REQ-080 | Product scope | Privacy Decoy MUST NOT adopt features solely because competitors provide them where they conflict with the canonical architecture, including root/guest-root, Magisk/Xposed/LSPosed/custom-ROM dependence, patched-kernel dependence, routine APK rewriting/re-signing, cosmetic cloning as privacy mediation, a convenience full guest Android, or a duplicate built-in tracker/VPN system. | Prevent competitive-feature drift from weakening the boundary. | Product governance/architecture | Scope and architecture review | All / Required | Any future exception remains subject to applicable ADR and explicit user-decision rules. |
 | PD-REQ-081 | Path coverage | Capability coverage MUST include material Play Services, embedded third-party SDK, WebView/browser-mediated, JNI/native-library, dynamically loaded code, and alternate library-wrapper paths where relevant. | Direct framework mediation does not establish wrapper-path safety. | Coverage registry/engine | Path inventory and adversarial per-path probes | Later / Gate | An SDK/library path cannot be presumed safe from direct-API results; Unknown mandatory paths block execution. |
 | PD-REQ-082 | Testing | Every supported synthetic value/capability MUST be validated, as applicable, for stability, identifier scope, restart/reboot/safe-update persistence, cross-API consistency, temporal plausibility, coherent rotation, safe failure, adversarial bypass resistance, enforcement/privacy behavior, and compatibility within its supported scope. | Establish both privacy enforcement and usable bounded support. | Test program/evidence registry | Scoped adversarial and compatibility suites on required matrices | 1.0 / Gate | Emulator/debug evidence alone is insufficient; physical non-rooted devices and release-equivalent builds remain required for production claims. |
 | PD-REQ-083 | Acceptance | Privacy Decoy 1.0 protection/release claims MUST pass a deliberate acceptance gate: no mandatory Unknown coverage; fail-closed Unsupported paths; protection before code; evidenced persona stability/scope/coherence; scoped native/framework/SDK/library, storage/personal-data, and independent network/VPN/fallback evidence; physical non-rooted release-equivalent support-matrix evidence; enforcement and compatibility tests; and completed independent Android/native security review. | Prevent incomplete evidence from becoming a release claim. | Release governance | Completed acceptance checklist and evidence trace | 1.0 / Gate | No unresolved mandatory requirement may be hidden by compatibility success; a green debug/emulator suite alone is insufficient. |
 | PD-REQ-084 | Governance | Privacy Decoy 1.0 MUST be governed by the canonical 46-PR roadmap, with roadmap numbering separate from GitHub PR numbering and mandatory STOP/decision gates at Roadmap PR 5 and PR 20; gates MUST NOT be silently moved, removed, or inferred satisfied from GitHub numbering. Historical labels MUST remain accurate, and no later implementation may proceed while the authoritative sequence is missing or materially unreconciled. | Preserve canonical sequencing without rewriting history. | Project governance | Restored roadmap source, reconciliation review, and gate decisions | Roadmap / Gate | Historical Roadmap PR 6 REDESIGN remains labeled PR 6; the variance is documented. Roadmap PR 20 has not occurred. |
+| PD-REQ-085 | Repository privacy | Privacy Decoy repositories, pull requests, Actions logs, retained CI artifacts, diagnostic evidence intended for project review, and other project publication surfaces MUST be treated as public for secrecy purposes regardless of actual repository visibility and MUST NOT contain secrets, credentials, private user data, raw protected/persona/host values, or production signing material. | Prevent publication of private or sensitive material. | Repository/review/CI/diagnostics | Diff/tree review, secret scanning where applicable, log/artifact inspection, and diagnostic redaction tests | All / Required | Actual GitHub visibility never relaxes this rule; controlled synthetic fixtures are allowed; private user data is never required for research or CI evidence. |
 
 ## Traceability and handoff
 
 Each implementation change must cite requirement IDs and link tests and evidence.
-PR 4 must answer execution without installation/re-signing; actual process/UID and
+In the **historical repository execution context**, PR 4 was assigned to answer
+execution without installation/re-signing; actual process/UID and
 management boundaries; Binder/service/provider/package/host leakage; JNI/syscall,
 `/proc`, `/sys`, filesystem/property leakage; early initialization; multiprocess;
-stale capabilities; and pre-code fail-closed launch. PR 5 must identify every
+stale capabilities; and pre-code fail-closed launch. Historical PR 5 was assigned
+to identify every
 traffic producer and establish attribution, external-VPN route verification,
 route-change behavior, fail-closed networking, protocol/path coverage, and
-independent packet evidence. PR 6 reviews those results and requires an explicit
-user decision; it does not infer feasibility from application compatibility.
+independent packet evidence. Historical Roadmap PR 6 reviewed those results and
+recorded the explicit user decision **A — REDESIGN**; compatibility was not proof
+of feasibility.
+
+This historical PR 4/5/6 research sequence remains valid scoped evidence/history;
+it does not replace the restored canonical 46-PR roadmap. Canonical Roadmap PR 5
+and Roadmap PR 20 remain mandatory STOP gates. Historical Roadmap PR 6 REDESIGN
+is not renamed. No later roadmap implementation may proceed until the exact
+canonical roadmap source and amendment refinements are restored and reviewed;
+see [roadmap reconciliation](roadmap-reconciliation.md).

@@ -37,9 +37,11 @@ explicit feasibility gate; the current research prototype will not proceed
 unchanged as the product. No production architecture or engine has been selected.
 Ordinary protected apps, real accounts, and private user data remain prohibited.
 
-The canonical audit amendment has now been reconciled into repository
-documentation. [PD-REQ-001 through PD-REQ-070 remain preserved and additive
-PD-REQ-071 through PD-REQ-084 are recorded](docs/requirements.md), without
+The currently recoverable canonical audit amendment obligations have been
+integrated into repository documentation; the full amendment remains authoritative.
+The exact roadmap/refinement source gap remains recorded and blocks later
+implementation. [PD-REQ-001 through PD-REQ-070 remain preserved and additive
+PD-REQ-071 through PD-REQ-085 are recorded](docs/requirements.md), without
 upgrading existing evidence. See the [canonical amendment integration](docs/canonical-audit-integration.md),
 [Privacy Decoy 1.0 acceptance criteria](docs/acceptance-criteria-1.0.md),
 [roadmap reconciliation](docs/roadmap-reconciliation.md), and

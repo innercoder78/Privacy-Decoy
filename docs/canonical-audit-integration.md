@@ -5,15 +5,16 @@
 **Effective date:** 2026-09-22
 
 This document is the normalized repository integration of the currently
-authoritative Privacy Decoy Project Instructions and Canonical Audit Integration
-Amendment obligations. It is **not** represented as a verbatim archival copy of
+recoverable obligations of the authoritative Privacy Decoy Project Instructions
+and Canonical Audit Integration Amendment. It is **not** represented as a verbatim archival copy of
 an unavailable external document. Where older working assumptions conflict or
 are incomplete, these obligations control. Existing evidence retains its scope;
 this integration does not select a production architecture or turn prototype CI
-into protection.
+into protection. The full amendment remains authoritative; the exact roadmap
+and refinement source gaps recorded below block later implementation.
 
 The [requirements register](requirements.md) preserves PD-REQ-001 through
-PD-REQ-070 and adds PD-REQ-071 through PD-REQ-084 for materially new obligations.
+PD-REQ-070 and adds PD-REQ-071 through PD-REQ-085 for materially new obligations.
 Ordinary protected applications, real accounts, and private user data remain
 prohibited.
 
@@ -103,16 +104,25 @@ must be validated before any protected code, provider, or native initializer.
 
 The Privacy Access Ledger is local, bounded, clearable, metadata-only, and
 redacted; it is not proof of non-access and its failure never opens access.
-Developer Mode is separate diagnostic/support tooling. It must not weaken policy,
-expose unnecessary raw host/persona/protected values, or upgrade missing evidence;
-its output is bounded, redacted, and explicit about scope and
-Unknown/Unsupported/Partial status.
+Developer Mode is diagnostic/support tooling separate from the Privacy Access
+Ledger. It MUST NOT emit, record, or retain raw protected/persona/host values.
+It MUST use only bounded, redacted, allowlisted metadata/categories/status
+evidence, explicit about scope and Unknown/Unsupported/Partial status. It MUST
+NOT weaken policy or mediation or convert missing evidence into success.
 
 Rotation is transactional and coherent, never silent regeneration. UX must state
 the affected scopes. Rotation, reset, clearing local state, or creating a fresh
 instance does not erase remote history, server correlation, sessions, or account
 links. Reusable templates, if supported, are versioned configuration/identity
 policy—not shared app storage or sessions—and preserve assignment and isolation.
+
+Repository content, pull requests, Actions logs, retained/uploaded CI artifacts,
+diagnostic evidence intended for project review, and other project publication
+surfaces MUST be treated as public for secrecy purposes regardless of actual
+GitHub visibility. They MUST NOT contain secrets, credentials, private user data,
+raw protected/persona/host values, or production signing material (PD-REQ-085).
+Controlled synthetic fixtures are allowed; private user data is never required
+for research or CI evidence.
 
 ## H. Privacy Decoy 1.0 media scope
 
@@ -125,8 +135,8 @@ synthetic-media support. Existing camera and microphone policy obligations remai
 ## I. Competitive-drift restrictions
 
 Competitor features do not justify architectural drift. Privacy Decoy must not
-become dependent on root or guest root, Magisk/Xposed/LSPosed/custom ROMs, routine
-APK rewriting/re-signing, cosmetic cloning as a privacy substitute, a convenience
+become dependent on root or guest root, Magisk/Xposed/LSPosed/custom ROMs, patched
+kernels, routine APK rewriting/re-signing, cosmetic cloning as a privacy substitute, a convenience
 full guest Android, or a duplicate built-in tracker/VPN. Any future exception
 must pass the already-applicable ADR and explicit user-decision rules.
 
