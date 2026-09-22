@@ -11,13 +11,15 @@ Evidence must identify the protected app/version/artifacts, runtime build,
 Android/API, OEM/device, ABI, persona, policy, and relevant external dependencies.
 The PR 4 (containment), PR 5 (networking), PR 6 (early feasibility decision),
 and Later ownership annotations in PD-REQ-001..070 retain their historical
-repository research-sequence meaning. They do not reconstruct the canonical
-46-PR roadmap. Canonical Roadmap PR 5 and PR 20 remain mandatory STOP gates;
-the historical Roadmap PR 6 REDESIGN decision retains its PR 6 label. The exact
-canonical 46-PR sequence is unavailable and blocks later implementation pending
-source restoration and review. Roadmap numbers remain separate from GitHub PR
-numbers; see [roadmap reconciliation](roadmap-reconciliation.md).
-
+repository research-sequence meaning. The project owner restored the authoritative
+46-PR sequence in [canonical-roadmap-1.0.md](canonical-roadmap-1.0.md). Roadmap
+numbers remain separate from GitHub PR numbers, and historical variance remains
+recorded in the [roadmap reconciliation](roadmap-reconciliation.md). Canonical
+Roadmap PR 5 and PR 20 remain mandatory STOP gates; the historical Roadmap PR 6
+REDESIGN event retains its PR 6 label and is not represented as having occurred
+under PR 5. The source-restoration blocker is closed. Product implementation
+remains paused for architecture/feasibility reasons, not because roadmap text is
+missing.
 
 negative, adversarial, lifecycle, and failure evidence where applicable.
 
@@ -128,6 +130,7 @@ of feasibility.
 This historical PR 4/5/6 research sequence remains valid scoped evidence/history;
 it does not replace the restored canonical 46-PR roadmap. Canonical Roadmap PR 5
 and Roadmap PR 20 remain mandatory STOP gates. Historical Roadmap PR 6 REDESIGN
-is not renamed. No later roadmap implementation may proceed until the exact
-canonical roadmap source and amendment refinements are restored and reviewed;
-see [roadmap reconciliation](roadmap-reconciliation.md).
+is not renamed. The roadmap source and amendment refinements are restored; future work must
+follow that canonical governance. Product implementation remains paused pending a
+separate architecture/feasibility decision; see [roadmap
+reconciliation](roadmap-reconciliation.md).

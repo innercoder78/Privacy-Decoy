@@ -4,14 +4,11 @@
 
 **Effective date:** 2026-09-22
 
-This document is the normalized repository integration of the currently
-recoverable obligations of the authoritative Privacy Decoy Project Instructions
-and Canonical Audit Integration Amendment. It is **not** represented as a verbatim archival copy of
-an unavailable external document. Where older working assumptions conflict or
-are incomplete, these obligations control. Existing evidence retains its scope;
+This document integrates the authoritative Privacy Decoy Project Instructions
+and the restored Canonical Audit Integration Amendment. The project owner supplied
+the original canonical source on 2026-09-22. Existing evidence retains its scope;
 this integration does not select a production architecture or turn prototype CI
-into protection. The full amendment remains authoritative; the exact roadmap
-and refinement source gaps recorded below block later implementation.
+into protection. The exact PR-specific amendment refinements are restored below.
 
 The [requirements register](requirements.md) preserves PD-REQ-001 through
 PD-REQ-070 and adds PD-REQ-071 through PD-REQ-085 for materially new obligations.
@@ -155,20 +152,126 @@ network and persistent-state observation, the claimed API/OEM/ABI matrix, and an
 independent Android/native security review. Compatibility cannot hide an
 unresolved mandatory protection.
 
-## K. Canonical roadmap and source gap
+## K. Restored canonical roadmap governance
 
-The canonical Privacy Decoy 1.0 roadmap contains 46 roadmap PRs. Roadmap numbers
-are separate from GitHub PR numbers. Roadmap PR 5 and Roadmap PR 20 are mandatory
-STOP/decision gates; Roadmap PR 20 has not occurred.
+The [authoritative restored roadmap](canonical-roadmap-1.0.md) contains canonical
+Roadmap PR 1 through PR 46. Roadmap numbers remain separate from GitHub PR
+numbers. Roadmap PR 5 and Roadmap PR 20 are mandatory STOP/decision gates;
+Roadmap PR 20 has not occurred.
 
 Repository history records the executed REDESIGN decision as **Roadmap PR 6**.
-That historical label and decision remain valid and are not retroactively renamed.
-It supplies relevant substantive feasibility/governance evidence, but the restored
-canonical specification independently requires the earlier Roadmap PR 5 gate.
+That label is historical evidence and is not retroactively renamed. Canonical
+production-domain PR 6 has not started. The source gap is resolved, but product
+implementation remains paused for architecture/feasibility reasons. The
+[roadmap reconciliation](roadmap-reconciliation.md) records the variance and the
+separate status of open GitHub PR #10.
 
-The exact authoritative 46-PR sequence and exact amendment refinements for
-Roadmap PRs 6, 12, 13, 14, 18, 21, 22, 23, 29, 33, 38, 40, 41, 43, and 46 are not
-present in repository evidence and cannot safely be reconstructed. They remain
-canonical obligations, not permission to invent content. As detailed in the
-[roadmap reconciliation](roadmap-reconciliation.md), later roadmap implementation
-is blocked until the exact source is restored into the repository and reviewed.
+## L. Restored PR-specific amendment refinements
+
+### PR 6
+
+The capability model must represent advertising-related identifiers,
+power/battery surfaces, and other environmental categories without introducing
+one-off policy systems. Coverage records must support those categories and
+evidence states.
+
+### PR 12
+
+Preserve explicit per-execution package-universe control. Persona sharing **MUST
+NOT** automatically grant mutual visibility. Targeted package probing remains
+mandatory package-visibility analysis.
+
+### PR 13
+
+Explicitly investigate and, where feasible, implement advertising-related
+identifiers, descriptive Android/build identity, battery/charging/power-state
+surfaces, and cross-property device coherence. Do **NOT** advertise Android
+platform versions/capabilities inconsistent with the actual protected runtime.
+
+### PR 14
+
+Include network transport/type information, local-network metadata, and
+cross-checking network persona against regional persona where technically
+meaningful. Do not infer public-IP protection from local values.
+
+### PR 18
+
+Add conservative network-persona consistency diagnostics where reliable evidence
+exists. Any external exit-IP/geography lookup must be deliberate,
+user-authorized, privacy-conscious/minimized, approximate evidence, and
+nonessential to fail-closed enforcement. Unknown is preferable to guessed
+geography.
+
+### PR 21
+
+Add explicit cross-API and temporal-coherence testing requirements.
+
+### PR 22
+
+Maintain preference for Empty where fictional data adds little benefit.
+
+### PR 23
+
+Synthetic camera/media injection is deferred advanced post-1.0 work. For 1.0,
+establish physical paths safely as supported, denied, unavailable, or Unsupported
+without requiring synthetic camera input.
+
+### PR 29
+
+Design bridges so they do not foreclose future synthetic-media input. Do **NOT**
+implement unrestricted synthetic camera injection merely because media bridging
+exists.
+
+### PR 33
+
+Expand reporting for advertising-related identity, battery/power,
+network-persona consistency, Java versus native sensor coverage, known
+SDK/library paths, and external protection dependencies. Maintain separation
+among coverage evidence, Privacy Access Ledger, and Developer Mode. No raw
+protected/persona/host values.
+
+### PR 38
+
+Look explicitly for alternative paths, including SDK/library-mediated behavior
+not exercised by earlier probes. Compatibility fixes must never weaken privacy
+for a specific app.
+
+### PR 40
+
+Include regressions for advertising identifiers, battery/power where supported,
+cross-surface persona coherence, targeted package-probe isolation,
+network-persona consistency, diagnostic redaction, and coverage-state
+correctness.
+
+### PR 41
+
+Where implemented, test long-running dynamic synthetic battery, sensors,
+network, and diagnostic models for bounded/coherent behavior.
+
+### PR 43
+
+Document advertising-ID scope, power/battery coverage, descriptive Android
+identity versus actual runtime capability, network-persona consistency limits,
+external VPN responsibilities, and synthetic camera/media as future advanced
+work rather than a 1.0 guarantee.
+
+### PR 46
+
+Reject claims of coherent persona behavior where supported surfaces materially
+contradict one another. Release readiness remains evidence-based rather than
+feature-presence-based.
+
+## M. Restored 1.0 acceptance refinements
+
+Where supported:
+
+- advertising-related ID behavior has defined scope and tested mediation;
+- battery/power behavior is coherent and policy-safe;
+- descriptive Android/device values do not imply unavailable runtime capabilities;
+- network-persona warnings do not cause unnecessary third-party requests;
+- package visibility stays isolated among apps sharing a persona;
+- cross-surface persona coherence survives restart, process death, reboot, update,
+  and rotation; and
+- coverage distinguishes framework/native/external/unsupported/partial/unknown.
+
+Synthetic camera/media input is **not** a 1.0 requirement.

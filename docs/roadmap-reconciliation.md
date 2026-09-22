@@ -1,69 +1,54 @@
 # Roadmap reconciliation
 
-**Status:** canonical source gap; later roadmap implementation blocked
+**Status:** canonical source gap resolved; architecture/feasibility pause remains
 
 **Recorded:** 2026-09-22
 
-## Governing facts
+## Restored governing source
 
-- The canonical Privacy Decoy 1.0 roadmap length is **46 roadmap PRs**.
-- Roadmap PR numbers are not GitHub pull-request numbers.
-- **Roadmap PR 5** and **Roadmap PR 20** are mandatory STOP/decision gates.
-- A gate cannot be moved, removed, or inferred satisfied because GitHub numbering
-  differs.
-- Roadmap PR 20 has **not occurred** and remains a future mandatory STOP gate.
+The project owner restored the complete original roadmap source on 2026-09-22.
+The authoritative [canonical roadmap](canonical-roadmap-1.0.md) now provides
+Roadmap PR 1 through PR 46. Roadmap PR 5 and PR 20 are mandatory STOP gates, and
+the exact amendment refinements for PRs 6, 12, 13, 14, 18, 21, 22, 23, 29, 33,
+38, 40, 41, 43, and 46 are available. No roadmap content needed to be
+reconstructed or guessed. Roadmap numbers remain distinct from GitHub PR numbers.
+
+The source-restoration blocker described by ADR-0004 is resolved by ADR-0005.
+This does not satisfy a technical security requirement, select a production
+architecture, or authorize canonical PR 6 implementation.
 
 ## Historical variance preserved
 
-An early foundation description identified a canonical Roadmap PR 5 feasibility
-gate. Merged repository history instead records the executed **A — REDESIGN**
-decision as **Roadmap PR 6** in ADR-0002. The Roadmap PR 6 label is historical
-fact: it remains valid and is not renamed or rewritten. That decision provides
-relevant substantive feasibility and governance evidence, but it does not erase
-the restored canonical Roadmap PR 5 STOP obligation or satisfy Roadmap PR 20.
+- The repository foundation corresponds to canonical PR 1.
+- The clean-root correction corresponds to the inserted PR 1A transition and
+  does not renumber PRs 2–46.
+- Historical threat/engine work substantially served canonical PR 2 research.
+- Historical containment research substantially served canonical PR 3 research.
+- Historical networking research substantially served canonical PR 4 research.
+- The repository's REDESIGN decision was historically labeled **Roadmap PR 6**,
+  although canonical governance calls for the early decision at PR 5. That
+  historical event is not renamed or represented as having occurred under PR 5.
+- Later redesign, S1, and S2 research is additional feasibility work performed
+  because the early architecture did not survive.
 
-Roadmap PR 8's S1 managed-profile result remains **FALSIFIED**. Its Roadmap PR 9
-survival-gated networking/revocation follow-up remains **BLOCKED** because S1 did
-not survive. Roadmap PR 8A's S2 source/provenance audit exists in open GitHub
-PR #10 and is not merged canonical main state. This reconciliation neither copies
-nor modifies PR #10; its candidate findings remain separate and are not
-invalidated.
+Canonical production-domain PR 6 has **not** started and is not complete.
+Historical REDESIGN, S1 falsification, the blocked S1 networking follow-up, and
+all scoped containment/network evidence remain unchanged. Roadmap PR 20 has not
+occurred.
 
-## Canonical roadmap source gap — implementation blocker
+## Open GitHub PR #10
 
-No complete authoritative 46-PR roadmap sequence is present in the repository
-evidence reviewed. The exact sequence cannot safely be reconstructed from current
-roadmap labels, GitHub PR numbers, ADRs, commits, or research evidence. This record
-therefore does **not** fabricate titles, tasks, ordering, or gate satisfaction.
+GitHub PR #10, **Roadmap PR 8A: Audit S2 engine source and provenance**, is
+supplemental redesign/feasibility research created after the early architecture
+failed. It is not canonical production Roadmap PR 8 or an inserted production
+PR 8A. Its historical title and findings are neither renumbered nor invalidated.
 
-The 46-PR roadmap remains authoritative. No future roadmap implementation is
-authorized until the exact canonical sequence and amendment refinements are
-restored into the repository and independently reviewed. Research history remains
-usable only within its recorded evidence scope; it is not a substitute roadmap.
+After this restoration PR merges, PR #10 may be refreshed onto current `main`,
+reconciled against PD-REQ-001 through PD-REQ-085 and the restored canonical
+documents, reviewed as research/evidence, and potentially merged under normal
+hard-merge rules. This restoration does not modify, rebase, merge, or copy
+evidence from PR #10.
 
-## Missing amendment-specific refinement source
-
-For every row below, the disposition is deliberately identical:
-**CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING —
-MUST BE RESTORED BEFORE THAT ROADMAP STAGE.**
-
-| Roadmap PR | Repository disposition |
-|---:|---|
-| 6 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 12 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 13 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 14 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 18 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 21 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 22 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 23 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 29 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 33 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 38 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 40 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 41 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 43 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-| 46 | CANONICAL REFINEMENT PRESENT IN AMENDMENT — EXACT REPOSITORY TEXT MISSING — MUST BE RESTORED BEFORE THAT ROADMAP STAGE. |
-
-Restoration must preserve actual historical labels and decisions rather than
-retroactively reshaping them to fit the recovered source.
+Merging PR #10 would not authorize production implementation of canonical
+Roadmap PR 6 or later. A separate project decision must determine the next
+architecture direction from the REDESIGN/S1/S2 evidence.
