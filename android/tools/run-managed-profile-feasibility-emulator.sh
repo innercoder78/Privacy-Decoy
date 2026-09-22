@@ -95,8 +95,8 @@ unset NONCE
 # No probe component executes until ALL owner reads, nonce checks and fixture hashes succeed.
 invoke() {
     local user=$1 pkg=$2
-    "$ADB" shell am start -W --user "$user" -a android.intent.action.VIEW -d pd-research://run -n "$pkg/.ProbeActivity" >/dev/null
-    "$ADB" shell am broadcast --user "$user" -a com.privacydecoy.research.PROBE -n "$pkg/.ProbeReceiver" >/dev/null
+    "$ADB" shell am start -W --user "$user" -a android.intent.action.VIEW -d pd-research://run -n "$pkg/com.privacydecoy.research.managedprobe.ProbeActivity" >/dev/null
+    "$ADB" shell am broadcast --user "$user" -a com.privacydecoy.research.PROBE -n "$pkg/com.privacydecoy.research.managedprobe.ProbeReceiver" >/dev/null
 }
 invoke 0 "$PA"; invoke "$USER_ID" "$PA"; invoke "$USER_ID" "$PB"
 pull() {
