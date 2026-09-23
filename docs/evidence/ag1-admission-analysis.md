@@ -20,14 +20,18 @@ Binder virtualization, runtime interception, VPN enforcement, or production UI.
 `android/tools/ag1-admission-analyzer.py` uses only Python's standard library to
 read ZIP entries and DEX bytes. It invokes the pinned Android SDK's `apkanalyzer`
 and `apksigner` in read-only modes for manifest and signing identity. Missing SDK
-inspection tools are an explicit operational failure; failed required metadata
-extraction makes the set `INCOMPATIBLE`, never eligible by omission.
+inspection tools are an explicit operational failure. A positively established
+structural defect or base/split package, version, or signer mismatch can make a
+set `INCOMPATIBLE`. Metadata that the tools cannot establish instead remains
+Unknown/unproven, blocks Protected eligibility, and does not by itself prevent
+`EXPERIMENTAL_ELIGIBLE` classification.
 
 Each artifact record contains its base/split role, basename, SHA-256, byte size,
 statically obtained package/version/split/signer identity, DEX entries, native
-libraries, and ABIs. The generation ID hashes normalized analyzer-version,
-content, role, and identity metadata. Split input ordering is normalized. Local
-paths, clocks, users, hosts, and secrets are excluded.
+libraries, and ABIs. The generation ID hashes normalized schema/analyzer version,
+content digest, byte size, and base/split role. Split input ordering is normalized.
+Local paths, basenames, clocks, users, hosts, and secrets are excluded, so merely
+renaming identical artifact bytes does not create a new admission generation.
 
 The research-domain outcomes are `PROTECTED_ELIGIBLE`,
 `EXPERIMENTAL_ELIGIBLE`, `KNOWN_UNSAFE`, and `INCOMPATIBLE`. They are separate
@@ -54,8 +58,9 @@ coverage, dynamically introduced code blocking, or hostile native containment.
 Actual Android split completeness is also Unknown: this slice compares obtainable
 package, version, split-name, and signer metadata but does not implement
 bundle-aware dependency/configuration completeness. A missing property is never
-inferred equal. App-controlled native containment and all runtime mediation remain
-Unknown.
+inferred equal or treated as a mismatch: it receives an explicit Unknown/unproven
+finding. Missing metadata cannot qualify for Protected eligibility. App-controlled
+native containment and all runtime mediation remain Unknown.
 
 ## Controlled fixtures and expected observations
 

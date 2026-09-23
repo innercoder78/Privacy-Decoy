@@ -13,11 +13,6 @@ while IFS= read -r path; do
   [[ -z "$path" ]] && continue
 
   case "$path" in
-    docs/evidence/ag1-admission-analysis.md)
-      baseline=true
-      admission=true
-      ;;
-
     README.md|docs/*|.github/CONTRIBUTING.md)
       ;;
 
