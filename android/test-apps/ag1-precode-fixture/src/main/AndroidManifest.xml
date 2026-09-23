@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Never installed. Callbacks are deliberately synthetic, not framework startup. -->
+    <application android:allowBackup="false" android:hasCode="true"
+        android:label="AG-1B controlled fixture" android:usesCleartextTraffic="false" />
+</manifest>

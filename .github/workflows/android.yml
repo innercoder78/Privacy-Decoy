@@ -19,6 +19,7 @@ jobs:
       network: ${{ steps.classify.outputs.network }}
       managed: ${{ steps.classify.outputs.managed }}
       admission: ${{ steps.classify.outputs.admission }}
+      ag1runtime: ${{ steps.classify.outputs.ag1runtime }}
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -40,13 +41,14 @@ jobs:
             'containment=true' \
             'network=true' \
             'managed=true' \
-            'admission=true' >> "$GITHUB_OUTPUT"
+            'admission=true' \
+            'ag1runtime=true' >> "$GITHUB_OUTPUT"
 
           case "$EVENT_NAME" in
             pull_request) base_sha=$PR_BASE_SHA ;;
             push) base_sha=$EVENT_BEFORE_SHA ;;
             *)
-              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (unexpected event)'
+              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (unexpected event)'
               exit 0
               ;;
           esac
@@ -54,20 +56,20 @@ jobs:
           sha_pattern='^[0-9a-f]{40}$'
           if ! [[ "$base_sha" =~ $sha_pattern && "$TESTED_SHA" =~ $sha_pattern ]] ||
              [[ "$base_sha" == 0000000000000000000000000000000000000000 ]]; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (unresolved comparison)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (unresolved comparison)'
             exit 0
           fi
 
           changed_files=$(mktemp)
           if ! git diff --name-only --diff-filter=ACDMRTUXB "$base_sha" "$TESTED_SHA" > "$changed_files"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (diff failed)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (diff failed)'
             exit 0
           fi
 
           cat "$changed_files"
           classification=$(mktemp)
           if ! .github/scripts/classify-ci-changes.sh < "$changed_files" > "$classification"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (classification failed)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (classification failed)'
             exit 0
           fi
           tee -a "$GITHUB_OUTPUT" < "$classification"
@@ -102,6 +104,10 @@ jobs:
           :app:lintDebug
           :app:testDebugUnitTest
           :app:assembleDebug
+          :app:assembleDebugAndroidTest
+          :test-apps:ag1-precode-fixture:lintDebug
+          :test-apps:ag1-precode-fixture:testDebugUnitTest
+          :test-apps:ag1-precode-fixture:assembleDebug
           :probe-app:lintDebug
           :probe-app:testDebugUnitTest
           :probe-app:assembleDebug
@@ -251,3 +257,35 @@ jobs:
       - name: Run managed-profile falsification experiment
         working-directory: android
         run: bash tools/run-managed-profile-feasibility-emulator.sh
+
+  admission-runtime-feasibility:
+    needs: changes
+    if: needs.changes.outputs.ag1runtime == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up JDK 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify wrapper JAR
+        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
+        working-directory: android
+      - name: Install pinned toolchain and API 35 x86_64 emulator
+        run: >-
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
+          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+      - name: Free space for the disposable Android userdata image
+        # Hosted runners include a large unused .NET SDK. Android tests need its disk space.
+        run: sudo rm -rf -- /usr/share/dotnet
+      - name: Enable KVM for the runner
+        run: sudo chmod a+rw /dev/kvm
+      - name: Run admission-bound pre-code bootstrap experiment
+        working-directory: android
+        run: bash tools/run-ag1-precode-emulator.sh

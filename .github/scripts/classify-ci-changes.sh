@@ -8,6 +8,7 @@ containment=false
 network=false
 managed=false
 admission=false
+ag1runtime=false
 
 while IFS= read -r path; do
   [[ -z "$path" ]] && continue
@@ -48,9 +49,29 @@ while IFS= read -r path; do
       admission=true
       ;;
 
+    android/app/src/androidTest/java/com/privacydecoy/research/PrototypeTestRunner.java)
+      baseline=true
+      containment=true
+      network=true
+      ag1runtime=true
+      ;;
+
+    android/test-apps/ag1-precode-fixture/*|\
+    android/tools/run-ag1-precode-emulator.sh)
+      baseline=true
+      admission=true
+      ag1runtime=true
+      ;;
+
+    android/app/src/debug/java/com/privacydecoy/research/ag1/*|\
+    android/app/src/androidTest/java/com/privacydecoy/research/ag1/*|\
+    android/app/src/testDebug/java/com/privacydecoy/research/ag1/*)
+      baseline=true
+      ag1runtime=true
+      ;;
+
     android/probe-app/*|\
     android/research-native/*|\
-    android/app/src/androidTest/java/com/privacydecoy/research/PrototypeTestRunner.java|\
     android/app/src/androidTest/java/com/privacydecoy/research/PrototypeTests.java|\
     android/tools/run-containment-emulator.sh)
       baseline=true
@@ -63,6 +84,7 @@ while IFS= read -r path; do
       network=true
       managed=true
       admission=true
+      ag1runtime=true
       ;;
   esac
 done
@@ -72,5 +94,6 @@ printf 'containment=%s\n' "$containment"
 printf 'network=%s\n' "$network"
 printf 'managed=%s\n' "$managed"
 printf 'admission=%s\n' "$admission"
-printf 'CI_CHANGESET baseline=%s containment=%s network=%s managed=%s admission=%s\n' \
-  "$baseline" "$containment" "$network" "$managed" "$admission" >&2
+printf 'ag1runtime=%s\n' "$ag1runtime"
+printf 'CI_CHANGESET baseline=%s containment=%s network=%s managed=%s admission=%s ag1runtime=%s\n' \
+  "$baseline" "$containment" "$network" "$managed" "$admission" "$ag1runtime" >&2

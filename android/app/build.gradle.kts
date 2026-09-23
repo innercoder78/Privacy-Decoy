@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 plugins {
     id("com.android.application")
 }
@@ -59,4 +61,28 @@ val generateProbeAssets = tasks.register<GenerateProbeAssets>("generateProbeAsse
 }
 androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
     variant.androidTest?.sources?.assets?.addGeneratedSourceDirectory(generateProbeAssets, GenerateProbeAssets::outputDirectory)
+}
+
+abstract class GenerateAg1Assets : DefaultTask() {
+    @get:InputFile abstract val apk: RegularFileProperty
+    @get:OutputDirectory abstract val outputDirectory: DirectoryProperty
+    @TaskAction fun generate() {
+        val source = apk.get().asFile
+        val output = outputDirectory.get().asFile
+        output.mkdirs()
+        val asset = output.resolve("ag1-precode-fixture-debug.apk")
+        source.copyTo(asset, overwrite = true)
+        val digest = MessageDigest.getInstance("SHA-256")
+        check(digest.digest(source.readBytes()).contentEquals(digest.digest(asset.readBytes()))) {
+            "AG-1 generated asset differs from source APK"
+        }
+    }
+}
+val generateAg1Assets = tasks.register<GenerateAg1Assets>("generateAg1Assets") {
+    dependsOn(":test-apps:ag1-precode-fixture:assembleDebug")
+    apk.set(project(":test-apps:ag1-precode-fixture").layout.buildDirectory.file("outputs/apk/debug/ag1-precode-fixture-debug.apk"))
+    outputDirectory.set(layout.buildDirectory.dir("generated/ag1Assets"))
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
+    variant.androidTest?.sources?.assets?.addGeneratedSourceDirectory(generateAg1Assets, GenerateAg1Assets::outputDirectory)
 }
