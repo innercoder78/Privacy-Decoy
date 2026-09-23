@@ -106,6 +106,44 @@ def capture_offsets():
     assert all(size>=24 for size in offsets.values()), 'Missing capture header'
     return offsets
 
+
+def capture_end_after_quiescence(minimum_seconds=1.0,quiet_seconds=.5,
+                                 deadline_seconds=3.0,interval=.1):
+    """Observe capture sizes only; a deadline never substitutes for evidence."""
+    assert 0<=minimum_seconds<=deadline_seconds and 0<quiet_seconds<=deadline_seconds
+    assert interval>0
+    started=time.monotonic();deadline=started+deadline_seconds
+    offsets=capture_offsets();stable_since=started
+    while True:
+        now=time.monotonic()
+        if now>=deadline or (now-started>=minimum_seconds and now-stable_since>=quiet_seconds):
+            return offsets
+        time.sleep(min(interval,deadline-now))
+        current=capture_offsets()
+        if current!=offsets:
+            stable_since=time.monotonic()
+            offsets=current
+
+TUN_SIGNATURES={
+    'JAVA_TCP4':(4,'tcp','host-control',46151),
+    'JAVA_UDP4':(4,'udp','documentation-v4',46152),
+    'NATIVE_TCP4':(4,'tcp','host-control',46153),
+    'NATIVE_UDP4':(4,'udp','documentation-v4',46154),
+    'DNS_LOOKUP_TEST':(4,'udp','synthetic-dns',53),
+}
+
+def require_tun_operation(observations,op):
+    """Match the fixed operation tuple within this case's reset-bounded logs."""
+    assert ('BEGIN op='+op in observations and
+            any(line.startswith('END op='+op+' ') for line in observations)), 'Missing operation bounds: '+op
+    family,protocol,category,port=TUN_SIGNATURES[op]
+    packet=re.compile(r'PACKET mode=[A-Z_]+ family='+str(family)+
+                      r' protocol='+protocol+r' category='+category+
+                      r' port='+str(port)+r' count=[0-9]+')
+    # The fixture observer is a separate process: delivery can follow END.
+    assert any(packet.fullmatch(line) for line in observations), 'Missing per-operation TUN evidence: '+op
+
+
 def case_packets(captures,case):
     rows=[]
     for name,packets_ in captures.items():
@@ -122,8 +160,7 @@ def run_case(name,mode):
     begin=time.time()
     output=adb('shell','am','instrument','-w','-r','-e','suite','network','-e','case',name,
         'com.privacydecoy.app.test/com.privacydecoy.research.PrototypeTestRunner',timeout=150)
-    time.sleep(.4)  # Include trailing fixed packets before closing the case interval.
-    capture_end=capture_offsets()
+    capture_end=capture_end_after_quiescence()
     end=time.time();observations=logs()
     # Both the runner summary and a fixed PASS record are mandatory (no skip/zero-test escape).
     passed='Tests run: 1, Failures: 0' in output and 'PASS '+name in observations
@@ -260,11 +297,8 @@ def analyze():
         if name=='testDirectProcessRestrictions':assert not rows,'Restricted process emitted fixed traffic'
         if name in ('testFullTunnel','testPerAppInclude'):
             assert not rows,'Fixed target escaped full VPN route'
-            for op in ('JAVA_TCP4','JAVA_UDP4','NATIVE_TCP4','NATIVE_UDP4','DNS_LOOKUP_TEST'):
-                assert 'BEGIN op='+op+'\n' in obs and 'END op='+op+' ' in obs, 'Missing operation bounds: '+op
-                window=obs.split('BEGIN op='+op+'\n',1)[1].split('END op='+op,1)[0]
-                port={'JAVA_TCP4':46151,'JAVA_UDP4':46152,'NATIVE_TCP4':46153,'NATIVE_UDP4':46154,'DNS_LOOKUP_TEST':53}[op]
-                assert re.search(r'PACKET .* port='+str(port)+r' ',window),'Missing per-operation TUN evidence: '+op
+            for op in TUN_SIGNATURES:
+                require_tun_operation(case['observations'],op)
             assert 'category=synthetic-dns port=53' in obs,'Missing controlled DNS TUN evidence'
             case['ipv6']={}
             for op in ('JAVA_UDP6','NATIVE_UDP6'):

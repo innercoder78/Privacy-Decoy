@@ -120,4 +120,116 @@ class LockdownReadinessTests(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError,r'^Lockdown setup failed: package-unavailable$'):
                 evidence.lockdown_setup_control(deadline_seconds=1,interval=0)
 
+
+class CaptureQuiescenceTests(unittest.TestCase):
+    def settle(self,offsets):
+        elapsed=[0.0]
+        def sleep(seconds):
+            elapsed[0]+=seconds
+        with mock.patch.object(evidence.time,'monotonic',side_effect=lambda:elapsed[0]), \
+             mock.patch.object(evidence.time,'sleep',side_effect=sleep), \
+             mock.patch.object(evidence,'capture_offsets',side_effect=lambda:offsets(elapsed[0])), \
+             mock.patch.object(evidence,'adb') as adb:
+            result=evidence.capture_end_after_quiescence(interval=.125)
+        adb.assert_not_called()
+        return result,elapsed[0]
+
+    def test_stable_sizes_wait_for_minimum_observation(self):
+        offsets={'physical.pcap':24,'wifi.pcap':80}
+        result,elapsed=self.settle(lambda _:dict(offsets))
+        self.assertEqual(result,offsets)
+        self.assertEqual(elapsed,1.0)
+
+    def test_changes_in_either_capture_restart_quiet_interval(self):
+        def offsets(t):
+            return {'physical.pcap':24 if t<.875 else 100,
+                    'wifi.pcap':24 if t<1.25 else 200}
+        result,elapsed=self.settle(offsets)
+        self.assertEqual(result,{'physical.pcap':100,'wifi.pcap':200})
+        self.assertEqual(elapsed,1.75)
+
+    def test_continuous_changes_return_final_offsets_at_deadline(self):
+        result,elapsed=self.settle(lambda t:{'physical.pcap':24+int(t*1000),
+                                            'wifi.pcap':48+int(t*2000)})
+        self.assertEqual(elapsed,3.0)
+        self.assertEqual(result,{'physical.pcap':3024,'wifi.pcap':6048})
+
+    def test_run_case_instruments_once_and_uses_settled_offsets(self):
+        start={'physical.pcap':24,'wifi.pcap':24}
+        end={'physical.pcap':100,'wifi.pcap':200}
+        with mock.patch.object(evidence,'reset'), \
+             mock.patch.object(evidence,'capture_offsets',return_value=start), \
+             mock.patch.object(evidence,'capture_end_after_quiescence',return_value=end) as settle, \
+             mock.patch.object(evidence,'adb',return_value='Tests run: 1, Failures: 0') as adb, \
+             mock.patch.object(evidence,'logs',return_value='PASS testFullTunnel'), \
+             mock.patch('builtins.print'):
+            case=evidence.run_case('testFullTunnel',None)
+        adb.assert_called_once()
+        self.assertEqual(adb.call_args.args[:3],('shell','am','instrument'))
+        settle.assert_called_once_with()
+        self.assertEqual(case['captureStart'],start)
+        self.assertEqual(case['captureEnd'],end)
+        self.assertTrue(case['passed'])
+
+class TunAttributionTests(unittest.TestCase):
+    # Independent expected tuples prevent the tests from merely echoing the map.
+    signatures=(('JAVA_TCP4',4,'tcp','host-control',46151),
+                ('JAVA_UDP4',4,'udp','documentation-v4',46152),
+                ('NATIVE_TCP4',4,'tcp','host-control',46153),
+                ('NATIVE_UDP4',4,'udp','documentation-v4',46154),
+                ('DNS_LOOKUP_TEST',4,'udp','synthetic-dns',53))
+
+    def packet(self,family,protocol,category,port):
+        return (f'PACKET mode=FULL_TUNNEL family={family} protocol={protocol} '
+                f'category={category} port={port} count=1')
+
+    def bounds(self,op):
+        return ['BEGIN op='+op,'END op='+op+' result=success']
+
+    def test_exact_signatures_before_and_after_end(self):
+        for op,*signature in self.signatures:
+            for delayed in (False,True):
+                with self.subTest(op=op,delayed=delayed):
+                    obs=self.bounds(op)
+                    obs.insert(2 if delayed else 1,self.packet(*signature))
+                    evidence.require_tun_operation(obs,op)
+
+    def test_wrong_tuple_or_missing_packet_fails(self):
+        for op,family,protocol,category,port in self.signatures:
+            for changes in ({'port':port+1},{'category':'other'},
+                            {'category':'platform-dns'},{'family':6},
+                            {'protocol':'udp' if protocol=='tcp' else 'tcp'}):
+                with self.subTest(op=op,changes=changes):
+                    fields=dict(family=family,protocol=protocol,category=category,port=port)
+                    fields.update(changes)
+                    with self.assertRaisesRegex(AssertionError,'Missing per-operation TUN evidence: '+op):
+                        evidence.require_tun_operation(self.bounds(op)+[self.packet(**fields)],op)
+            with self.assertRaisesRegex(AssertionError,'Missing per-operation TUN evidence: '+op):
+                evidence.require_tun_operation(self.bounds(op),op)
+
+    def test_udp4_requires_documentation_destination_not_host_control(self):
+        for op,port in (('JAVA_UDP4',46152),('NATIVE_UDP4',46154)):
+            with self.subTest(op=op):
+                evidence.require_tun_operation(
+                    self.bounds(op)+[self.packet(4,'udp','documentation-v4',port)],op)
+                with self.assertRaisesRegex(AssertionError,'Missing per-operation TUN evidence: '+op):
+                    evidence.require_tun_operation(
+                        self.bounds(op)+[self.packet(4,'udp','host-control',port)],op)
+
+    def test_native_udp4_packet_in_other_case_cannot_satisfy_current_case(self):
+        op='NATIVE_UDP4'
+        previous=self.bounds(op)+[self.packet(4,'udp','documentation-v4',46154)]
+        current=self.bounds(op)
+        evidence.require_tun_operation(previous,op)
+        with self.assertRaisesRegex(AssertionError,'Missing per-operation TUN evidence: NATIVE_UDP4'):
+            evidence.require_tun_operation(current,op)
+
+    def test_both_exact_operation_markers_are_required(self):
+        op='NATIVE_UDP4';packet=self.packet(4,'udp','documentation-v4',46154)
+        for bounds in ([],self.bounds(op)[:1],self.bounds(op)[1:],
+                       self.bounds(op+'_OTHER')):
+            with self.subTest(bounds=bounds):
+                with self.assertRaisesRegex(AssertionError,'Missing operation bounds: '+op):
+                    evidence.require_tun_operation(bounds+[packet],op)
+
 if __name__=='__main__':unittest.main()

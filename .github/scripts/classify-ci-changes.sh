@@ -7,6 +7,7 @@ baseline=false
 containment=false
 network=false
 managed=false
+admission=false
 
 while IFS= read -r path; do
   [[ -z "$path" ]] && continue
@@ -38,6 +39,15 @@ while IFS= read -r path; do
       managed=true
       ;;
 
+    android/test-apps/ag1-java-fixture/*|\
+    android/test-apps/ag1-dynamic-fixture/*|\
+    android/tools/ag1-admission-analyzer.py|\
+    android/tools/test-ag1-admission-analyzer.py|\
+    android/tools/run-ag1-admission-fixtures.sh)
+      baseline=true
+      admission=true
+      ;;
+
     android/probe-app/*|\
     android/research-native/*|\
     android/app/src/androidTest/java/com/privacydecoy/research/PrototypeTestRunner.java|\
@@ -52,6 +62,7 @@ while IFS= read -r path; do
       containment=true
       network=true
       managed=true
+      admission=true
       ;;
   esac
 done
@@ -60,5 +71,6 @@ printf 'baseline=%s\n' "$baseline"
 printf 'containment=%s\n' "$containment"
 printf 'network=%s\n' "$network"
 printf 'managed=%s\n' "$managed"
-printf 'CI_CHANGESET baseline=%s containment=%s network=%s managed=%s\n' \
-  "$baseline" "$containment" "$network" "$managed" >&2
+printf 'admission=%s\n' "$admission"
+printf 'CI_CHANGESET baseline=%s containment=%s network=%s managed=%s admission=%s\n' \
+  "$baseline" "$containment" "$network" "$managed" "$admission" >&2

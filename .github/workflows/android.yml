@@ -18,6 +18,7 @@ jobs:
       containment: ${{ steps.classify.outputs.containment }}
       network: ${{ steps.classify.outputs.network }}
       managed: ${{ steps.classify.outputs.managed }}
+      admission: ${{ steps.classify.outputs.admission }}
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -38,13 +39,14 @@ jobs:
             'baseline=true' \
             'containment=true' \
             'network=true' \
-            'managed=true' >> "$GITHUB_OUTPUT"
+            'managed=true' \
+            'admission=true' >> "$GITHUB_OUTPUT"
 
           case "$EVENT_NAME" in
             pull_request) base_sha=$PR_BASE_SHA ;;
             push) base_sha=$EVENT_BEFORE_SHA ;;
             *)
-              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (unexpected event)'
+              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (unexpected event)'
               exit 0
               ;;
           esac
@@ -52,20 +54,20 @@ jobs:
           sha_pattern='^[0-9a-f]{40}$'
           if ! [[ "$base_sha" =~ $sha_pattern && "$TESTED_SHA" =~ $sha_pattern ]] ||
              [[ "$base_sha" == 0000000000000000000000000000000000000000 ]]; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (unresolved comparison)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (unresolved comparison)'
             exit 0
           fi
 
           changed_files=$(mktemp)
           if ! git diff --name-only --diff-filter=ACDMRTUXB "$base_sha" "$TESTED_SHA" > "$changed_files"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (diff failed)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (diff failed)'
             exit 0
           fi
 
           cat "$changed_files"
           classification=$(mktemp)
           if ! .github/scripts/classify-ci-changes.sh < "$changed_files" > "$classification"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true (classification failed)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true (classification failed)'
             exit 0
           fi
           tee -a "$GITHUB_OUTPUT" < "$classification"
@@ -159,6 +161,35 @@ jobs:
       - name: Run controlled containment instrumentation
         working-directory: android
         run: bash tools/run-containment-emulator.sh
+
+  admission-feasibility:
+    needs: changes
+    if: needs.changes.outputs.admission == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up JDK 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify wrapper JAR
+        working-directory: android
+        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
+      - name: Install static fixture toolchain
+        run: >-
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          "platforms;android-37.0" "build-tools;36.0.0"
+          "ndk;27.2.12479018" "cmake;3.22.1"
+      - name: Test admission analyzer model
+        run: python3 android/tools/test-ag1-admission-analyzer.py
+      - name: Build and statically inspect controlled fixtures
+        working-directory: android
+        run: bash tools/run-ag1-admission-fixtures.sh
 
   network-feasibility:
     needs: changes
