@@ -87,17 +87,167 @@ done
 adb install -t app/build/outputs/apk/debug/app-debug.apk >"$tmp/install.log" 2>&1
 adb install -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk >>"$tmp/install.log" 2>&1
 [[ -z "$(adb shell pm path com.privacydecoy.ag1.precode | tr -d '\r')" ]]
+instrumentation_exit=0
 timeout 240 adb shell am instrument -w -r -e suite ag1runtime \
   -e ag1Generation "${identity[0]}" -e ag1Sha "${identity[1]}" -e ag1Admission EXPERIMENTAL_ELIGIBLE \
-  com.privacydecoy.app.test/com.privacydecoy.research.PrototypeTestRunner >"$tmp/instrumentation.log" 2>&1
-python3 - "$tmp/instrumentation.log" <<'PY'
+  com.privacydecoy.app.test/com.privacydecoy.research.PrototypeTestRunner >"$tmp/instrumentation.log" 2>&1 || instrumentation_exit=$?
+python3 - "$tmp/instrumentation.log" "$instrumentation_exit" <<'PY'
 import pathlib, re, sys
-text=pathlib.Path(sys.argv[1]).read_text()
-codes=re.findall(r'^INSTRUMENTATION_STATUS_CODE: (-?\d+)\s*$',text,re.M)
-assert codes == ['1','0']*8, 'Expected eight starts/passes, zero failures or skips'
-assert 'Tests run: 8, Failures: 0' in text, 'Missing complete suite result'
-assert re.search(r'^INSTRUMENTATION_CODE: -1\s*$',text,re.M), 'Instrumentation did not finish successfully'
-assert 'INSTRUMENTATION_FAILED' not in text, 'Instrumentation failed'
+# Never echo transcript fragments. Even printable text can contain private data.
+names = sorted((
+    'testLaunchPolicyHardStopsBeforeBinding',
+    'testArtifactAndGenerationMismatchBeforeBinding',
+    'testUpdatedGenerationCannotInheritConsent',
+    'testMissingPrerequisiteNeverReady',
+    'testRunBeforeReadyHasZeroGuestClassLoads',
+    'testRevocationAndReplayBeforeTransfer',
+    'testProcessDeathInvalidatesAuthorization',
+    'testExactExperimentalExecutionAfterBarrier',
+))
+safe_messages = {
+    'bounded analyzer arguments missing', 'real admission must be Experimental only',
+    'embedded artifact differs from analyzer', 'embedded generation differs from analyzer',
+    'invalid launch crossed manager gate', 'denied state exposed guest bytes',
+    'negative evidence missing', 'negative path reached guest code',
+    'negative path transferred guest bytes', 'bootstrap denied',
+    'missing prerequisite reached READY', 'missing prerequisite recorded READY',
+    'unknown prerequisites reached READY', 'service accepted pre-READY RUN',
+    'revoked service accepted RUN', 'replayed session accepted RUN', 'revoked session rearmed',
+    'death retained authority', 'replacement denied', 'replacement reused process',
+    'dead claim regained authority', 'isolated identity equals manager',
+    'exact Experimental bootstrap denied', 'controlled execution failed',
+    'pre-code ordering violated', 'fixture events missing', 'controlled event preceded barrier',
+    'execution was not exactly once', 'second invocation authorized',
+    'service replay authorized', 'replay ran guest again', 'controlled guest must never be installed',
+}
+safe_exceptions = {
+    'IllegalStateException', 'IllegalArgumentException', 'SecurityException',
+    'NullPointerException', 'RemoteException', 'DeadObjectException', 'TimeoutException',
+    'ExecutionException', 'InterruptedException', 'IOException', 'FileNotFoundException',
+    'ClassNotFoundException', 'NoSuchMethodException', 'InvocationTargetException',
+    'IllegalAccessException', 'ErrnoException', 'RuntimeException', 'unknown',
+}
+def detail(value, name):
+    prefix = name + ': '
+    if not value.startswith(prefix):
+        return 'redacted'
+    value = value[len(prefix):]
+    if len(value) > 100 or re.fullmatch(r'[A-Za-z :\-]+', value) is None:
+        return 'redacted'
+    if value in safe_messages:
+        return value
+    prefix = 'platform-or-harness-exception:'
+    if value.startswith(prefix) and value[len(prefix):] in safe_exceptions:
+        return value
+    return 'redacted'
+
+malformed = False
+try:
+    with pathlib.Path(sys.argv[1]).open('rb') as source:
+        raw = source.read(256 * 1024 + 1)
+    malformed = len(raw) > 256 * 1024
+    text = raw[:256 * 1024].decode('utf-8', errors='strict')
+except (OSError, UnicodeError):
+    text = ''; malformed = True
+failed_marker = 'INSTRUMENTATION_FAILED' in text
+events, totals, finals = [], [], []
+pending = {}
+observed = {name: [] for name in names}
+details = {name: [] for name in names}
+known_codes = {'1', '0', '-1', '-2', '-3', '-4'}
+def status_label(value):
+    # Preserve bounded numeric status codes, never arbitrary protocol payloads.
+    return value if re.fullmatch(r'-?(?:0|[1-9][0-9]?)', value) else 'invalid'
+
+unknown_test = False
+for line in text.splitlines():
+    if not line:
+        continue
+    if len(line) > 2048:
+        malformed = True
+        continue
+    if line.startswith('INSTRUMENTATION_STATUS: '):
+        key, separator, value = line[len('INSTRUMENTATION_STATUS: '):].partition('=')
+        if not separator or key not in {'id', 'class', 'test', 'numtests', 'current', 'stream', 'stack'} or key in pending:
+            malformed = True
+        else:
+            pending[key] = value
+    elif line.startswith('INSTRUMENTATION_STATUS_CODE: '):
+        code = line[len('INSTRUMENTATION_STATUS_CODE: '):]
+        name = pending.get('test')
+        if len(events) >= 32:
+            malformed = True
+            pending = {}
+            continue
+        events.append((name, code))
+        if name not in observed:
+            unknown_test = True
+        else:
+            observed[name].append(status_label(code))
+            if code in {'-1', '-2'} and len(details[name]) < 2:
+                details[name].append(detail(pending.get('stack', ''), name))
+            if (pending.get('id') != 'PrivacyDecoyPrototype'
+                    or pending.get('class') != 'com.privacydecoy.research.ag1.Ag1RuntimeTests'
+                    or pending.get('numtests') != '8'
+                    or pending.get('current') != str(names.index(name) + 1)):
+                malformed = True
+        if code not in known_codes or finals or totals:
+            malformed = True
+        pending = {}
+    elif line.startswith('INSTRUMENTATION_RESULT: stream='):
+        value = line[len('INSTRUMENTATION_RESULT: stream='):]
+        match = re.fullmatch(r'Tests run: ([0-8]), Failures: ([0-8])', value)
+        totals.append(match.groups() if match else None)
+        if not match or pending or finals:
+            malformed = True
+    elif line.startswith('INSTRUMENTATION_CODE: '):
+        value = line[len('INSTRUMENTATION_CODE: '):]
+        finals.append(status_label(value))
+        if pending:
+            malformed = True
+    else:
+        # Unknown fields, continuations, stack traces and raw command errors never print.
+        malformed = True
+if pending:
+    malformed = True
+
+# Bounded output: eight fixed names, at most eight status labels and two details each.
+for name in names:
+    codes = observed[name]
+    started, passed = '1' in codes, '0' in codes
+    failed = any(code in {'-1', '-2'} for code in codes)
+    result = 'FAIL' if failed else 'PASS' if codes == ['1', '0'] else 'MISSING' if not codes else 'INCOMPLETE'
+    statuses = ','.join(codes[:8]) or 'none'
+    if len(codes) > 8:
+        statuses += ',overflow'
+    print(f'AG1B_TEST name={name} codes={statuses} started={str(started).lower()} '
+          f'passed={str(passed).lower()} failed={str(failed).lower()} result={result}')
+    for value in details[name]:
+        print('AG1B_DETAIL ' + value)
+if len(totals) == 1 and totals[0] is not None:
+    print(f'AG1B_TOTAL Tests run: {totals[0][0]}, Failures: {totals[0][1]}')
+else:
+    print('AG1B_TOTAL missing-or-invalid')
+print('AG1B_FINAL code=' + (finals[0] if len(finals) == 1 else 'missing-or-invalid')
+      + ' instrumentation_failed=' + str(failed_marker).lower())
+
+reasons = []
+if any(code in {'-1', '-2'} for codes in observed.values() for code in codes):
+    reasons.append('device-test-failure')
+if unknown_test or any(codes.count('1') != 1 or len(codes) != 2 for codes in observed.values()):
+    reasons.append('test-count-invalid')
+expected = [(name, code) for name in names for code in ('1', '0')]
+if malformed or events != expected:
+    reasons.append('status-sequence-invalid')
+if totals != [('8', '0')]:
+    reasons.append('test-count-invalid')
+if finals != ['-1'] or failed_marker or len(sys.argv) != 3 or sys.argv[2] != '0':
+    reasons.append('instrumentation-incomplete')
+for reason in dict.fromkeys(reasons):
+    print('AG1B_RESULT ' + reason)
+if reasons:
+    raise SystemExit(1)
+print('AG1B_RESULT pass')
 print('AG-1B: eight device tests, zero failures/skips; API 35 Google APIs x86_64 debug; Experimental only.')
 PY
 [[ -z "$(adb shell pm path com.privacydecoy.ag1.precode | tr -d '\r')" ]]

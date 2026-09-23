@@ -223,3 +223,44 @@ ShadowHook, Pine, external engine, or other runtime dependency/source is added.
 Only controlled synthetic data is used; no ordinary private data or real accounts.
 Canonical PR 5's owner gate has not occurred. Canonical production PR 6 remains
 unauthorized. AG-1 remains in progress, and this slice does not authorize AG-1C.
+
+## First exact-head AG-1B device run
+
+For PR #21 head `6dbe461ba3202b758c5ce512bdc30d4d5534377b`, Actions run
+#142 passed `changes`, `validate`, `containment-prototype`,
+`admission-feasibility`, `network-feasibility`, and
+`managed-profile-feasibility`. `admission-runtime-feasibility` failed after
+reaching the AG-1B emulator runner. The surfaced diagnostic was only the generic
+assertion `Expected eight starts/passes, zero failures or skips`; cleanup removed
+the redirected instrumentation transcript. The exact device-test failure at
+that head therefore remains **Unknown**. These results do not establish an
+AG-1B runtime-policy defect or AG-1B device success.
+
+This diagnostic-only revision prints a bounded summary before result validation:
+the eight allowlisted test names, observed status labels, start/pass/failure
+flags, final test totals, final instrumentation code, and presence of an
+instrumentation-failed marker. Fixed result labels distinguish device failures,
+invalid test counts, invalid status sequences, and incomplete termination.
+An unsuccessful instrumentation command still reaches the summary parser and
+still fails the job.
+
+Failure details require an exact known assertion message or an allowlisted
+exception category, at most 100 characters, using only ASCII letters, spaces,
+colons, and hyphens. Other details become `redacted`. Unknown test names, raw
+transcripts, stack traces, paths, hashes, identities, and timestamps are never
+printed. Transcript input and summary output are bounded; malformed, oversized,
+unexpected, duplicate, missing, skipped, or unsuccessful results fail closed.
+Exactly eight recognized starts and passes, zero failures/skips, exact successful
+totals, successful termination, and absence of `INSTRUMENTATION_FAILED` remain
+mandatory. No security assertion or AG-1B Java policy/test semantics is weakened,
+and no security-test retry is added. Local Linux/KVM device reproduction remains
+unavailable. No AG-1B device success is claimed; the next exact-head CI run must
+provide the missing evidence.
+
+Local diagnostic validation passed shell syntax, all 57 existing Python tests,
+and 16 synthetic parser cases, including clean passes, a recognized failure,
+the missing eighth test, unexpected status, missing final code, and unsafe detail
+redaction. Additional cases covered skips, duplicate fields/completion, unknown
+names, oversized input/details, exception allowlisting, printable secret text,
+the failed marker, and command timeout. Synthetic transcripts remain uncommitted
+temporary build products.
