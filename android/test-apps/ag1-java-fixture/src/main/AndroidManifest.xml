@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:allowBackup="false" android:hasCode="true"
+        android:label="AG-1A Java fixture" android:usesCleartextTraffic="false" />
+</manifest>
