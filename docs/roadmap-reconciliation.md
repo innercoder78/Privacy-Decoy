@@ -71,6 +71,10 @@ continue through the admission-gated hypothesis recorded by
 [ADR-0007](decisions/ADR-0007-admission-gated-controlled-runtime.md). The old
 synthesis remains historical evidence and is not retroactively rewritten.
 
-AG-1 is supplemental feasibility work before canonical production PR 6, which
-remains unstarted until AG-1 succeeds. No third-party engine is selected
-wholesale. This documentation decision has no hardcoded future GitHub PR number.
+AG-1 is supplemental feasibility work before canonical production PR 6.
+Canonical PR 6 remains unstarted. AG-1 success is necessary but not sufficient:
+after AG-1, its evidence must be reviewed through the still-mandatory canonical
+Roadmap PR 5 STOP/owner gate, and explicit project-owner approval is required
+before PR 6 may begin. AG-1 failure favors STOP rather than weakening Protected
+Mode. No third-party engine is selected wholesale. This documentation decision
+has no hardcoded future GitHub PR number.

@@ -22,10 +22,12 @@ and [open-source reference catalog](docs/open-source-reference-catalog.md) befor
 architecture or reuse work. No third-party engine is selected wholesale.
 
 **AG-1 — Admission-Gated Controlled Runtime Feasibility Checkpoint** is next.
-Canonical production Roadmap PR 6 remains unstarted and pending AG-1; passing
-AG-1 would not itself prove production privacy. Only controlled fixtures and test
-applications are authorized during AG-1. Ordinary private user data and real
-accounts remain prohibited.
+Canonical production Roadmap PR 6 remains unstarted. AG-1 success is a
+prerequisite, not authorization: AG-1 evidence must then pass the still-mandatory
+canonical Roadmap PR 5 STOP/owner gate, with explicit project-owner approval
+required before PR 6 may begin. Passing AG-1 does not itself establish production
+privacy. Only controlled fixtures and test applications are authorized during
+AG-1. Ordinary private user data and real accounts remain prohibited.
 
 Historical evidence is preserved: S1 is **FALSIFIED**, its follow-up is
 **BLOCKED**, Blacks-BlackBox is **STOPPED_UNRESOLVED**, and the exact reviewed
