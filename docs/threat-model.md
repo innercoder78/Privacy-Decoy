@@ -160,9 +160,13 @@ PR 5 owned networking investigation, and Roadmap PR 6 was the mandatory user
 STOP decision. The merged historical Roadmap PR 6 **A — REDESIGN** decision
 remains valid evidence and retains its label. The restored canonical roadmap
 independently requires mandatory STOP gates at Roadmap PR 5 and Roadmap PR 20.
-The exact canonical sequence and amendment refinements remain unavailable, and
-implementation remains blocked until their restoration and review; see
-[roadmap reconciliation](roadmap-reconciliation.md).
+The canonical roadmap and amendment are restored. Canonical Roadmap PR 5 and
+Roadmap PR 20 remain mandatory STOP gates. ADR-0007 authorizes only supplemental
+AG-1 feasibility work; canonical production PR 6 remains unstarted. AG-1 success
+is necessary but not sufficient: its evidence must be reviewed through the
+canonical Roadmap PR 5 STOP/owner gate, and explicit project-owner approval is
+required before PR 6 may begin. AG-1 failure favors STOP rather than weakening
+Protected Mode; see [roadmap reconciliation](roadmap-reconciliation.md).
 
 ## Abuse cases and required evidence
 

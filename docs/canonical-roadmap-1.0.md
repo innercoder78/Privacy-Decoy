@@ -514,10 +514,13 @@ Do not assume the outside copy automatically has access to every genuine value.
 
 ### AG-1 — Admission-Gated Controlled Runtime Feasibility Checkpoint
 
-AG-1 is **not** a renumbered canonical PR. It is supplemental work inserted by
-ADR-0007 before canonical production Roadmap PR 6. Canonical PR 6 remains
-unstarted until AG-1 succeeds, and passing AG-1 does not itself establish
-production privacy or authorize broad implementation.
+AG-1 is **not** a renumbered canonical PR. It is supplemental feasibility work
+inserted by ADR-0007 before canonical production Roadmap PR 6. Canonical PR 6
+remains unstarted. AG-1 success is necessary but not sufficient: after AG-1, its
+evidence must be reviewed through the still-mandatory canonical Roadmap PR 5
+STOP/owner gate, and explicit project-owner approval is required before PR 6 may
+begin. Passing AG-1 does not establish production privacy or authorize broad
+implementation. AG-1 failure favors STOP rather than weakening Protected Mode.
 
 Using controlled fixtures only, AG-1 must answer:
 
@@ -525,7 +528,7 @@ Using controlled fixtures only, AG-1 must answer:
    code runs?
 2. Can it detect native libraries, executable splits, dynamic-code mechanisms,
    and opaque/packed cases sufficiently to report honest Protected,
-   Experimental, Unsupported/known-unsafe, and Incompatible outcomes?
+   Experimental, Known unsafe, and Incompatible outcomes?
 3. Can all mandatory Protected mediation be established before providers,
    `Application`, native initializers, or target code?
 4. Can unexpected dynamic executable content be blocked or demoted from
@@ -567,7 +570,8 @@ Failure of the hypothesis favors STOP over weakening Protected Mode.
 * **PR 40:** regressions cover admission generation, update invalidation,
   unexpected executable code, known-unsafe hard stop, and Experimental consent.
 * **PR 43:** documentation explains Protected eligible, Experimental eligible,
-  Unsupported/known unsafe, and Incompatible outcomes.
+  Known unsafe, and Incompatible app-admission outcomes, while keeping canonical
+  capability coverage `Unsupported` distinct.
 * **PR 46:** final readiness rejects every claim that mixes Experimental-only
   compatibility with Protected support.
 

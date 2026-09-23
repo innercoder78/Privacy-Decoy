@@ -143,6 +143,10 @@ This historical PR 4/5/6 research sequence remains valid scoped evidence/history
 it does not replace the restored canonical 46-PR roadmap. Canonical Roadmap PR 5
 and Roadmap PR 20 remain mandatory STOP gates. Historical Roadmap PR 6 REDESIGN
 is not renamed. The roadmap source and amendment refinements are restored; future work must
-follow that canonical governance. Product implementation remains paused pending a
-separate architecture/feasibility decision; see [roadmap
-reconciliation](roadmap-reconciliation.md).
+follow that canonical governance. Broad production implementation remains
+paused. ADR-0007 authorizes only AG-1 supplemental feasibility work; canonical
+production PR 6 remains unstarted. AG-1 success is necessary but not sufficient:
+its evidence must be reviewed through the still-mandatory canonical Roadmap PR 5
+STOP/owner gate, and explicit project-owner approval is required before PR 6 may
+begin. AG-1 failure favors STOP rather than weakening Protected Mode; see
+[roadmap reconciliation](roadmap-reconciliation.md).

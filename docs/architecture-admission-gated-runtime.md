@@ -49,7 +49,7 @@ Capability/coverage resolution
         |
         +--> Experimental eligible
         |
-        +--> Unsupported / known unsafe
+        +--> Known unsafe
         |
         +--> Incompatible
 ```
@@ -135,10 +135,19 @@ and unproven.
   scope is mediated or fail-closed; no mandatory Unknown remains.
 * **Experimental eligible:** only unresolved/Unknown coverage prevents Protected,
   and there is neither a positively known mandatory bypass nor incompatibility.
-* **Unsupported / known unsafe:** a mandatory bypass or genuine-state exposure
-  outside enforceable mediation is positively identified; hard stop, no checkbox.
-* **Incompatible:** the app fundamentally requires Android semantics PD cannot
-  provide; hard stop, distinct from privacy coverage.
+* **Known unsafe:** a mandatory privacy-breaking bypass or genuine-state
+  exposure outside enforceable mediation is positively established; hard stop,
+  with no Experimental option and no Protected execution.
+* **Incompatible:** the app requires Android/runtime semantics PD cannot safely
+  and correctly provide; hard stop, with no Experimental option and no Protected
+  execution.
+
+These app-admission outcomes are distinct from PD-REQ-020 capability coverage.
+Capability `Unsupported` means PD intentionally and reliably blocks that
+capability, which can be a safe fail-closed result rather than a privacy bypass.
+An application may be Incompatible when it requires such a blocked capability.
+Unknown/unproven coverage may qualify only for Experimental mode under ADR-0007;
+it never becomes Known unsafe or Protected merely by classification.
 
 ## 12. Update/re-analysis
 
@@ -223,7 +232,11 @@ AG-1 is the supplemental, controlled-fixture checkpoint before canonical
 production Roadmap PR 6. It must demonstrate honest four-way admission,
 pre-code mandatory mediation, executable-code blocking/demotion, distinct
 Protected/Experimental behavior, and fail-closed failure without prohibited
-privilege or product mechanisms. Passing AG-1 is not production privacy evidence.
+privilege or product mechanisms. AG-1 success is necessary but not sufficient to
+begin PR 6: its evidence must then be reviewed through the still-mandatory
+canonical Roadmap PR 5 STOP/owner gate, and explicit project-owner approval is
+required. Passing AG-1 is not production privacy evidence; failure favors STOP
+rather than weakening Protected Mode.
 
 ## 20. Non-goals and retained invariants
 

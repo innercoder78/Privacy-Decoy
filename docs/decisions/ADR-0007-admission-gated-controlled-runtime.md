@@ -60,7 +60,10 @@ The owner rejects the current STOP disposition and authorizes only the bounded
 AG-1 admission-gated feasibility checkpoint described in the canonical roadmap.
 Broad production implementation is not silently authorized.
 
-* Canonical production Roadmap PR 6 remains pending until AG-1 succeeds.
+* Canonical production Roadmap PR 6 remains unstarted. AG-1 success is a
+  prerequisite, not authorization: its evidence must be reviewed through the
+  still-mandatory canonical Roadmap PR 5 STOP/owner gate, and explicit
+  project-owner approval is required before PR 6 may begin.
 * Only controlled fixtures and test applications are authorized during AG-1.
   Ordinary private user data and real accounts remain prohibited.
 * Historical evidence, including S1 **FALSIFIED**, its follow-up **BLOCKED**,
