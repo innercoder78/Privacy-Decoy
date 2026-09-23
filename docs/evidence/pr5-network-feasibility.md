@@ -335,3 +335,23 @@ and production privacy claims are unchanged. Deterministic host regression tests
 cover settling, deadlines, both offsets, single instrumentation dispatch and exact
 case-local attribution. Successful stabilization is not established until the new
 exact-head GitHub Actions run supplies device and independent capture evidence.
+
+### PR #20 run #139 UDP tuple correction
+
+Exact-head run #139 on `8dad707701d77811db443bd9389a01eb20094542`
+passed all jobs except `network-feasibility`, which failed with
+`Missing per-operation TUN evidence: JAVA_UDP4`. The device operation emitted
+the expected family-4 UDP packet with category `documentation-v4` and port 46152;
+the newly introduced analyzer tuple incorrectly expected `host-control`.
+Source inspection confirms that `FixedNetworkProbe.JAVA_UDP4` and native UDP4
+in `android/research-native/src/main/cpp/probe.c` target `198.51.100.7`, which
+`FixtureVpnService` classifies as `documentation-v4`. Native UDP4 uses port 46154.
+
+This revision corrects only the matcher and independent test expectations for
+those two UDP tuples, with explicit rejection of `host-control`. TCP remains
+`host-control` and controlled DNS remains `synthetic-dns`. Capture quiescence,
+case-local exact matching, BEGIN/END requirements and delayed-after-END support
+are preserved. No measured operation, network policy, positive-control requirement,
+physical-capture requirement, lockdown assertion, Known Gap result or privacy
+claim is weakened. The next exact-head CI result remains pending; no success is
+claimed in advance.

@@ -126,9 +126,9 @@ def capture_end_after_quiescence(minimum_seconds=1.0,quiet_seconds=.5,
 
 TUN_SIGNATURES={
     'JAVA_TCP4':(4,'tcp','host-control',46151),
-    'JAVA_UDP4':(4,'udp','host-control',46152),
+    'JAVA_UDP4':(4,'udp','documentation-v4',46152),
     'NATIVE_TCP4':(4,'tcp','host-control',46153),
-    'NATIVE_UDP4':(4,'udp','host-control',46154),
+    'NATIVE_UDP4':(4,'udp','documentation-v4',46154),
     'DNS_LOOKUP_TEST':(4,'udp','synthetic-dns',53),
 }
 

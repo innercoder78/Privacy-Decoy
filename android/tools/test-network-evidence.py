@@ -174,9 +174,9 @@ class CaptureQuiescenceTests(unittest.TestCase):
 class TunAttributionTests(unittest.TestCase):
     # Independent expected tuples prevent the tests from merely echoing the map.
     signatures=(('JAVA_TCP4',4,'tcp','host-control',46151),
-                ('JAVA_UDP4',4,'udp','host-control',46152),
+                ('JAVA_UDP4',4,'udp','documentation-v4',46152),
                 ('NATIVE_TCP4',4,'tcp','host-control',46153),
-                ('NATIVE_UDP4',4,'udp','host-control',46154),
+                ('NATIVE_UDP4',4,'udp','documentation-v4',46154),
                 ('DNS_LOOKUP_TEST',4,'udp','synthetic-dns',53))
 
     def packet(self,family,protocol,category,port):
@@ -207,16 +207,25 @@ class TunAttributionTests(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError,'Missing per-operation TUN evidence: '+op):
                 evidence.require_tun_operation(self.bounds(op),op)
 
+    def test_udp4_requires_documentation_destination_not_host_control(self):
+        for op,port in (('JAVA_UDP4',46152),('NATIVE_UDP4',46154)):
+            with self.subTest(op=op):
+                evidence.require_tun_operation(
+                    self.bounds(op)+[self.packet(4,'udp','documentation-v4',port)],op)
+                with self.assertRaisesRegex(AssertionError,'Missing per-operation TUN evidence: '+op):
+                    evidence.require_tun_operation(
+                        self.bounds(op)+[self.packet(4,'udp','host-control',port)],op)
+
     def test_native_udp4_packet_in_other_case_cannot_satisfy_current_case(self):
         op='NATIVE_UDP4'
-        previous=self.bounds(op)+[self.packet(4,'udp','host-control',46154)]
+        previous=self.bounds(op)+[self.packet(4,'udp','documentation-v4',46154)]
         current=self.bounds(op)
         evidence.require_tun_operation(previous,op)
         with self.assertRaisesRegex(AssertionError,'Missing per-operation TUN evidence: NATIVE_UDP4'):
             evidence.require_tun_operation(current,op)
 
     def test_both_exact_operation_markers_are_required(self):
-        op='NATIVE_UDP4';packet=self.packet(4,'udp','host-control',46154)
+        op='NATIVE_UDP4';packet=self.packet(4,'udp','documentation-v4',46154)
         for bounds in ([],self.bounds(op)[:1],self.bounds(op)[1:],
                        self.bounds(op+'_OTHER')):
             with self.subTest(bounds=bounds):
