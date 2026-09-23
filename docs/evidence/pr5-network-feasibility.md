@@ -303,3 +303,35 @@ location. Route authorization comes from trusted test setup, not hostile code or
 broker self-attestation; production route validation remains a next-roadmap-stage question.
 PR 4 containment limitations remain unchanged. No requirement is globally
 satisfied by this debug prototype; PD-REQ-033/034/058 require actual observations.
+
+
+## PR #20 exact-head observation-harness stabilization
+
+PR #20 run #136 passed network feasibility. Run #137 failed after device
+operations with `Missing per-operation TUN evidence: NATIVE_UDP4`; run #138
+failed after device operations with `Missing independent physical positive control`.
+AG-1A admission feasibility was green on both latter heads. These failures
+occurred at different asynchronous observation boundaries; neither missing
+observation is accepted as successful network evidence.
+
+This revision replaces the fixed 0.4-second post-case wait with capture-size
+observation: at least one second after instrumentation, both physical and Wi-Fi
+offsets stable for 0.5 seconds, and a three-second overall deadline, sampled every
+0.1 seconds. Either file changing restarts the quiet interval. At the deadline,
+the final offsets bound the case even if sizes have not settled; all existing
+evidence assertions still apply. No packet contents are inspected while waiting.
+
+Mandatory IPv4/native/controlled-DNS TUN attribution now requires both BEGIN and
+END markers plus the operation's exact family/protocol/category/port tuple within
+the same reset-bounded case observations. A delayed fixture PACKET log after END
+can count; another case, wrong tuple, `other`, or platform DNS cannot substitute.
+This removes dependence on cross-process textual placement. IPv6 remains
+preliminary with its existing observation handling unchanged.
+
+Measured operations remain single-shot. All physical positive controls, required
+TUN evidence, no-fixed-egress assertions, distinct VPN-loss calibration and verified
+lockdown checks remain mandatory; missing evidence still fails. Known Gap results
+and production privacy claims are unchanged. Deterministic host regression tests
+cover settling, deadlines, both offsets, single instrumentation dispatch and exact
+case-local attribution. Successful stabilization is not established until the new
+exact-head GitHub Actions run supplies device and independent capture evidence.
