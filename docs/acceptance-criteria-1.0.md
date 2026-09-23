@@ -59,3 +59,21 @@ whole. Evidence and compatibility are both required; neither substitutes for the
 other. The restored [canonical roadmap](canonical-roadmap-1.0.md) culminates in
 the PR 46 release-candidate and final-readiness gate. Source restoration does not
 satisfy any checklist item. No item is satisfied by this document's existence.
+
+## ADR-0007 admission and execution-class acceptance refinement
+
+All existing Protected-mode gates remain unchanged. Protected release claims
+still require no mandatory Unknown. Experimental & Unproven Compatibility Mode
+is a separate feature surface: an application that runs only experimentally MUST
+NOT appear in a Supported/Protected compatibility claim, and experimental runs
+cannot satisfy PD-REQ-083.
+
+If Experimental mode ships in 1.0, acceptance must test informed opt-in, exact
+version/artifact/split consent scope, update and re-analysis invalidation,
+persistent runtime and coverage/Ledger/diagnostic labeling, and hard stops for
+known-unsafe and incompatible results. It must also test that Experimental mode
+cannot waive external-VPN requirements, no-host-GPS fallback, repository privacy,
+data-minimization defaults, or any other invariant. Independent Android/native
+security review must explicitly assess the admission classifier, runtime
+executable-code gate, false classifications, and Protected/Experimental
+separation.

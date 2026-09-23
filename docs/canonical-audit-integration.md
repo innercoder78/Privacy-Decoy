@@ -166,7 +166,7 @@ That label is historical evidence and is not retroactively renamed. Canonical
 production-domain PR 6 has not started. The source gap is resolved, but product
 implementation remains paused for architecture/feasibility reasons. The
 [roadmap reconciliation](roadmap-reconciliation.md) records the variance and the
-separate status of open GitHub PR #10.
+separate historical status of merged GitHub PR #10.
 
 ## L. Restored PR-specific amendment refinements
 
@@ -350,3 +350,21 @@ security regression → independent assessment → documentation and release
 engineering → release candidate readiness.
 
 No new competitive feature is permitted to bypass that dependency order.
+
+## O. ADR-0007 admission-gated refinement
+
+ADR-0007 adds PD-REQ-086 through PD-REQ-095; the governing requirements range is
+now **PD-REQ-001..095**. The original amendment above is preserved in full.
+**Unknown mandatory coverage blocks Protected execution.** Experimental &
+Unproven Compatibility Mode is a separately labeled, unproven execution class,
+not an exception to that rule and not evidence for Protected support.
+
+Before canonical production PR 6, supplemental AG-1 must evaluate immutable
+admission generations, the four admission outcomes, pre-code mediation, runtime
+executable-code gating, exact-scope Experimental consent, Known unsafe and
+Incompatible hard stops, and visible claim separation using only controlled
+fixtures. AG-1 success is necessary but not sufficient to begin PR 6: AG-1
+evidence must then pass the still-mandatory canonical Roadmap PR 5 STOP/owner
+gate, including explicit project-owner approval. AG-1 failure favors STOP rather
+than weakening Protected Mode. No third-party reference or hook library is
+preapproved by this refinement.

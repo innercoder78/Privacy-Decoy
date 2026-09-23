@@ -160,9 +160,13 @@ PR 5 owned networking investigation, and Roadmap PR 6 was the mandatory user
 STOP decision. The merged historical Roadmap PR 6 **A — REDESIGN** decision
 remains valid evidence and retains its label. The restored canonical roadmap
 independently requires mandatory STOP gates at Roadmap PR 5 and Roadmap PR 20.
-The exact canonical sequence and amendment refinements remain unavailable, and
-implementation remains blocked until their restoration and review; see
-[roadmap reconciliation](roadmap-reconciliation.md).
+The canonical roadmap and amendment are restored. Canonical Roadmap PR 5 and
+Roadmap PR 20 remain mandatory STOP gates. ADR-0007 authorizes only supplemental
+AG-1 feasibility work; canonical production PR 6 remains unstarted. AG-1 success
+is necessary but not sufficient: its evidence must be reviewed through the
+canonical Roadmap PR 5 STOP/owner gate, and explicit project-owner approval is
+required before PR 6 may begin. AG-1 failure favors STOP rather than weakening
+Protected Mode; see [roadmap reconciliation](roadmap-reconciliation.md).
 
 ## Abuse cases and required evidence
 
@@ -186,3 +190,19 @@ implementation remains blocked until their restoration and review; see
 The normative obligations and evidence ownership are in the
 [requirements register](requirements.md); candidate feasibility is assessed in
 [the engine assessment](engine-assessment.md).
+
+## Admission execution classes (ADR-0007)
+
+The adversarial-app model is unchanged. Protected Mode treats every protected
+code path as adversarial and requires the normal mandatory, scoped evidence;
+PD-REQ-021 still makes mandatory Unknown coverage launch-blocking. An app is not
+“trusted” merely because static analysis found no obvious malicious behavior.
+Static analysis can find risk but cannot prove absent dynamic behavior.
+
+Experimental & Unproven Compatibility Mode knowingly carries unresolved
+coverage and therefore carries no complete protection guarantee. Experimental
+operation does not transform Unknown into Partially or Fully mediated, and it
+cannot support a Protected claim. It is available only for Unknown/unproven
+coverage when no mandatory bypass is positively known and the app is not
+incompatible. Known-unsafe paths and incompatible applications remain blocked.
+A later known-unsafe discovery terminates the affected session.
