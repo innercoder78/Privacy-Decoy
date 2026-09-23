@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 MODULE_PATH = Path(__file__).with_name("ag1-admission-analyzer.py")
@@ -92,16 +93,59 @@ class AdmissionAnalyzerTest(unittest.TestCase):
             self.assertIn("ARTIFACT_SPLIT_IDENTITY_UNPROVEN", findings)
 
     def test_positive_metadata_mismatches_are_incompatible(self):
-        template = {"role": "base", "package": "p", "signer_sha256": "s", "version_code": "1", "version_name": "one", "split_name": None}
-        for key in ("package", "signer_sha256", "version_code", "version_name"):
+        template = {"role": "base", "package": "p", "signer_sha256_digests": ["s1", "s2"],
+                    "version_code": "1", "version_name": "one", "split_name": None,
+                    "split_identity_state": "absent"}
+        for key in ("package", "signer_sha256_digests", "version_code"):
             with self.subTest(key=key):
                 base = dict(template)
-                split = dict(template, role="split", split_name="config.test")
-                split[key] = "different"
+                split = dict(template, role="split", split_name="config.test", split_identity_state="present")
+                split[key] = ["different"] if key == "signer_sha256_digests" else "different"
                 findings = []
                 compatible = analyzer.evaluate_metadata([base, split], findings)
                 self.assertFalse(compatible)
                 self.assertEqual("INCOMPATIBLE", analyzer.classify(compatible, findings))
+
+    def test_version_name_mismatch_is_not_structural(self):
+        base = {"role": "base", "package": "p", "signer_sha256_digests": ["s"],
+                "version_code": "1", "version_name": "base label", "split_name": None,
+                "split_identity_state": "absent"}
+        split = dict(base, role="split", version_name="different label",
+                     split_name="config.test", split_identity_state="present")
+        findings = []
+        self.assertTrue(analyzer.evaluate_metadata([base, split], findings))
+        self.assertEqual("EXPERIMENTAL_ELIGIBLE", analyzer.classify(True, findings))
+        self.assertNotIn("ARTIFACT_VERSION_MISMATCH", {item["code"] for item in findings})
+
+    def test_established_base_and_split_roles_and_duplicate_names(self):
+        common = {"package": "p", "signer_sha256_digests": ["s"], "version_code": "1", "version_name": "one"}
+        cases = (
+            ([dict(common, role="base", split_name="feature", split_identity_state="present")], "BASE_ARTIFACT_IS_SPLIT"),
+            ([dict(common, role="base", split_name=None, split_identity_state="absent"),
+              dict(common, role="split", split_name=None, split_identity_state="absent")], "SPLIT_ARTIFACT_HAS_NO_SPLIT_IDENTITY"),
+            ([dict(common, role="base", split_name=None, split_identity_state="absent"),
+              dict(common, role="split", split_name="same", split_identity_state="present"),
+              dict(common, role="split", split_name="same", split_identity_state="present")], "DUPLICATE_SPLIT_IDENTITY"),
+        )
+        for records, expected in cases:
+            with self.subTest(expected=expected):
+                findings = []
+                self.assertFalse(analyzer.evaluate_metadata(records, findings))
+                self.assertIn(expected, {item["code"] for item in findings})
+                self.assertEqual("INCOMPATIBLE", analyzer.classify(False, findings))
+
+    def test_multiple_signer_digests_are_all_preserved(self):
+        output = """Signer #1 certificate SHA-256 digest: AA:BB
+Signer #2 certificate SHA-256 digest: dd:cc
+Signer #1 certificate SHA-1 digest: ignored
+"""
+        self.assertEqual(["aabb", "ddcc"], analyzer.signer_digests(output))
+        record = {"package": None, "version_code": None, "version_name": None,
+                  "split_name": None, "split_identity_state": "unknown",
+                  "signer_sha256_digests": None}
+        with mock.patch.object(analyzer, "command", side_effect=["p", "1", "one", "<manifest/>", output]):
+            self.assertTrue(analyzer.add_sdk_metadata(record, Path("fixture.apk"), "apkanalyzer", "apksigner"))
+        self.assertEqual(["aabb", "ddcc"], record["signer_sha256_digests"])
 
     def test_classifier_represents_four_outcomes_without_conflation(self):
         unsupported = [analyzer.finding("UNSUPPORTED_CAPABILITY", "blocked capability", "test", "Unsupported", False)]

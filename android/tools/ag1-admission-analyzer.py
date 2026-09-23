@@ -12,7 +12,7 @@ import subprocess
 import sys
 import zipfile
 
-ANALYZER_VERSION = "ag1a-1"
+ANALYZER_VERSION = "ag1a-2"
 OUTCOMES = ("PROTECTED_ELIGIBLE", "EXPERIMENTAL_ELIGIBLE", "KNOWN_UNSAFE", "INCOMPATIBLE")
 CAPABILITIES = ("Fully mediated", "Partially mediated", "Unsupported", "External", "N/A", "Unknown")
 
@@ -56,7 +56,8 @@ def scan_archive(path, role):
     raw = path.read_bytes()
     record = {"role": role, "basename": path.name, "sha256": hashlib.sha256(raw).hexdigest(),
               "byte_size": len(raw), "package": None, "version_code": None,
-              "version_name": None, "split_name": None, "signer_sha256": None,
+              "version_name": None, "split_name": None, "split_identity_state": "unknown",
+              "signer_sha256_digests": None,
               "dex_entries": [], "native_libraries": [], "abis": []}
     findings = []
     try:
@@ -105,20 +106,35 @@ def command(argv):
         raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "inspection command failed")
     return result.stdout.strip()
 
+def signer_digests(apksigner_output):
+    """Return every current signer digest reported by apksigner, normalized."""
+    matches = re.findall(r"Signer #\d+ certificate SHA-256 digest:\s*([0-9a-fA-F:]+)", apksigner_output, re.IGNORECASE)
+    return sorted({value.replace(":", "").lower() for value in matches})
+
 def add_sdk_metadata(record, path, apkanalyzer, apksigner):
-    record["package"] = command([apkanalyzer, "manifest", "application-id", str(path)])
-    record["version_code"] = command([apkanalyzer, "manifest", "version-code", str(path)])
-    record["version_name"] = command([apkanalyzer, "manifest", "version-name", str(path)])
-    if not record["package"] or not record["version_code"] or not record["version_name"]:
-        raise RuntimeError("required manifest metadata unavailable")
-    manifest = command([apkanalyzer, "manifest", "print", str(path)])
-    match = re.search(r'\bsplit="([^"]+)"', manifest)
-    record["split_name"] = match.group(1) if match else None
-    certs = command([apksigner, "verify", "--print-certs", str(path)])
-    match = re.search(r"certificate SHA-256 digest:\s*([0-9a-fA-F:]+)", certs)
-    if not match:
-        raise RuntimeError("signer SHA-256 digest unavailable")
-    record["signer_sha256"] = match.group(1).replace(":", "").lower()
+    complete = True
+    for key, operation in (("package", "application-id"), ("version_code", "version-code"), ("version_name", "version-name")):
+        try:
+            record[key] = command([apkanalyzer, "manifest", operation, str(path)]) or None
+        except RuntimeError:
+            complete = False
+    try:
+        manifest = command([apkanalyzer, "manifest", "print", str(path)])
+        match = re.search(r'\bsplit="([^"]+)"', manifest)
+        record["split_name"] = match.group(1) if match else None
+        record["split_identity_state"] = "present" if match else "absent"
+    except RuntimeError:
+        complete = False
+    try:
+        certs = command([apksigner, "verify", "--print-certs", str(path)])
+        observed = signer_digests(certs)
+        if observed:
+            record["signer_sha256_digests"] = observed
+        else:
+            complete = False
+    except RuntimeError:
+        complete = False
+    return complete
 
 def generation_id(records):
     normalized = [{key: item[key] for key in ("role", "sha256", "byte_size")}
@@ -132,28 +148,39 @@ def evaluate_metadata(records, findings):
     compatible = True
     properties = (
         ("package", "ARTIFACT_PACKAGE_UNPROVEN", "package identity"),
-        ("signer_sha256", "ARTIFACT_SIGNER_UNPROVEN", "signer identity"),
+        ("signer_sha256_digests", "ARTIFACT_SIGNER_UNPROVEN", "complete observed signer set"),
         ("version_code", "ARTIFACT_VERSION_UNPROVEN", "version code"),
-        ("version_name", "ARTIFACT_VERSION_UNPROVEN", "version name"),
     )
     for record in records:
         for key, code, description in properties:
             if record[key] is None:
                 findings.append(finding(code, "Artifact " + description + " could not be established.", "android-sdk-tools"))
-        if record["role"] == "split" and not record["split_name"]:
-            findings.append(finding("ARTIFACT_SPLIT_IDENTITY_UNPROVEN", "Supplied split identity could not be established.", "manifest"))
+        if record["version_name"] is None:
+            findings.append(finding("ARTIFACT_VERSION_NAME_UNPROVEN", "Informational version name could not be established.", "android-sdk-tools"))
+        split_state = record["split_identity_state"]
+        if split_state == "unknown":
+            findings.append(finding("ARTIFACT_SPLIT_IDENTITY_UNPROVEN", "Manifest split identity could not be established.", "manifest"))
+        elif record["role"] == "base" and split_state == "present":
+            findings.append(finding("BASE_ARTIFACT_IS_SPLIT", "Artifact supplied as the base has an established split identity.", "manifest", "Unsupported", True, False))
+            compatible = False
+        elif record["role"] == "split" and split_state == "absent":
+            findings.append(finding("SPLIT_ARTIFACT_HAS_NO_SPLIT_IDENTITY", "Artifact supplied as a split is positively established as base-like.", "manifest", "Unsupported", True, False))
+            compatible = False
     base = records[0]
     mismatches = (
         ("package", "ARTIFACT_PACKAGE_MISMATCH", "Base and split package identities differ.", "manifest"),
-        ("signer_sha256", "ARTIFACT_SIGNER_MISMATCH", "Base and split signer digests differ.", "certificate"),
+        ("signer_sha256_digests", "ARTIFACT_SIGNER_MISMATCH", "Base and split observed signer sets differ.", "certificate"),
         ("version_code", "ARTIFACT_VERSION_MISMATCH", "Base and split version codes differ.", "manifest"),
-        ("version_name", "ARTIFACT_VERSION_MISMATCH", "Base and split version names differ.", "manifest"),
     )
     for record in records[1:]:
         for key, code, description, source in mismatches:
             if base[key] is not None and record[key] is not None and base[key] != record[key]:
                 findings.append(finding(code, description, source, "Unsupported", True, False))
                 compatible = False
+    established_names = [record["split_name"] for record in records[1:] if record["split_identity_state"] == "present"]
+    if len(established_names) != len(set(established_names)):
+        findings.append(finding("DUPLICATE_SPLIT_IDENTITY", "Two supplied splits have the same established split identity.", "manifest", "Unsupported", True, False))
+        compatible = False
     return compatible
 
 def analyze(base, splits, use_sdk=True):
@@ -168,9 +195,7 @@ def analyze(base, splits, use_sdk=True):
         record, found, readable = scan_archive(path, role)
         records.append(record); findings.extend(found); valid &= readable
         if readable and sdk:
-            try:
-                add_sdk_metadata(record, path, *sdk)
-            except RuntimeError:
+            if not add_sdk_metadata(record, path, *sdk):
                 findings.append(finding("APK_METADATA_UNPROVEN", "Android SDK inspection could not establish complete APK metadata.", "android-sdk-tools"))
     if records:
         valid &= evaluate_metadata(records, findings)

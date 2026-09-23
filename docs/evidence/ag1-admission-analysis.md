@@ -21,8 +21,12 @@ Binder virtualization, runtime interception, VPN enforcement, or production UI.
 read ZIP entries and DEX bytes. It invokes the pinned Android SDK's `apkanalyzer`
 and `apksigner` in read-only modes for manifest and signing identity. Missing SDK
 inspection tools are an explicit operational failure. A positively established
-structural defect or base/split package, version, or signer mismatch can make a
-set `INCOMPATIBLE`. Metadata that the tools cannot establish instead remains
+structural defect or base/split package, version-code, or complete observed
+current-signer-set mismatch can make a set `INCOMPATIBLE`. A base positively
+identified as a split, a supplied split positively identified as base-like, or
+duplicate established split names are also incompatible. `versionName` remains
+reported user-facing metadata and is not a structural consistency criterion.
+Metadata that the tools cannot establish instead remains
 Unknown/unproven, blocks Protected eligibility, and does not by itself prevent
 `EXPERIMENTAL_ELIGIBLE` classification.
 
@@ -55,12 +59,21 @@ numerical or entropy-based risk score.
 Static string scanning cannot prove that a mechanism is reachable, cannot prove
 its absence, and cannot prove runtime mediation, early enforcement, Binder
 coverage, dynamically introduced code blocking, or hostile native containment.
-Actual Android split completeness is also Unknown: this slice compares obtainable
-package, version, split-name, and signer metadata but does not implement
-bundle-aware dependency/configuration completeness. A missing property is never
-inferred equal or treated as a mismatch: it receives an explicit Unknown/unproven
-finding. Missing metadata cannot qualify for Protected eligibility. App-controlled
-native containment and all runtime mediation remain Unknown.
+Actual Android split completeness is also Unknown. This slice establishes only
+bounded structural facts: one CLI-designated base, base/split manifest-role
+agreement where identity is established, package and version-code agreement,
+complete observed current-signer-set agreement, and uniqueness of established
+split names. It does not validate signing-certificate rotation lineage or prove
+that every required feature/configuration split is present. A missing property is
+never inferred equal or treated as a mismatch: it receives an explicit
+Unknown/unproven finding. Missing metadata cannot qualify for Protected
+eligibility. App-controlled native containment and all runtime mediation remain
+Unknown.
+
+AG-1A uses controlled fixtures and does not establish production-safe handling of
+arbitrary hostile archives. Bounds and defenses for oversized entries,
+compression bombs, and other analyzer resource-exhaustion cases remain Unknown
+future hardening work.
 
 ## Controlled fixtures and expected observations
 
