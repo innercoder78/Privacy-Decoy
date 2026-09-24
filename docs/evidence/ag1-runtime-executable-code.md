@@ -34,7 +34,10 @@ asset against its separately built executable, and verifies that changing a byte
 changes its digest. Device instrumentation independently checks both content
 digests and the primary admission generation before binding.
 
-The real primary remains `EXPERIMENTAL_ELIGIBLE`. On this local Windows build,
+Before execution, AG-1A classified the real primary as `EXPERIMENTAL_ELIGIBLE`
+because runtime mediation was unproven. This records the static admission result,
+not continued eligibility after the subsequently demonstrated runtime bypass.
+On the local Windows build,
 the unchanged analyzer established package/version/signing metadata and reported
 `DYNAMIC_DEX_LOADER_REFERENCE`, `IN_MEMORY_DEX_LOADER_REFERENCE`, and
 `RUNTIME_MEDIATION_UNPROVEN`. Static references do not establish mediation.
@@ -63,15 +66,15 @@ accepted snapshot is transferred read-only, checked again in the isolated
 process, and loaded by the trusted helper. The primary first completes the same
 AG-1B bind, READY, bounded transfer, and fixed pre-code event sequence.
 
-| Test | Required controlled-path result | Local evidence |
+| Test | Required controlled-path result | Evidence |
 |---|---|---|
-| Exact expected identity | AUTHORIZED, one-use consumption | JVM pass; device pending |
-| Changed byte | DENIED | JVM pass; device pending |
-| Unknown identity | DENIED | JVM pass; device pending |
-| Stale artifact generation | DENIED | JVM pass; device pending |
-| Stale session generation / wrong session identity | DENIED | JVM pass; device pending |
-| Revoked/dead session | DENIED | JVM pass; device pending |
-| Consumed authorization replay | DENIED | JVM pass, including concurrent consumers; device pending |
+| Exact expected identity | AUTHORIZED, one-use consumption | JVM pass; run #150 device observation confirmed |
+| Changed byte | DENIED | JVM pass; run #150 device observation confirmed |
+| Unknown identity | DENIED | JVM pass; run #150 device observation confirmed |
+| Stale artifact generation | DENIED | JVM pass; run #150 device observation confirmed |
+| Stale session generation / wrong session identity | DENIED | JVM pass for both; run #150 confirmed stale session generation |
+| Revoked/dead session | DENIED | JVM pass for both; run #150 confirmed revoked session |
+| Consumed authorization replay | DENIED | JVM pass, including concurrent consumers; run #150 confirmed sequential replay denial |
 | Wrong kind/execution class or borrowed authority | DENIED | JVM pass |
 
 Device negatives independently compare isolated-process secondary attempt
@@ -109,36 +112,123 @@ are `SECURITY_EXCEPTION`, `CLASS_NOT_FOUND`, `LINKAGE_ERROR`,
 exception message or stack trace is published. A missing fixture method or IPC
 failure fails the harness rather than pretending to be a loader denial.
 
-**Local direct-loader result: pending.** The local Windows Desktop host does not
-provide the required Linux/KVM execution environment. No local device experiment
-or assertion retry was performed. Compilation and JVM results are not device
-observations. The dedicated API 35 Google APIs x86_64 CI run must provide them.
+**Historical local-host context:** at initial publication, the local direct-loader
+device result was pending because the Windows Desktop host lacked Linux/KVM.
+No local device experiment or assertion retry was performed. Compilation and JVM
+results were not device observations. The subsequent exact-head CI device
+experiment completed in run #150 and demonstrated the direct-loader bypass
+recorded below; AG-1C device evidence is no longer pending for that tested head.
+
+## First exact-head AG-1C device result
+
+[Actions run #150](https://github.com/innercoder78/Privacy-Decoy/actions/runs/36057346901)
+(run ID `36057346901`) completed at exact PR head
+`55ed5b7803608101f57f7c7a87eb9bd0a2a56634`, tree
+`5fc2b17be1c23cedb2b58af8e500875426af3762`. The dedicated
+`admission-dynamic-code-feasibility` job exercised API 35 Google APIs x86_64.
+All eight AG-1C instrumentation cases completed successfully **as observations**.
+The workflow conclusion was SUCCESS: `changes`, `validate`,
+`containment-prototype`, `network-feasibility`, `managed-profile-feasibility`,
+`admission-feasibility`, `admission-runtime-feasibility`, and
+`admission-dynamic-code-feasibility` all succeeded at that head.
+
+The runner reported:
+
+```text
+AG1C_BUILD PRIMARY_ANALYZED SECONDARY_SEPARATE CONTENT_IDENTITY_VERIFIED
+```
+
+The trusted-path observations were:
+
+| Case | Decision | Stage sequence | Category |
+|---|---|---|---|
+| CHANGED | DENIED | 0000 | COMPLETE |
+| REPLAY | DENIED | 0000 | COMPLETE |
+| REVOKED | DENIED | 0000 | COMPLETE |
+| STALE_ARTIFACT | DENIED | 0000 | COMPLETE |
+| STALE_SESSION | DENIED | 0000 | COMPLETE |
+| UNKNOWN | DENIED | 0000 | COMPLETE |
+| EXACT | AUTHORIZED | 1111 | COMPLETE |
+
+Stage order is loader construction, class resolution, static initialization,
+and entry invocation. Denial rows report per-attempt stage deltas, including
+zero additional stages for replay after its earlier authorized invocation.
+The exact-authorized path completed all four stages. `COMPLETE` denotes completion
+of the observation; it does not turn a denied case into executed code or establish
+protection outside the trusted helper.
+
+The separate direct-loader observation was:
+
+```text
+AG1C_CASE DIRECT OBSERVED
+AG1C_STAGE DIRECT LOADER_CONSTRUCTED=1
+AG1C_STAGE DIRECT CLASS_RESOLVED=1
+AG1C_STAGE DIRECT STATIC_INITIALIZED=1
+AG1C_STAGE DIRECT ENTRY_INVOKED=1
+AG1C_CATEGORY DIRECT COMPLETE
+AG1C_INTERPRETATION TESTED_DIRECT_PATH_NOT_MEDIATED
+AG1C_RESULT OBSERVATION_COMPLETE EXPERIMENTAL_ONLY
+```
+
+The admitted synthetic guest directly used Android's standard
+`InMemoryDexClassLoader` without passing through `Ag1ExecutableAuthorization`.
+Previously unadmitted secondary DEX reached all four stages (`1111`), including
+entry invocation. This is positive evidence of a bypass of the executable
+authorization boundary for the exact tested direct-loader path, not merely
+missing evidence or Unknown coverage for that path. The workflow succeeded
+because the experiment completed and classified its observation correctly.
+**The runtime-mediation security hypothesis for this path did not succeed.**
 
 ## Interpretation
 
-The direct test's success condition is a complete, structurally consistent
-observation, independent of whether Android executes the payload. If all four
-stages occur, the runner prints `TESTED_DIRECT_PATH_NOT_MEDIATED`: the current
-controlled runtime does not establish mediation of that tested direct-loader
-path. The result must remain available to the architecture review, without
-adding another interception mechanism to make the experiment succeed.
+**AG-1C falsified the current runtime-mediation hypothesis for the tested direct
+InMemoryDexClassLoader path.** The current runtime did not mediate that path:
+unadmitted secondary executable content reached entry without the trusted
+executable authorization decision. No incidental exception, invalid-DEX failure,
+or Android restriction prevented execution in this observation.
 
-If execution does not complete, the stage prefix and bounded category are
-reported. A platform exception category alone is **not** a demonstrated Android
-restriction, deliberate PD decision, or mediation. The runner explicitly emits
-`DIRECT_FAILURE_REQUIRES_CAUSE_REVIEW_NOT_MEDIATION_EVIDENCE`. The trusted-path
-validity control helps distinguish invalid payload/configuration from direct
-loader behavior, but any remaining cause must be investigated before a stronger
-claim. No non-execution reason or successful protection result is asserted here.
+The pre-execution static result and later runtime discovery must remain distinct.
+AG-1A's `EXPERIMENTAL_ELIGIBLE` result reflected unproven runtime mediation before
+execution. AG-1C then positively demonstrated the tested bypass. The earlier
+static classification cannot override this later evidence or authorize continued
+execution despite a known-unsafe discovery.
+
+* **PD-REQ-087:** the architecture cannot claim Protected eligibility while this
+  demonstrated direct-loader path remains available and unmediated. Experimental
+  compatibility cannot count as Protected evidence.
+* **PD-REQ-090:** positively established mandatory bypasses/known-unsafe results
+  require a hard stop, with no Experimental override. Recording the fixture's
+  historical admission class does not weaken that rule or grant a new exception.
+* **PD-REQ-091:** newly introduced executable content must be blocked or classified
+  before use wherever enforceable, and positive known-unsafe discovery during
+  execution requires safe termination or revocation. Here, unadmitted DEX reached
+  entry invocation. The current AG-1C runtime experiment does **not** satisfy
+  that requirement for this tested path. Normal test teardown is not evidence of
+  the required discovery-triggered termination or revocation.
+* **PD-REQ-093:** static analysis, compatibility, and absence of other detections
+  cannot establish mediation or replace this positive runtime evidence. Other
+  loader paths retain Unknown coverage; no universal Java-loader bypass is inferred.
+
+The canonical AG-1 checkpoint asks whether unexpected dynamic executable content
+can be blocked or demoted before execution, and whether a controlled Java/Kotlin
+fixture attempting unexpected executable loading can be stopped. For this direct
+`InMemoryDexClassLoader` path, the current architecture failed that falsification
+probe. The trusted helper's correct decisions do not rescue the failed direct-path
+hypothesis, and a passing observation workflow does not mean AG-1 has passed.
+
+This PR preserves the result and selects no remediation or interception mechanism.
+It does not decide that the project should continue despite the failure. Failure
+favors STOP rather than weakening Protected Mode; the canonical Roadmap PR 5
+STOP/owner gate remains pending and production PR 6 remains unauthorized.
 
 ## Loader inventory
 
 | Java/DEX surface | This slice | Evidence status |
 |---|---|---|
-| `InMemoryDexClassLoader` | Explicit trusted-helper and direct-fixture experiments | Device pending; no mediation established |
+| `InMemoryDexClassLoader` | Trusted-helper and direct-fixture paths exercised on the exact-head run #150 device | Direct unadmitted DEX reached construction, resolution, initialization, and entry (`1111`, COMPLETE); bypass demonstrated, current runtime does not mediate this tested direct path |
 | `DexClassLoader` | No direct experiment | Unknown |
 | `PathClassLoader` | No direct experiment | Unknown |
-| `BaseDexClassLoader` | No separate direct experiment | Unknown; superclass relationships do not confer coverage |
+| Other `BaseDexClassLoader` paths | No separate direct experiment | Unknown; superclass relationships do not confer coverage |
 | `DexFile` | No direct experiment | Unknown |
 
 No class-loader family-wide or complete Java/DEX coverage is inferred.
@@ -186,20 +276,27 @@ Local validation on 2026-09-24:
 
 Wrapper Git blob remains `b1b8ef56b44f16b14dc800fa8103a6d89abb526f`, SHA-256
 `497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7`;
-`android/gradlew` remains mode `100755`. CI pending after publication.
+`android/gradlew` remains mode `100755`. The initial publication-time note was
+"CI pending after publication." Run #150 subsequently completed the exact-head
+device experiment described above; that result is not pending. It applies to
+the tested implementation head, not an assertion that later revisions have
+already completed CI.
 
 ## Limitations
 
 * Other Java loader paths remain Unknown unless directly tested.
 * Native loading and native containment remain Unknown.
+  Arbitrary native containment remains unresolved; ByteHook/ShadowHook are not
+  kernel sandboxes.
 * Raw syscall containment remains Unknown.
 * Full Binder/framework mediation remains Unknown.
 * Fixture/service observations are controlled synthetic evidence, not independent
   evidence against arbitrary hostile guest tampering.
 * No Protected eligibility is established; Experimental compatibility cannot
-  count as Protected coverage. No safety score is assigned.
+  count as Protected coverage. This is not a production privacy result, and no
+  broader Protected claim is permitted. No safety score is assigned.
 * No external runtime dependency, engine, hook library, privilege requirement,
   APK rewriting, VPN service, or native interception is added.
-* AG-1 remains in progress. Canonical Roadmap PR 5 owner gate remains pending.
+* AG-1 remains incomplete and in progress. Canonical Roadmap PR 5 STOP/owner gate remains pending.
   Canonical production PR 6 remains unauthorized. This slice authorizes no
   follow-on native experiment.
