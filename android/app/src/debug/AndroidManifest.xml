@@ -4,7 +4,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Fixed queries avoid confusing package visibility filtering with non-installation. -->
-    <queries><package android:name="com.privacydecoy.probe" /></queries>
+    <queries>
+        <package android:name="com.privacydecoy.probe" />
+        <package android:name="com.privacydecoy.ag1.precode" />
+    </queries>
     <application>
         <processes>
             <deny-permission android:name="android.permission.INTERNET" />
@@ -15,10 +18,15 @@
             <process android:process=":isolated">
                 <deny-permission android:name="android.permission.INTERNET" />
             </process>
+            <process android:process=":ag1bootstrap">
+                <deny-permission android:name="android.permission.INTERNET" />
+            </process>
         </processes>
         <service android:name="com.privacydecoy.research.IsolatedProbeService"
             android:exported="false" android:isolatedProcess="true" android:process=":isolated" />
         <service android:name="com.privacydecoy.research.NetworkResearchBrokerService"
             android:exported="false" android:process=":networkresearch" />
+        <service android:name="com.privacydecoy.research.ag1.Ag1BootstrapService"
+            android:exported="false" android:isolatedProcess="true" android:process=":ag1bootstrap" />
     </application>
 </manifest>

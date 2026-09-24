@@ -1,16 +1,15 @@
 plugins { id("com.android.application") }
 
-dependencies { testImplementation("junit:junit:4.13.2") }
-
 android {
-    namespace = "com.privacydecoy.externalvpnfixture"
+    namespace = "com.privacydecoy.ag1.precode"
     compileSdk = 37
     defaultConfig {
-        applicationId = providers.gradleProperty("fixtureApplicationId").getOrElse("com.privacydecoy.externalvpnfixture")
+        applicationId = "com.privacydecoy.ag1.precode"
         minSdk = 31
         targetSdk = 37
         versionCode = 1
-        versionName = "pr5-test-only"
+        versionName = "ag1b-controlled"
+        multiDexEnabled = false
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

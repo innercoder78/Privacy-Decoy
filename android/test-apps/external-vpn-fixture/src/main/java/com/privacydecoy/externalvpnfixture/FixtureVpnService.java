@@ -49,6 +49,7 @@ public final class FixtureVpnService extends VpnService {
     }
     private void observe(ParcelFileDescriptor descriptor,Mode mode,int token) {
         byte[] packet=new byte[2048];int count=0;
+        PacketLogBudget budget=new PacketLogBudget();
         try {
             while(token==generation) {
                 int length;
@@ -74,10 +75,11 @@ public final class FixtureVpnService extends VpnService {
                 } else if(eq(packet,24,new int[]{32,1,13,184,0,0,0,0,0,0,0,0,0,0,0,7}))category="documentation-v6";
                 // Unknown traffic never reveals an address or arbitrary port/protocol.
                 if("other".equals(category)||!(port==46151||port==46152||port==46153||port==46154||port==53)) {category="other";port=0;}
-                if(count<128) {
+                String protocolCategory=protocol==6?"tcp":protocol==17?"udp":"other";
+                if(budget.shouldEmit(family,protocolCategory,category,port)) {
                     count++;
                     Log.i("PD_PR5_VPN","PACKET mode="+mode+" family="+family+" protocol="+
-                        (protocol==6?"tcp":protocol==17?"udp":"other")+" category="+category+" port="+port+" count="+count);
+                        protocolCategory+" category="+category+" port="+port+" count="+count);
                 }
                 Arrays.fill(packet,(byte)0);
             }

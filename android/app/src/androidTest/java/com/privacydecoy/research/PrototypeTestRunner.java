@@ -11,17 +11,21 @@ import java.util.Comparator;
 public final class PrototypeTestRunner extends Instrumentation {
 
     private String suite="containment", selected="";
+    private Bundle researchArguments = new Bundle();
+    public Bundle researchArguments() { return new Bundle(researchArguments); }
     @Override public void onCreate(Bundle arguments) {
+        if (arguments != null) researchArguments = new Bundle(arguments);
         if(arguments!=null){suite=arguments.getString("suite","containment");selected=arguments.getString("case","");}
         super.onCreate(arguments);start();
     }
     @Override public void onStart() {
 
-        Class<?> testClass="network".equals(suite)?NetworkTests.class:PrototypeTests.class;
-        if(!"network".equals(suite)&&!"containment".equals(suite)) {
+        Class<?> testClass="ag1runtime".equals(suite)?com.privacydecoy.research.ag1.Ag1RuntimeTests.class
+            :"network".equals(suite)?NetworkTests.class:PrototypeTests.class;
+        if(!"network".equals(suite)&&!"containment".equals(suite)&&!"ag1runtime".equals(suite)) {
             Bundle error=new Bundle();error.putString("shortMsg","Unknown test suite");finish(Activity.RESULT_CANCELED,error);return;
         }
-        String tag="network".equals(suite)?"PD_PR5":"PD_PR4";
+        String tag="ag1runtime".equals(suite)?"PD_AG1B":"network".equals(suite)?"PD_PR5":"PD_PR4";
         Method[] tests = Arrays.stream(testClass.getDeclaredMethods())
             .filter(m -> m.getName().startsWith("test") && m.getParameterCount() == 0)
             .filter(m -> selected.isEmpty() || m.getName().equals(selected))
