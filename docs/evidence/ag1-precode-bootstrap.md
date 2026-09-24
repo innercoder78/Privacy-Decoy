@@ -264,3 +264,31 @@ redaction. Additional cases covered skips, duplicate fields/completion, unknown
 names, oversized input/details, exception allowlisting, printable secret text,
 the failed marker, and command timeout. Synthetic transcripts remain uncommitted
 temporary build products.
+
+## Second exact-head AG-1B device run
+
+For PR #21 head `21ba3176ea97e1521a4ab32f337d85758cb62b0a`, Actions run
+#143 passed seven of eight AG-1B device tests. Only
+`testProcessDeathInvalidatesAuthorization` failed, with bounded detail
+`platform-or-harness-exception:IllegalStateException`. The exact lifecycle
+phase remains **Unknown** at that head. The other jobs (`changes`, `validate`,
+`containment-prototype`, `admission-feasibility`, `network-feasibility`, and
+`managed-profile-feasibility`) passed; `admission-runtime-feasibility` failed.
+
+This revision adds fixed failure labels for initial bind, initial arm,
+pre-death observation, death observation, replacement bind, replacement arm,
+stale-claim probe, and replacement observation. Only an unexpected
+`IllegalStateException` in those phases becomes a fixed assertion message;
+the original exception message and cause are not preserved. Existing assertions
+and intentional execution-denial checks remain unchanged. The parser allowlist
+adds only those eight fixed messages, with all sanitization and strict result
+validation unchanged. Process-death, authorization, and bootstrap behavior are
+unchanged. No AG-1B success is claimed yet.
+
+Local validation passed shell syntax, all 57 existing Python tests, and
+`:app:lintDebug`, `:app:testDebugUnitTest`, and `:app:assembleDebugAndroidTest`.
+Eight temporary synthetic instrumentation transcripts independently exercised
+the final parser: every new fixed phase message was emitted unchanged within
+the existing bounds and produced an unsuccessful overall result. No synthetic
+transcript is committed. Local Linux/KVM device reproduction remains unavailable;
+the next exact-head CI run must establish the failing lifecycle phase.

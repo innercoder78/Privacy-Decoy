@@ -116,16 +116,32 @@ public final class Ag1RuntimeTests {
             check(!s.arm(Ag1LaunchPolicy.REQUIRED), "revoked session rearmed"); zero(s);
         }
     }
+    private interface CheckedAction {
+        void run() throws Exception;
+    }
+    private static void lifecyclePhase(String fixedMessage, CheckedAction action) throws Exception {
+        try {
+            action.run();
+        } catch (IllegalStateException failure) {
+            throw new AssertionError(fixedMessage);
+        }
+    }
     public void testProcessDeathInvalidatesAuthorization() throws Exception {
         try (Ag1BootstrapSession old = fresh()) {
-            old.bind(); check(old.arm(Ag1LaunchPolicy.REQUIRED), "bootstrap denied"); zero(old);
-            old.killAndAwaitDeath(); check(old.policy.state() == Ag1LaunchPolicy.State.DEAD, "death retained authority");
+            lifecyclePhase("death setup bind failed", old::bind);
+            lifecyclePhase("death setup arm failed", () -> check(old.arm(Ag1LaunchPolicy.REQUIRED), "bootstrap denied"));
+            lifecyclePhase("death setup observation failed", () -> zero(old));
+            lifecyclePhase("death observation failed", old::killAndAwaitDeath);
+            check(old.policy.state() == Ag1LaunchPolicy.State.DEAD, "death retained authority");
             denyExecute(old);
             try (Ag1BootstrapSession replacement = fresh()) {
-                replacement.bind(); check(replacement.arm(Ag1LaunchPolicy.REQUIRED), "replacement denied");
+                lifecyclePhase("replacement bind failed", replacement::bind);
+                lifecyclePhase("replacement arm failed", () -> check(replacement.arm(Ag1LaunchPolicy.REQUIRED), "replacement denied"));
                 check(replacement.policy.pid() != old.policy.pid(), "replacement reused process");
-                check(!replacement.probeRun(old.policy.id,old.policy.sessionEpoch).getBoolean("accepted"), "dead claim regained authority");
-                denyExecute(replacement); zero(replacement);
+                lifecyclePhase("stale claim probe failed", () ->
+                    check(!replacement.probeRun(old.policy.id,old.policy.sessionEpoch).getBoolean("accepted"), "dead claim regained authority"));
+                denyExecute(replacement);
+                lifecyclePhase("replacement observation failed", () -> zero(replacement));
             }
         }
     }

@@ -105,6 +105,9 @@ names = sorted((
     'testExactExperimentalExecutionAfterBarrier',
 ))
 safe_messages = {
+    'death setup bind failed', 'death setup arm failed', 'death setup observation failed',
+    'death observation failed', 'replacement bind failed', 'replacement arm failed',
+    'stale claim probe failed', 'replacement observation failed',
     'bounded analyzer arguments missing', 'real admission must be Experimental only',
     'embedded artifact differs from analyzer', 'embedded generation differs from analyzer',
     'invalid launch crossed manager gate', 'denied state exposed guest bytes',
