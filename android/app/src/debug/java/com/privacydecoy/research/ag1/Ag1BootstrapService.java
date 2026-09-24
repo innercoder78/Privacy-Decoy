@@ -48,7 +48,14 @@ public final class Ag1BootstrapService extends Service {
                     if (authority == null || Binder.getCallingUid() != managerUid
                             || Binder.getCallingPid() != managerPid) throw new SecurityException();
                     if (code == Ag1BootstrapWire.COUNT) result = observations();
-                    else if (code == Ag1BootstrapWire.KILL) Process.killProcess(Process.myPid());
+                    else if (code == Ag1BootstrapWire.KILL) {
+                        terminal = true;
+                        final int pid = Process.myPid();
+                        Process.killProcess(pid);
+                        // Controlled research fault injection: terminate even if killProcess returns.
+                        Runtime.getRuntime().halt(0);
+                        result.putBoolean("accepted", false);
+                    }
                     else if (code == Ag1BootstrapWire.ARM) {
                         if (terminal || ready || input.containsKey("dex") || !Ag1BootstrapWire.same(metadata, input)) throw new SecurityException();
                         ArrayList<String> prerequisites = input.getStringArrayList("prerequisites");

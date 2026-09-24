@@ -327,3 +327,36 @@ zero failures/errors/skips), `:app:assembleDebug`, and
 shell syntax. The local Windows host still lacks Linux/KVM support, so no local
 emulator run or security-test retry was performed. Exact-head device validation
 remains pending after publication.
+
+## Fourth exact-head AG-1B device run
+
+For PR #21 head `618b829cf80666e4bd5ab1ef82c5bc4d3d5d098c`, Actions run
+#145 passed seven of eight AG-1B device tests. Only
+`testProcessDeathInvalidatesAuthorization` failed; the phase remained
+`death observation failed`. Callback and captured-Binder `isBinderAlive()` /
+`pingBinder()` observation did not establish death within the bounded window.
+All other historical/baseline jobs (`changes`, `validate`,
+`containment-prototype`, `admission-feasibility`, `network-feasibility`, and
+`managed-profile-feasibility`) passed; `admission-runtime-feasibility` failed.
+
+This revision changes only the controlled debug/research service's process-death
+injection. The authorized KILL branch marks the service terminal, captures its
+own PID, calls `Process.killProcess(pid)` once, and immediately calls
+`Runtime.getRuntime().halt(0)` if execution continues. If termination returns
+or an exception reaches the existing handler, the service remains terminal and
+does not report acceptance. ARM/RUN remain denied in that terminal state.
+The hard VM termination fallback is confined to KILL; normal lifecycle and
+positive controlled execution are unchanged.
+
+KILL remains single-shot. Manager-side authorization and positive death proof
+are unchanged, including the callback latch, captured old Binder, liveness
+checks, bounded deadline, and hard failure without observed death. No security
+assertion is weakened. This tests the controlled death-injection hypothesis;
+no AG-1B success is claimed before exact-head CI passes.
+
+Local validation passed `:app:lintDebug`, `:app:testDebugUnitTest` (24 tests,
+zero failures/errors/skips), `:app:assembleDebug`, and
+`:app:assembleDebugAndroidTest`, all 57 existing Python tests, and AG-1B runner
+shell syntax. Linux/KVM support remains unavailable on the local Windows host;
+no local emulator run or security-test retry was performed. CI pending after
+publication.
