@@ -360,3 +360,44 @@ zero failures/errors/skips), `:app:assembleDebug`, and
 shell syntax. Linux/KVM support remains unavailable on the local Windows host;
 no local emulator run or security-test retry was performed. CI pending after
 publication.
+
+## Fifth exact-head AG-1B device run
+
+For PR #21 head `401ffae5b4e8d56cfddc380b02beee6686a7012e`, Actions run
+#146 passed seven of eight AG-1B device tests. Only
+`testProcessDeathInvalidatesAuthorization` failed, still at
+`death observation failed`. All historical/baseline jobs (`changes`, `validate`,
+`containment-prototype`, `admission-feasibility`, `network-feasibility`, and
+`managed-profile-feasibility`) passed; `admission-runtime-feasibility` failed.
+Hard service-side termination did not execute successfully through that transport.
+
+Code review identified KILL's `IBinder.FLAG_ONEWAY` transport as incompatible
+with the service's exact manager UID/PID check for post-INIT transactions.
+[Android's Binder contract](https://developer.android.com/reference/kotlin/android/os/Binder#getCallingPid())
+states that one-way calls receive no calling PID and expose PID zero. Together
+with the unchanged service check, this establishes why KILL was denied before
+its termination branch. This is a controlled research-session binding check,
+not a claim that PID alone is a production security identifier.
+
+KILL now uses a synchronous transaction with flags zero and a reply Parcel so
+the existing identity check can operate. A normal return reads the Binder
+exception status and then throws the fixed `RemoteException`
+`AG-1 death injection returned`. Both Parcels are recycled. A transaction failure
+still reaches the existing manager logic, which accepts death only with positive
+evidence from the captured old Binder. No PID-zero bypass or weaker UID/PID
+check is introduced. Single-shot KILL, service termination, manager observation,
+and all death assertions remain intact. No AG-1B success is claimed before
+the next exact-head CI proves it.
+
+The real fixture remains Experimental only; AG-1B does not establish Protected
+eligibility. AG-1 remains IN PROGRESS. Native containment, dynamic executable-code
+control, and full framework/Binder mediation remain Unknown. Canonical PR 5's
+owner gate remains pending; canonical production PR 6 remains unauthorized.
+
+Local validation passed `:app:lintDebug`, `:app:testDebugUnitTest` (24 tests,
+zero failures/errors/skips), `:app:assembleDebug`, and
+`:app:assembleDebugAndroidTest`, all 57 existing Python tests, and AG-1B runner
+shell syntax. Final review confirmed synchronous flags zero, reply recycling,
+normal-return failure, no PID-zero bypass, and unchanged service identity logic.
+Linux/KVM remains unavailable on the local Windows host, so no local emulator
+run or security-test retry was performed. CI pending after publication.

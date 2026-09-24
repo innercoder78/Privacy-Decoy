@@ -23,11 +23,15 @@ final class Ag1BootstrapWire {
         } finally { data.recycle(); reply.recycle(); }
     }
     static void kill(IBinder binder) throws RemoteException {
-        Parcel data = Parcel.obtain();
+        Parcel data = Parcel.obtain(), reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(TOKEN); data.writeBundle(new Bundle());
-            if (!binder.transact(KILL, data, null, IBinder.FLAG_ONEWAY)) throw new RemoteException("AG-1 death injection failed");
-        } finally { data.recycle(); }
+            // KILL must be synchronous: one-way Binder transactions do not expose calling PID,
+            // and this research service intentionally checks the exact manager UID/PID.
+            if (!binder.transact(KILL, data, reply, 0)) throw new RemoteException("AG-1 death injection failed");
+            reply.readException();
+            throw new RemoteException("AG-1 death injection returned");
+        } finally { data.recycle(); reply.recycle(); }
     }
     static Bundle metadata(Ag1LaunchPolicy policy) {
         Bundle b = new Bundle();
