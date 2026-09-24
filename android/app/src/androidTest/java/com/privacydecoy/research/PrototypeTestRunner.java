@@ -20,12 +20,13 @@ public final class PrototypeTestRunner extends Instrumentation {
     }
     @Override public void onStart() {
 
-        Class<?> testClass="ag1runtime".equals(suite)?com.privacydecoy.research.ag1.Ag1RuntimeTests.class
+        Class<?> testClass="ag1dynamic".equals(suite)?com.privacydecoy.research.ag1.Ag1DynamicCodeTests.class
+            :"ag1runtime".equals(suite)?com.privacydecoy.research.ag1.Ag1RuntimeTests.class
             :"network".equals(suite)?NetworkTests.class:PrototypeTests.class;
-        if(!"network".equals(suite)&&!"containment".equals(suite)&&!"ag1runtime".equals(suite)) {
+        if(!"network".equals(suite)&&!"containment".equals(suite)&&!"ag1runtime".equals(suite)&&!"ag1dynamic".equals(suite)) {
             Bundle error=new Bundle();error.putString("shortMsg","Unknown test suite");finish(Activity.RESULT_CANCELED,error);return;
         }
-        String tag="ag1runtime".equals(suite)?"PD_AG1B":"network".equals(suite)?"PD_PR5":"PD_PR4";
+        String tag="ag1dynamic".equals(suite)?"PD_AG1C":"ag1runtime".equals(suite)?"PD_AG1B":"network".equals(suite)?"PD_PR5":"PD_PR4";
         Method[] tests = Arrays.stream(testClass.getDeclaredMethods())
             .filter(m -> m.getName().startsWith("test") && m.getParameterCount() == 0)
             .filter(m -> selected.isEmpty() || m.getName().equals(selected))
@@ -45,6 +46,7 @@ public final class PrototypeTestRunner extends Instrumentation {
                 // Our assertions contain fixed messages only. Never report arbitrary platform exception payloads.
                 String detail = cause instanceof AssertionError ? cause.getMessage()
                     : "platform-or-harness-exception:" + (cause == null ? "unknown" : cause.getClass().getSimpleName());
+                if ("ag1dynamic".equals(suite)) detail = cause instanceof AssertionError ? "FIXED_ASSERTION_FAILED" : "HARNESS_EXCEPTION";
                 status.putString("stack", tests[i].getName() + ": " + detail);
                 status.putString("stream", "FAIL " + tests[i].getName() + ": " + detail + "\n"); sendStatus(-2, status);
                 android.util.Log.i(tag, "FAIL " + tests[i].getName() + ": " + detail);

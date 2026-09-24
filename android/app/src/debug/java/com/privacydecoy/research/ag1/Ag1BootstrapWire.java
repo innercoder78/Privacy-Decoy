@@ -8,7 +8,7 @@ import android.os.RemoteException;
 /** Fixed protocol; INIT/ARM carry metadata only. No guest-selected operations or class names. */
 final class Ag1BootstrapWire {
     static final String TOKEN = "com.privacydecoy.research.ag1.v1";
-    static final int INIT = 1, ARM = 2, RUN = 3, COUNT = 4, KILL = 5;
+    static final int INIT = 1, ARM = 2, RUN = 3, COUNT = 4, KILL = 5, SECONDARY = 6;
     static final int REGISTER = 10, READY = 11, CONSUME = 12;
     static final int MAX_DEX = 4 * 1024 * 1024;
     static Bundle call(IBinder binder, int code, Bundle input) throws RemoteException {

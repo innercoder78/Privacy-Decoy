@@ -23,9 +23,12 @@ public final class Ag1BootstrapService extends Service {
     private boolean terminal, ready, used;
     private long readyAt, bytesAt, loaderAt, resolutionAt;
     private int loaders, resolutions, invocations;
+    private ClassLoader primaryLoader;
+    private int[] secondary = new int[5];
+    private int secondaryAttempts;
     private final Binder endpoint = new Binder() {
         @Override protected synchronized boolean onTransact(int code, Parcel data, Parcel reply, int flags) {
-            if (code < Ag1BootstrapWire.INIT || code > Ag1BootstrapWire.KILL) return false;
+            if (code < Ag1BootstrapWire.INIT || code > Ag1BootstrapWire.SECONDARY) return false;
             Bundle result = new Bundle();
             try {
                 data.enforceInterface(Ag1BootstrapWire.TOKEN);
@@ -48,6 +51,11 @@ public final class Ag1BootstrapService extends Service {
                     if (authority == null || Binder.getCallingUid() != managerUid
                             || Binder.getCallingPid() != managerPid) throw new SecurityException();
                     if (code == Ag1BootstrapWire.COUNT) result = observations();
+                    else if (code == Ag1BootstrapWire.SECONDARY) {
+                        if (terminal || !ready || !used || primaryLoader == null
+                                || !Ag1BootstrapWire.same(metadata, input)) throw new SecurityException();
+                        result = secondary(input);
+                    }
                     else if (code == Ag1BootstrapWire.KILL) {
                         terminal = true;
                         final int pid = Process.myPid();
@@ -90,6 +98,8 @@ public final class Ag1BootstrapService extends Service {
         Bundle b = new Bundle(); b.putLong("readyAt", readyAt); b.putLong("bytesAt", bytesAt);
         b.putLong("loaderAt", loaderAt); b.putLong("resolutionAt", resolutionAt);
         b.putInt("loaders", loaders); b.putInt("resolutions", resolutions); b.putInt("invocations", invocations);
+        b.putIntArray("secondary", secondary.clone());
+        b.putInt("secondaryAttempts", secondaryAttempts);
         return b;
     }
     private Bundle run(Bundle input) throws Exception {
@@ -107,6 +117,7 @@ public final class Ag1BootstrapService extends Service {
                 if (!Ag1BootstrapSession.hash(dex.duplicate()).equals(input.getString("dexSha"))) throw new SecurityException();
                 loaderAt = SystemClock.elapsedRealtimeNanos(); loaders++;
                 ClassLoader loader = new InMemoryDexClassLoader(dex, ClassLoader.getSystemClassLoader().getParent());
+                primaryLoader = loader;
                 resolutionAt = SystemClock.elapsedRealtimeNanos();
                 long[] events = new long[6];
                 String[] classes = {"PreCodeProvider", "PreCodeApplication", "PreCodeEntry"};
@@ -120,6 +131,27 @@ public final class Ag1BootstrapService extends Service {
                 invocations++;
                 Bundle result = observations(); result.putLongArray("events", events); result.putBoolean("accepted", true);
                 return result;
+            } finally { SharedMemory.unmap(dex); }
+        }
+    }
+    private Bundle secondary(Bundle input) throws Exception {
+        SharedMemory memory = input.getParcelable("dex");
+        if (memory == null) throw new SecurityException();
+        try (memory) {
+            if (memory.getSize() <= 0 || memory.getSize() > Ag1BootstrapWire.MAX_DEX
+                    || !memory.setProtect(OsConstants.PROT_READ)) throw new SecurityException();
+            ByteBuffer dex = memory.mapReadOnly();
+            try {
+                if (!Ag1BootstrapSession.hash(dex.duplicate()).equals(input.getString("dexSha"))) throw new SecurityException();
+                secondaryAttempts++;
+                if (input.getBoolean("direct")) {
+                    // Deliberately no executable authorization helper on this fixture-owned path.
+                    Class<?> probe = Class.forName("com.privacydecoy.ag1.precode.DirectDexProbe", true, primaryLoader);
+                    secondary = (int[]) probe.getMethod("observe", ByteBuffer.class).invoke(null, dex);
+                } else {
+                    secondary = Ag1DexObservation.observe(dex);
+                }
+                Bundle result = observations(); result.putBoolean("accepted", true); return result;
             } finally { SharedMemory.unmap(dex); }
         }
     }

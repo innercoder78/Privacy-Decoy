@@ -15,4 +15,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    // AG-1B debug stays unchanged; only this separately analyzed variant has a loader probe.
+    buildTypes {
+        create("dynamic") {
+            initWith(getByName("debug"))
+            matchingFallbacks += listOf("debug")
+        }
+    }
 }

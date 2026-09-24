@@ -20,6 +20,7 @@ jobs:
       managed: ${{ steps.classify.outputs.managed }}
       admission: ${{ steps.classify.outputs.admission }}
       ag1runtime: ${{ steps.classify.outputs.ag1runtime }}
+      ag1dynamic: ${{ steps.classify.outputs.ag1dynamic }}
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,13 +43,14 @@ jobs:
             'network=true' \
             'managed=true' \
             'admission=true' \
-            'ag1runtime=true' >> "$GITHUB_OUTPUT"
+            'ag1runtime=true' \
+            'ag1dynamic=true' >> "$GITHUB_OUTPUT"
 
           case "$EVENT_NAME" in
             pull_request) base_sha=$PR_BASE_SHA ;;
             push) base_sha=$EVENT_BEFORE_SHA ;;
             *)
-              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (unexpected event)'
+              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (unexpected event)'
               exit 0
               ;;
           esac
@@ -56,20 +58,20 @@ jobs:
           sha_pattern='^[0-9a-f]{40}$'
           if ! [[ "$base_sha" =~ $sha_pattern && "$TESTED_SHA" =~ $sha_pattern ]] ||
              [[ "$base_sha" == 0000000000000000000000000000000000000000 ]]; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (unresolved comparison)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (unresolved comparison)'
             exit 0
           fi
 
           changed_files=$(mktemp)
           if ! git diff --name-only --diff-filter=ACDMRTUXB "$base_sha" "$TESTED_SHA" > "$changed_files"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (diff failed)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (diff failed)'
             exit 0
           fi
 
           cat "$changed_files"
           classification=$(mktemp)
           if ! .github/scripts/classify-ci-changes.sh < "$changed_files" > "$classification"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true (classification failed)'
+            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (classification failed)'
             exit 0
           fi
           tee -a "$GITHUB_OUTPUT" < "$classification"
@@ -89,6 +91,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Test dynamic-code evidence parser
+        run: python3 android/tools/test-ag1-dynamic-evidence.py
       - name: Test independent capture analyzer
         run: python3 android/tools/test-network-evidence.py
       - name: Test managed-profile evidence classifier
@@ -108,6 +112,11 @@ jobs:
           :test-apps:ag1-precode-fixture:lintDebug
           :test-apps:ag1-precode-fixture:testDebugUnitTest
           :test-apps:ag1-precode-fixture:assembleDebug
+          :test-apps:ag1-precode-fixture:lintDynamic
+          :test-apps:ag1-precode-fixture:assembleDynamic
+          :test-apps:ag1-secondary-dex-fixture:lintDebug
+          :test-apps:ag1-secondary-dex-fixture:testDebugUnitTest
+          :test-apps:ag1-secondary-dex-fixture:assembleDebug
           :probe-app:lintDebug
           :probe-app:testDebugUnitTest
           :probe-app:assembleDebug
@@ -289,3 +298,35 @@ jobs:
       - name: Run admission-bound pre-code bootstrap experiment
         working-directory: android
         run: bash tools/run-ag1-precode-emulator.sh
+
+  admission-dynamic-code-feasibility:
+    needs: changes
+    if: needs.changes.outputs.ag1dynamic == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up JDK 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify wrapper JAR
+        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
+        working-directory: android
+      - name: Install pinned toolchain and API 35 x86_64 emulator
+        run: >-
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
+          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+      - name: Free space for the disposable Android userdata image
+        # Hosted runners include a large unused .NET SDK. Android tests need its disk space.
+        run: sudo rm -rf -- /usr/share/dotnet
+      - name: Enable KVM for the runner
+        run: sudo chmod a+rw /dev/kvm
+      - name: Run controlled dynamic-code compatibility experiment
+        working-directory: android
+        run: bash tools/run-ag1-dynamic-code-emulator.sh
