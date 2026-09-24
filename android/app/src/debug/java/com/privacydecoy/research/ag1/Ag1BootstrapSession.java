@@ -46,7 +46,7 @@ public final class Ag1BootstrapSession implements AutoCloseable {
         @Override public void onServiceConnected(ComponentName name, IBinder binder) {
             remote = binder;
             try { binder.linkToDeath(() -> { policy.died(); death.countDown(); }, 0); }
-            catch (android.os.RemoteException failure) { policy.died(); }
+            catch (android.os.RemoteException failure) { policy.died(); death.countDown(); }
             connected.countDown();
         }
         @Override public void onServiceDisconnected(ComponentName name) { policy.died(); death.countDown(); }
@@ -139,8 +139,24 @@ public final class Ag1BootstrapSession implements AutoCloseable {
     public synchronized Bundle observations() throws Exception { return call(Ag1BootstrapWire.COUNT, new Bundle()); }
     public synchronized void revoke() { policy.revoke(); acknowledged = false; }
     public synchronized void killAndAwaitDeath() throws Exception {
-        Ag1BootstrapWire.kill(remote);
-        if (!death.await(10, TimeUnit.SECONDS)) throw new IllegalStateException("AG-1 death not observed");
+        // Reconnection may replace remote; only this authorized target is being killed.
+        final IBinder target = remote;
+        if (target == null) throw new IllegalStateException("AG-1 death not observed");
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        try {
+            Ag1BootstrapWire.kill(target);
+        } catch (android.os.RemoteException failure) {
+            if (target.isBinderAlive() && target.pingBinder()) throw failure;
+            policy.died(); death.countDown(); return;
+        }
+        while (death.getCount() != 0) {
+            if (!target.isBinderAlive() || !target.pingBinder()) {
+                policy.died(); death.countDown(); return;
+            }
+            long remaining = deadline - System.nanoTime();
+            if (remaining <= 0) throw new IllegalStateException("AG-1 death not observed");
+            if (death.await(Math.min(remaining, TimeUnit.MILLISECONDS.toNanos(50)), TimeUnit.NANOSECONDS)) return;
+        }
     }
     public synchronized int bindings() { return bindings; }
     public synchronized int transfers() { return transfers; }

@@ -292,3 +292,38 @@ the final parser: every new fixed phase message was emitted unchanged within
 the existing bounds and produced an unsuccessful overall result. No synthetic
 transcript is committed. Local Linux/KVM device reproduction remains unavailable;
 the next exact-head CI run must establish the failing lifecycle phase.
+
+## Third exact-head AG-1B device run
+
+For PR #21 head `b7324c2a5132021e0f825e047511ee4068315b3b`, Actions run
+#144 passed seven of eight AG-1B device tests. Only
+`testProcessDeathInvalidatesAuthorization` failed, with the exact fixed phase
+`death observation failed`. Initial bind, arm, and pre-death observation
+therefore completed. The other jobs (`changes`, `validate`,
+`containment-prototype`, `admission-feasibility`, `network-feasibility`, and
+`managed-profile-feasibility`) passed; `admission-runtime-feasibility` failed.
+
+The old implementation relied on callback/latch observation after issuing KILL.
+This revision retains callback-based Binder death notification and adds liveness
+observation of the exact old Binder proxy captured before the single-shot KILL.
+A monotonic ten-second deadline and latch waits of at most 50 milliseconds bound
+the observation loop. A false `isBinderAlive()` or `pingBinder()` result marks
+the policy DEAD and signals the latch; elapsed time alone never establishes
+death. Missing death evidence still fails with `AG-1 death not observed`.
+An IPC exception during KILL succeeds only if that captured Binder is observed
+dead; a live target's exception propagates. A `linkToDeath()` registration
+exception now signals the latch as well as marking the policy DEAD.
+
+These checks follow the [Android IBinder contract](https://developer.android.com/reference/android/os/IBinder).
+Later reconnection assignments cannot replace the target being observed, and
+the existing terminal DEAD policy cannot authorize a replacement. No
+launch-policy, consent, pre-code ordering, or guest-execution assertion is
+weakened. The instrumentation test and its phase labels remain unchanged.
+No new exact-head CI success or AG-1B device success is claimed.
+
+Local validation passed `:app:lintDebug`, `:app:testDebugUnitTest` (24 tests,
+zero failures/errors/skips), `:app:assembleDebug`, and
+`:app:assembleDebugAndroidTest`, all 57 existing Python tests, and AG-1B runner
+shell syntax. The local Windows host still lacks Linux/KVM support, so no local
+emulator run or security-test retry was performed. Exact-head device validation
+remains pending after publication.
