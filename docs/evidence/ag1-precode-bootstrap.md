@@ -401,3 +401,19 @@ shell syntax. Final review confirmed synchronous flags zero, reply recycling,
 normal-return failure, no PID-zero bypass, and unchanged service identity logic.
 Linux/KVM remains unavailable on the local Windows host, so no local emulator
 run or security-test retry was performed. CI pending after publication.
+
+## Sixth exact-head AG-1B device run
+
+At head `180213a970d7382ca8c69908d18a5309d6a8ee2d`, Actions run #147
+passed all eight AG-1B device tests (`Tests run: 8, Failures: 0`,
+`AG1B_RESULT pass`). The process-death test passed after synchronous KILL
+preserved the manager's Binder identity. `admission-runtime-feasibility`
+succeeded. The overall workflow remained red solely because the separate
+historical `network-feasibility` job failed on missing NATIVE_UDP4 TUN evidence.
+Thus the bounded AG-1B device experiment passed at that exact head, but the PR
+was not yet mergeable. This revision changes only fixture logging visibility
+and its tests; AG-1B runtime code is untouched.
+
+AG-1 remains IN PROGRESS. This controlled device result does not establish
+Protected eligibility, complete mediation, native containment, or production
+privacy. All prior research limitations and owner gates remain applicable.

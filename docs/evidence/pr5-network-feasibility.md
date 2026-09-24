@@ -355,3 +355,52 @@ are preserved. No measured operation, network policy, positive-control requireme
 physical-capture requirement, lockdown assertion, Known Gap result or privacy
 claim is weakened. The next exact-head CI result remains pending; no success is
 claimed in advance.
+
+### PR #21 run #147 bounded PACKET-log starvation
+
+At PR #21 head `180213a970d7382ca8c69908d18a5309d6a8ee2d`, Actions run
+#147's network job failed with `Missing per-operation TUN evidence: NATIVE_UDP4`.
+In `testFullTunnel`, observer output reached `count=128` before NATIVE_UDP4.
+The fixture had one shared 128-record budget; platform/background traffic
+consumed capacity needed by later controlled observations. No NATIVE_UDP4
+PACKET record was emitted afterward. This does not establish that the required
+packet actually traversed the TUN: the analyzer correctly failed on missing
+evidence.
+
+The revision reserves eight records for each exact controlled signature:
+
+| Family | Protocol | Category | Port |
+|---|---|---|---|
+| 4 | tcp | host-control | 46151 |
+| 4 | udp | documentation-v4 | 46152 |
+| 4 | tcp | host-control | 46153 |
+| 4 | udp | documentation-v4 | 46154 |
+| 4 | udp | synthetic-dns | 53 |
+| 6 | udp | documentation-v6 | 46152 |
+| 6 | udp | documentation-v6 | 46154 |
+
+All other sanitized tuples, including platform DNS, share 64 background slots.
+The per-establishment maximum is **7 x 8 + 64 = 120 PACKET records**, stricter
+than the previous 128. The public count remains an emitted-record ordinal, never
+a raw packet total. Unknown traffic is still sanitized to `other` and port zero
+before budgeting; the pure helper receives only family, protocol category,
+destination category, and port. It receives no addresses or payloads and cannot
+create evidence for an unobserved packet. IPv6 remains preliminary.
+
+No measured operation is retried. Exact per-operation TUN evidence, BEGIN/END
+markers, case boundaries, packet signatures, physical-capture assertions,
+positive controls, VPN-loss calibration, split-route and lockdown requirements
+are unchanged. Known Gap findings and production privacy claims remain unchanged.
+Prior run history is preserved. A fixture-only JUnit 4.13.2 test dependency
+matches the app's existing test version and adds no runtime dependency.
+
+Local validation passed fixture lint, nine fixture JVM tests, fixture debug
+assembly, app lint, all 24 app JVM tests, and instrumentation assembly. Tests
+cover 1,000-record other/platform-DNS floods, exact independent eight-record
+signature limits, the shared 64-record background limit, non-controlled tuples,
+the 120-record total bound, fresh establishment budgets, and the sanitized-only
+API. All 57 existing Python tests and both network/AG-1B runner syntax checks
+passed. Fixture-only CI classification remains baseline/network only; no
+classifier change was needed. Linux/KVM remains unavailable locally, so no
+network device experiment or measured-operation retry was run. CI pending after
+publication.

@@ -1,5 +1,7 @@
 plugins { id("com.android.application") }
 
+dependencies { testImplementation("junit:junit:4.13.2") }
+
 android {
     namespace = "com.privacydecoy.externalvpnfixture"
     compileSdk = 37
