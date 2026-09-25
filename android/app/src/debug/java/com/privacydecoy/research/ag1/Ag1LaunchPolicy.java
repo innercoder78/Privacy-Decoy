@@ -79,6 +79,7 @@ public final class Ag1LaunchPolicy {
     }
     public synchronized void died() { if (boundConsent != null) boundConsent.revoke(); state = State.DEAD; }
     public synchronized State state() { return state; }
+    public synchronized boolean executableSessionActive() { return state == State.USED && consentActive(); }
     public synchronized int uid() { return uid; }
     public synchronized int pid() { return pid; }
 }

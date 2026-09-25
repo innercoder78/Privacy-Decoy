@@ -137,6 +137,33 @@ public final class Ag1BootstrapSession implements AutoCloseable {
         return result;
     }
     public synchronized Bundle observations() throws Exception { return call(Ag1BootstrapWire.COUNT, new Bundle()); }
+    /** Controlled helper denies before descriptor transfer or any secondary loader construction. */
+    public synchronized Bundle controlledSecondary(byte[] bytes, Ag1ExecutableAuthorization authorization,
+            String generation, String id, long epoch) throws Exception {
+        byte[] snapshot = bytes.clone();
+        if (authorization == null || !authorization.belongsTo(policy)
+                || !authorization.consume(generation, id, epoch, hash(ByteBuffer.wrap(snapshot)),
+                Ag1ExecutableAuthorization.Kind.DEX, policy.execution)) {
+            Bundle denied = observations(); denied.putBoolean("authorized", false); return denied;
+        }
+        Bundle result = transferSecondary(snapshot, false); result.putBoolean("authorized", true); return result;
+    }
+    /** Explicit synthetic experiment. No call to Ag1ExecutableAuthorization. */
+    public synchronized Bundle directSecondary(byte[] bytes) throws Exception {
+        return transferSecondary(bytes.clone(), true);
+    }
+    private Bundle transferSecondary(byte[] bytes, boolean direct) throws Exception {
+        if (!policy.executableSessionActive() || bytes.length == 0 || bytes.length > Ag1BootstrapWire.MAX_DEX)
+            throw new IllegalStateException("AG-1 secondary transfer denied");
+        try (SharedMemory memory = SharedMemory.create("ag1-secondary", bytes.length)) {
+            ByteBuffer buffer = memory.mapReadWrite();
+            try { buffer.put(bytes); } finally { SharedMemory.unmap(buffer); }
+            if (!memory.setProtect(OsConstants.PROT_READ)) throw new IllegalStateException("AG-1 secondary read-only failed");
+            Bundle input = Ag1BootstrapWire.metadata(policy); input.putParcelable("dex", memory);
+            input.putString("dexSha", hash(ByteBuffer.wrap(bytes))); input.putBoolean("direct", direct);
+            return call(Ag1BootstrapWire.SECONDARY, input);
+        }
+    }
     public synchronized void revoke() { policy.revoke(); acknowledged = false; }
     public synchronized void killAndAwaitDeath() throws Exception {
         // Reconnection may replace remote; only this authorized target is being killed.

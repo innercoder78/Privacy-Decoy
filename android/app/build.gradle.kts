@@ -1,4 +1,5 @@
 import java.security.MessageDigest
+import java.util.zip.ZipFile
 
 plugins {
     id("com.android.application")
@@ -85,4 +86,29 @@ val generateAg1Assets = tasks.register<GenerateAg1Assets>("generateAg1Assets") {
 }
 androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
     variant.androidTest?.sources?.assets?.addGeneratedSourceDirectory(generateAg1Assets, GenerateAg1Assets::outputDirectory)
+}
+
+abstract class GenerateAg1DynamicAssets : DefaultTask() {
+    @get:InputFile abstract val primary: RegularFileProperty
+    @get:InputFile abstract val secondary: RegularFileProperty
+    @get:OutputDirectory abstract val outputDirectory: DirectoryProperty
+    @TaskAction fun generate() {
+        val output = outputDirectory.get().asFile
+        output.mkdirs()
+        primary.get().asFile.copyTo(output.resolve("ag1-precode-fixture-dynamic.apk"), overwrite = true)
+        ZipFile(secondary.get().asFile).use { zip ->
+            zip.getInputStream(zip.getEntry("classes.dex")).use {
+                output.resolve("ag1-secondary.dex").writeBytes(it.readBytes())
+            }
+        }
+    }
+}
+val generateAg1DynamicAssets = tasks.register<GenerateAg1DynamicAssets>("generateAg1DynamicAssets") {
+    dependsOn(":test-apps:ag1-precode-fixture:assembleDynamic", ":test-apps:ag1-secondary-dex-fixture:assembleDebug")
+    primary.set(project(":test-apps:ag1-precode-fixture").layout.buildDirectory.file("outputs/apk/dynamic/ag1-precode-fixture-dynamic.apk"))
+    secondary.set(project(":test-apps:ag1-secondary-dex-fixture").layout.buildDirectory.file("outputs/apk/debug/ag1-secondary-dex-fixture-debug.apk"))
+    outputDirectory.set(layout.buildDirectory.dir("generated/ag1DynamicAssets"))
+}
+androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
+    variant.androidTest?.sources?.assets?.addGeneratedSourceDirectory(generateAg1DynamicAssets, GenerateAg1DynamicAssets::outputDirectory)
 }

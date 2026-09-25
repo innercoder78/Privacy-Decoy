@@ -9,6 +9,7 @@ network=false
 managed=false
 admission=false
 ag1runtime=false
+ag1dynamic=false
 
 while IFS= read -r path; do
   [[ -z "$path" ]] && continue
@@ -40,6 +41,20 @@ while IFS= read -r path; do
       managed=true
       ;;
 
+    android/test-apps/ag1-secondary-dex-fixture/*|\
+    android/test-apps/ag1-precode-fixture/src/dynamic/*|\
+    android/app/src/debug/java/com/privacydecoy/research/ag1/Ag1ExecutableAuthorization.java|\
+    android/app/src/debug/java/com/privacydecoy/research/ag1/Ag1DexObservation.java|\
+    android/app/src/androidTest/java/com/privacydecoy/research/ag1/Ag1DynamicCodeTests.java|\
+    android/app/src/testDebug/java/com/privacydecoy/research/ag1/Ag1ExecutableAuthorizationTest.java|\
+    android/tools/ag1-dynamic-evidence.py|\
+    android/tools/test-ag1-dynamic-evidence.py|\
+    android/tools/run-ag1-dynamic-code-emulator.sh)
+      baseline=true
+      admission=true
+      ag1dynamic=true
+      ;;
+
     android/test-apps/ag1-java-fixture/*|\
     android/test-apps/ag1-dynamic-fixture/*|\
     android/tools/ag1-admission-analyzer.py|\
@@ -47,6 +62,8 @@ while IFS= read -r path; do
     android/tools/run-ag1-admission-fixtures.sh)
       baseline=true
       admission=true
+      ag1runtime=true
+      ag1dynamic=true
       ;;
 
     android/app/src/androidTest/java/com/privacydecoy/research/PrototypeTestRunner.java)
@@ -54,6 +71,7 @@ while IFS= read -r path; do
       containment=true
       network=true
       ag1runtime=true
+      ag1dynamic=true
       ;;
 
     android/test-apps/ag1-precode-fixture/*|\
@@ -61,6 +79,7 @@ while IFS= read -r path; do
       baseline=true
       admission=true
       ag1runtime=true
+      ag1dynamic=true
       ;;
 
     android/app/src/debug/java/com/privacydecoy/research/ag1/*|\
@@ -68,6 +87,7 @@ while IFS= read -r path; do
     android/app/src/testDebug/java/com/privacydecoy/research/ag1/*)
       baseline=true
       ag1runtime=true
+      ag1dynamic=true
       ;;
 
     android/probe-app/*|\
@@ -85,6 +105,7 @@ while IFS= read -r path; do
       managed=true
       admission=true
       ag1runtime=true
+      ag1dynamic=true
       ;;
   esac
 done
@@ -94,6 +115,7 @@ printf 'containment=%s\n' "$containment"
 printf 'network=%s\n' "$network"
 printf 'managed=%s\n' "$managed"
 printf 'admission=%s\n' "$admission"
+printf 'ag1dynamic=%s\n' "$ag1dynamic"
 printf 'ag1runtime=%s\n' "$ag1runtime"
-printf 'CI_CHANGESET baseline=%s containment=%s network=%s managed=%s admission=%s ag1runtime=%s\n' \
-  "$baseline" "$containment" "$network" "$managed" "$admission" "$ag1runtime" >&2
+printf 'CI_CHANGESET baseline=%s containment=%s network=%s managed=%s admission=%s ag1runtime=%s ag1dynamic=%s\n' \
+  "$baseline" "$containment" "$network" "$managed" "$admission" "$ag1runtime" "$ag1dynamic" >&2
