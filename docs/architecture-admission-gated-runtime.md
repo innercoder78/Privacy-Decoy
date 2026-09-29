@@ -1,5 +1,31 @@
 # Admission-gated controlled-runtime architecture
 
+## Outcome status — 2026-09-29
+
+**AG-1 CHECKPOINT: FAILED UNDER CURRENT HYPOTHESIS.** The original hypothesis
+and design obligations below are preserved as the ADR-0007 technical handoff,
+not claims that these layers were implemented or proven.
+
+AG-1A established bounded static admission analysis. AG-1B established an
+admission-bound READY barrier and controlled synthetic execution ordering.
+AG-1C preserved correct trusted-helper authorization behavior but positively
+demonstrated execution of previously unadmitted DEX through the tested direct
+`InMemoryDexClassLoader` path. That path bypassed the helper and falsified
+AG-1 questions 4 and 5; it does not satisfy PD-REQ-091. No real Protected-eligible
+device fixture or complete mandatory mediation was established.
+
+The [AG-1 closeout](evidence/ag1-feasibility-closeout.md) distinguishes this
+known bypass, which requires a PD-REQ-090 hard stop, from untested loader/native
+paths that remain Unknown. ByteHook/ShadowHook remain reference/dependency
+candidates, not syscall confinement or an evidenced repair. No additional native
+experiment is needed to establish the failed checkpoint.
+
+The active gate is the [canonical Roadmap PR 5 decision package](evidence/canonical-pr5-feasibility-decision.md),
+which recommends **STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME
+HYPOTHESIS**. Tony's decision is pending. Production PR 6 remains unstarted and
+unauthorized; AG-1 success was a necessary prerequisite and was not achieved.
+This status note selects no remediation or third-party enforcement mechanism.
+
 ## 1. Goal
 
 Investigate a PD-owned runtime that preserves strong, evidence-based Protected

@@ -1,6 +1,6 @@
 # Roadmap reconciliation
 
-**Status:** canonical source gap resolved; architecture/feasibility pause remains
+**Status:** AG-1 failed under current hypothesis; canonical Roadmap PR 5 owner gate active; production paused
 
 **Recorded:** 2026-09-22
 
@@ -78,3 +78,35 @@ Roadmap PR 5 STOP/owner gate, and explicit project-owner approval is required
 before PR 6 may begin. AG-1 failure favors STOP rather than weakening Protected
 Mode. No third-party engine is selected wholesale. This documentation decision
 has no hardcoded future GitHub PR number.
+
+## AG-1 closeout and canonical PR 5 gate — 2026-09-29
+
+GitHub [PR #22](https://github.com/innercoder78/Privacy-Decoy/pull/22),
+**research: prototype AG-1 dynamic-code compatibility**, merged at
+`b1754bc02c2b9cbf54f29a2d3afa16bd2967628e` (tree
+`0adb246bcb888a10f4f3ed7b51213ff3f85956ee`). Its AG-1C evidence positively
+demonstrated previously unadmitted DEX reaching entry invocation through the
+tested direct `InMemoryDexClassLoader` path without trusted-helper authorization.
+The successful observation workflow did not establish runtime mediation.
+
+**AG-1 CHECKPOINT: FAILED UNDER CURRENT HYPOTHESIS.** The
+[question-by-question closeout](evidence/ag1-feasibility-closeout.md) preserves
+AG-1A and AG-1B's bounded positive findings, AG-1C's trusted-helper behavior,
+and its decisive direct-loader falsification. Native/direct-syscall containment
+and other untested paths remain Unknown; completing another experiment is not
+required to establish this failure. Historical slice-level IN PROGRESS notes
+remain historical and are superseded for overall status by this closeout.
+
+The [canonical Roadmap PR 5 feasibility decision package](evidence/canonical-pr5-feasibility-decision.md)
+is now the active governance gate. It is not GitHub PR #5 and does not relabel
+the historical Roadmap PR 6 REDESIGN decision. The repository recommendation is
+**STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME HYPOTHESIS**;
+Tony's owner decision remains pending. No Accepted ADR records a new owner choice.
+
+AG-1 success was necessary but not sufficient for production PR 6; that
+prerequisite was not met. Canonical production PR 6 remains unstarted and
+unauthorized, and PR 20 has not occurred. No production PR 6 work may begin
+unless canonical governance conditions are satisfied and Tony explicitly
+authorizes it. This closeout authorizes no runtime remediation, native experiment,
+new engine, or requirement weakening. The source-restoration blocker remains
+resolved; the pause is due to feasibility and governance.

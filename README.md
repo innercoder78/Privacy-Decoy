@@ -15,19 +15,26 @@ families it evaluated. That recommendation remains valid historical evidence.
 After a ten-project source/reference review identified a narrower admission-gated
 hypothesis, the project owner explicitly chose **CONTINUE** on 2026-09-22 through
 [ADR-0007](docs/decisions/ADR-0007-admission-gated-controlled-runtime.md). The
-selected investigation is a PD-owned admission engine and controlled runtime with
+authorized investigation concerned a PD-owned admission engine and controlled runtime with
 fail-closed Protected Mode plus a separately labeled Experimental & Unproven
 Compatibility Mode. Read the [technical architecture handoff](docs/architecture-admission-gated-runtime.md)
 and [open-source reference catalog](docs/open-source-reference-catalog.md) before
 architecture or reuse work. No third-party engine is selected wholesale.
 
-**AG-1 — Admission-Gated Controlled Runtime Feasibility Checkpoint** is next.
-Canonical production Roadmap PR 6 remains unstarted. AG-1 success is a
-prerequisite, not authorization: AG-1 evidence must then pass the still-mandatory
-canonical Roadmap PR 5 STOP/owner gate, with explicit project-owner approval
-required before PR 6 may begin. Passing AG-1 does not itself establish production
-privacy. Only controlled fixtures and test applications are authorized during
-AG-1. Ordinary private user data and real accounts remain prohibited.
+**AG-1 CHECKPOINT: FAILED UNDER CURRENT HYPOTHESIS.** AG-1A's bounded admission
+analysis and AG-1B's controlled pre-code bootstrap remain positive evidence.
+AG-1C demonstrated that previously unadmitted DEX executed through the tested
+direct `InMemoryDexClassLoader` path without the trusted authorization helper.
+The [AG-1 closeout](docs/evidence/ag1-feasibility-closeout.md) evaluates all nine
+checkpoint questions; successful observation CI is not a security pass.
+
+The [canonical Roadmap PR 5 decision package](docs/evidence/canonical-pr5-feasibility-decision.md)
+is now the active governance gate and recommends **STOP UNDER CURRENT GOALS /
+CURRENT ADMISSION-GATED RUNTIME HYPOTHESIS**. Tony's owner decision remains
+pending. Production implementation remains paused, and canonical production
+PR 6 remains unstarted and unauthorized: AG-1 did not meet its prerequisite.
+No follow-on runtime or native experiment is authorized by this closeout.
+Ordinary private user data and real accounts remain prohibited.
 
 Historical evidence is preserved: S1 is **FALSIFIED**, its follow-up is
 **BLOCKED**, Blacks-BlackBox is **STOPPED_UNRESOLVED**, and the exact reviewed

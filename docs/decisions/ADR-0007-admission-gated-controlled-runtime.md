@@ -74,3 +74,25 @@ Broad production implementation is not silently authorized.
 
 The forward technical handoff is
 [Admission-gated controlled-runtime architecture](../architecture-admission-gated-runtime.md).
+
+## Outcome/status note — 2026-09-29
+
+The owner authorization and original decision above remain historical and
+unchanged. The authorized hypothesis encountered a decisive AG-1C failure:
+previously unadmitted DEX executed through the tested direct
+`InMemoryDexClassLoader` path without the trusted executable authorization
+helper. AG-1A's bounded analysis, AG-1B's pre-code bootstrap, and AG-1C's
+trusted-helper results remain valid within their documented scopes.
+
+**AG-1 CHECKPOINT: FAILED UNDER CURRENT HYPOTHESIS.** The
+[AG-1 closeout](../evidence/ag1-feasibility-closeout.md) records the nine-question
+assessment and requirement consequences. The
+[canonical Roadmap PR 5 decision package](../evidence/canonical-pr5-feasibility-decision.md)
+recommends **STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME
+HYPOTHESIS** and now requires canonical governance/owner disposition.
+
+This is an evidence outcome and recommendation, not a new decision by Tony or
+an Accepted STOP ADR. His owner decision remains pending. AG-1 success was not
+achieved; production PR 6 remains unstarted and unauthorized. No follow-on native
+experiment, remediation mechanism, third-party integration, or requirement
+weakening is authorized by this note.
