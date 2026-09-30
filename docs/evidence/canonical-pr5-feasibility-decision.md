@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-29
 
-**Gate status:** evidence package complete; owner decision pending; production paused
+**Gate status:** evidence package complete; owner decision REDESIGN recorded 2026-09-29; production paused
 
 This is the **canonical Roadmap PR 5** early feasibility evidence package, not
 GitHub PR #5. It audits the mandatory boundaries in the
@@ -10,9 +10,9 @@ GitHub PR #5. It audits the mandatory boundaries in the
 and [early decision stage](../canonical-roadmap-1.0.md#pr-5--early-feasibility-decision).
 The required outputs are an evidence-backed recommendation, proposed supported
 configuration, unresolved-risk register, and architecture decision. This package
-supplies the first three and presents the architecture disposition for Tony's
-decision; it does not fabricate the final owner decision or satisfy the gate by
-its existence.
+supplied the first three for owner review. The dated owner-decision section below
+now records the architecture disposition in ADR-0008. The package's existence
+and owner response do not establish a technical feasibility pass.
 
 The evidence baseline is main `b1754bc02c2b9cbf54f29a2d3afa16bd2967628e`, tree
 `0adb246bcb888a10f4f3ed7b51213ff3f85956ee`, after GitHub PR #22. This is a
@@ -140,12 +140,13 @@ it is not a universal impossibility claim about every future architecture.
 
 **Repository recommendation: STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME HYPOTHESIS**
 
-## OWNER DECISION REQUIRED
+## Historical owner-response state at closeout publication
 
-Tony has not made the closeout owner decision. The recommendation above is not
-owner acceptance, an Accepted STOP ADR, or authorization to implement anything.
-The canonical Roadmap PR 5 gate remains pending his explicit disposition; its
-architecture decision must record what he actually chooses.
+At closeout publication, Tony had not made the owner decision. The recommendation
+above was not owner acceptance, an Accepted STOP ADR, or implementation
+authorization. The canonical Roadmap PR 5 owner response was pending. The
+following paragraph preserves the closeout's authorization boundary; the dated
+section below records the subsequent owner response and new research authority.
 
 No production Roadmap PR 6 work may begin unless the canonical governance
 conditions are satisfied and Tony explicitly authorizes it. AG-1 did not succeed,
@@ -153,3 +154,37 @@ so its necessary prerequisite for PR 6 is unmet; publication or approval of this
 evidence package cannot imply otherwise. Production remains paused. Stop here:
 no follow-on architecture experiment, native containment work, or production PR 6
 is authorized by this package.
+
+## OWNER DECISION — REDESIGN
+
+**Date:** 2026-09-29. **Decision maker:** Tony, project owner.
+
+Tony has considered the evidence and explicitly chooses **REDESIGN**, recorded
+in [ADR-0008](../decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md).
+The decision baseline is main `b289873284250881ac7379ede3356c1dc216f309`, tree
+`2883d025a1db10fe3c97bfad197761ba8d6104ef`, after merged GitHub
+[PR #23](https://github.com/innercoder78/Privacy-Decoy/pull/23). This does not
+change the earlier technical evidence baseline or any acceptance-matrix result.
+
+* Tony accepts that ADR-0007 failed AG-1, including AG-1C's positively
+  demonstrated direct execution of previously unadmitted DEX.
+* Tony does not authorize production continuation under ADR-0007, and does not
+  accept final project STOP at this point.
+* Tony authorizes another bounded, materially different enforcement-boundary
+  redesign using accumulated Privacy Decoy evidence and the ten-project research.
+  The [research charter](../post-ag1-enforcement-boundary-redesign.md) starts with
+  architecture, authority, and bypass analysis, not another runtime prototype.
+* PD-REQ-001..095 remain unchanged. Mandatory Unknown still blocks Protected
+  Mode; a known mandatory bypass still hard-stops execution with no Experimental
+  override. No requirement is marked satisfied.
+* Production remains paused and canonical production PR 6 remains blocked,
+  unstarted, and unauthorized. No replacement architecture is already established.
+
+This resolves the **current canonical PR 5 owner-response requirement as
+REDESIGN**. It does not convert failed feasibility evidence into PASS. The
+repository recommendation **STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED
+RUNTIME HYPOTHESIS** remains correct for the failed hypothesis and is preserved
+above. ADR-0008 supersedes ADR-0007 only for forward architecture work; prior
+authorization, positive bounded findings, failures, and unresolved risks remain
+historical evidence. Any future production proposal still requires canonical
+feasibility governance and Tony's explicit authorization.

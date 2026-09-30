@@ -1,5 +1,11 @@
 # Open-source architecture and implementation reference catalog
 
+**Forward status — 2026-09-29:** [ADR-0008](decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md)
+keeps this catalog active as a selective design/source reference for the
+[post-AG-1 enforcement-boundary redesign](post-ag1-enforcement-boundary-redesign.md).
+The findings, pins, and dispositions below are unchanged; reference influence
+is not security evidence, and no repository is selected wholesale.
+
 These entries are research reference snapshots, not production dependencies.
 Repository HEADs and exact-current upstream state can change; the commit pins
 below are the evidence snapshots reviewed on 2026-09-22. Upstream README claims
