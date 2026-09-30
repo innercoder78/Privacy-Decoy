@@ -20,11 +20,17 @@ paths that remain Unknown. ByteHook/ShadowHook remain reference/dependency
 candidates, not syscall confinement or an evidenced repair. No additional native
 experiment is needed to establish the failed checkpoint.
 
-The active gate is the [canonical Roadmap PR 5 decision package](evidence/canonical-pr5-feasibility-decision.md),
-which recommends **STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME
-HYPOTHESIS**. Tony's decision is pending. Production PR 6 remains unstarted and
-unauthorized; AG-1 success was a necessary prerequisite and was not achieved.
-This status note selects no remediation or third-party enforcement mechanism.
+The [canonical Roadmap PR 5 decision package](evidence/canonical-pr5-feasibility-decision.md)
+preserves **STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME HYPOTHESIS**
+as its evidence recommendation. Tony subsequently selected **REDESIGN** on
+2026-09-29 through [ADR-0008](decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md),
+which supersedes ADR-0007 for forward architecture work and authorizes only the
+[post-AG-1 enforcement-boundary research charter](post-ag1-enforcement-boundary-redesign.md).
+This document remains the failed ADR-0007 technical handoff. Useful supporting
+concepts may be reused, but this admission-gated runtime is not the current
+forward architecture. Requirements remain unchanged. Production PR 6 remains
+unstarted and unauthorized; AG-1 success was a necessary prerequisite and was
+not achieved. No new runtime prototype or third-party mechanism is selected.
 
 ## 1. Goal
 

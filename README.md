@@ -2,8 +2,8 @@
 
 Privacy Decoy is a planned **Android-only, root-free privacy container/mediation
 project**. The intended product would mediate applications' access to sensitive
-device information. Roadmap PR 6 selected **REDESIGN**; technical feasibility remains
-subject to another explicit gate. Privacy takes precedence over compatibility.
+device information. The canonical Roadmap PR 5 owner decision is **REDESIGN**;
+technical feasibility remains unproven. Privacy takes precedence over compatibility.
 
 ## Current status
 
@@ -29,12 +29,17 @@ The [AG-1 closeout](docs/evidence/ag1-feasibility-closeout.md) evaluates all nin
 checkpoint questions; successful observation CI is not a security pass.
 
 The [canonical Roadmap PR 5 decision package](docs/evidence/canonical-pr5-feasibility-decision.md)
-is now the active governance gate and recommends **STOP UNDER CURRENT GOALS /
-CURRENT ADMISSION-GATED RUNTIME HYPOTHESIS**. Tony's owner decision remains
-pending. Production implementation remains paused, and canonical production
-PR 6 remains unstarted and unauthorized: AG-1 did not meet its prerequisite.
-No follow-on runtime or native experiment is authorized by this closeout.
-Ordinary private user data and real accounts remain prohibited.
+preserves the evidence recommendation **STOP UNDER CURRENT GOALS / CURRENT
+ADMISSION-GATED RUNTIME HYPOTHESIS**. On 2026-09-29 Tony selected **REDESIGN** in
+[ADR-0008](docs/decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md),
+resolving the owner response without converting AG-1 into PASS. ADR-0007 will not
+proceed unchanged. The authorized next phase is bounded
+[post-AG-1 enforcement-boundary redesign](docs/post-ag1-enforcement-boundary-redesign.md)
+research using accumulated evidence and the ten-project catalog. No new
+architecture is selected. PD-REQ-001..095 remain unchanged; production
+implementation is paused and canonical PR 6 remains unstarted and unauthorized.
+No new runtime prototype is authorized. Ordinary private user data and real
+accounts remain prohibited.
 
 Historical evidence is preserved: S1 is **FALSIFIED**, its follow-up is
 **BLOCKED**, Blacks-BlackBox is **STOPPED_UNRESOLVED**, and the exact reviewed

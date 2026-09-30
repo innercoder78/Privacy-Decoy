@@ -1,8 +1,10 @@
 # Roadmap reconciliation
 
-**Status:** AG-1 failed under current hypothesis; canonical Roadmap PR 5 owner gate active; production paused
+**Status:** AG-1 failed; canonical Roadmap PR 5 owner decision REDESIGN; bounded enforcement-boundary research authorized; production paused
 
 **Recorded:** 2026-09-22
+
+**Forward decision updated:** 2026-09-29
 
 ## Restored governing source
 
@@ -98,10 +100,11 @@ required to establish this failure. Historical slice-level IN PROGRESS notes
 remain historical and are superseded for overall status by this closeout.
 
 The [canonical Roadmap PR 5 feasibility decision package](evidence/canonical-pr5-feasibility-decision.md)
-is now the active governance gate. It is not GitHub PR #5 and does not relabel
-the historical Roadmap PR 6 REDESIGN decision. The repository recommendation is
+became the active governance gate at closeout. It is not GitHub PR #5 and does
+not relabel the historical Roadmap PR 6 REDESIGN decision. The repository recommendation is
 **STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME HYPOTHESIS**;
-Tony's owner decision remains pending. No Accepted ADR records a new owner choice.
+Tony's owner response was pending at that publication. The subsequent decision
+below resolves that response without changing the evidence recommendation.
 
 AG-1 success was necessary but not sufficient for production PR 6; that
 prerequisite was not met. Canonical production PR 6 remains unstarted and
@@ -110,3 +113,30 @@ unless canonical governance conditions are satisfied and Tony explicitly
 authorizes it. This closeout authorizes no runtime remediation, native experiment,
 new engine, or requirement weakening. The source-restoration blocker remains
 resolved; the pause is due to feasibility and governance.
+
+## Post-AG-1 owner decision — 2026-09-29
+
+GitHub [PR #23](https://github.com/innercoder78/Privacy-Decoy/pull/23),
+**docs: close AG-1 and prepare canonical PR 5 decision**, merged. Main at this
+owner-decision baseline is `b289873284250881ac7379ede3356c1dc216f309`, tree
+`2883d025a1db10fe3c97bfad197761ba8d6104ef`.
+
+Tony's canonical Roadmap PR 5 owner decision is now **REDESIGN**.
+[ADR-0008](decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md) supersedes
+ADR-0007 for forward architecture work. ADR-0007 remains an Accepted historical
+decision whose hypothesis failed AG-1; ADR-0006 and all prior evidence remain
+historical. **AG-1 remains FAILED**, and the canonical PR 5 evidence recommendation
+remains **STOP UNDER CURRENT GOALS / CURRENT ADMISSION-GATED RUNTIME HYPOTHESIS**.
+The owner response is resolved as REDESIGN, not PROCEED or final project STOP,
+and not a technical feasibility pass.
+
+The supplemental [post-AG-1 enforcement-boundary redesign phase](post-ag1-enforcement-boundary-redesign.md)
+comes before any production Roadmap PR 6 work. It authorizes bounded architecture,
+authority, and bypass research using all accumulated evidence and the ten-project
+catalog. No architecture has already been found, no runtime prototype is
+authorized, and no engine is selected wholesale. PD-REQ-001..095 and canonical
+roadmap numbering remain unchanged. Canonical production PR 6 remains unstarted
+and unauthorized; implementation remains paused and PR 20 has not occurred.
+Future production work still requires canonical feasibility governance and Tony's
+explicit authorization; this research decision does not waive AG-1's failed
+prerequisite or approve a replacement gate.
