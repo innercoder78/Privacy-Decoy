@@ -86,6 +86,13 @@ does not authorize execution: runtime experiments, builds, dependency integratio
 or another prototype require the separate review described by the exit criteria.
 Do not patch the failed ADR-0007 helper as a substitute for this analysis.
 
+### Research progress
+
+Candidate 1 — OS/process-enforced compartment: **REJECTED — NO PERMITTED MANDATORY AUTHORITY BOUNDARY**.
+Evidence: [candidate record](evidence/post-ag1-candidate-1-os-process-compartment.md).
+Candidates 2–5 remain pending/not performed. No overall redesign exit outcome
+has been selected; no prototype or production PR 6 is authorized by this record.
+
 ### 1. OS/process-enforced guest compartment plus brokered authority
 
 Investigate whether ordinary non-rooted Android exposes a usable sandbox/process
