@@ -93,7 +93,10 @@ Evidence: [candidate record](evidence/post-ag1-candidate-1-os-process-compartmen
 Candidate 2 — controlled Android semantics above a stronger lower boundary:
 **UNKNOWN — LOWER BOUNDARY NOT YET ESTABLISHED**.
 Evidence: [candidate record](evidence/post-ag1-candidate-2-controlled-runtime-lower-boundary.md).
-Candidates 3–5 remain pending/not performed. No overall redesign exit outcome
+Candidate 3 — technically constrained execution classes:
+**UNKNOWN — CLASS ENFORCEMENT DEPENDS ON UNESTABLISHED LOWER AUTHORITY**.
+Evidence: [candidate record](evidence/post-ag1-candidate-3-constrained-execution-class.md).
+Candidates 4–5 remain pending/not performed. No overall redesign exit outcome
 has been selected; no prototype or production PR 6 is authorized by this record.
 
 ### 1. OS/process-enforced guest compartment plus brokered authority
