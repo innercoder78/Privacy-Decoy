@@ -90,7 +90,10 @@ Do not patch the failed ADR-0007 helper as a substitute for this analysis.
 
 Candidate 1 — OS/process-enforced compartment: **REJECTED — NO PERMITTED MANDATORY AUTHORITY BOUNDARY**.
 Evidence: [candidate record](evidence/post-ag1-candidate-1-os-process-compartment.md).
-Candidates 2–5 remain pending/not performed. No overall redesign exit outcome
+Candidate 2 — controlled Android semantics above a stronger lower boundary:
+**UNKNOWN — LOWER BOUNDARY NOT YET ESTABLISHED**.
+Evidence: [candidate record](evidence/post-ag1-candidate-2-controlled-runtime-lower-boundary.md).
+Candidates 3–5 remain pending/not performed. No overall redesign exit outcome
 has been selected; no prototype or production PR 6 is authorized by this record.
 
 ### 1. OS/process-enforced guest compartment plus brokered authority
