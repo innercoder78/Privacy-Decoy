@@ -96,7 +96,10 @@ Evidence: [candidate record](evidence/post-ag1-candidate-2-controlled-runtime-lo
 Candidate 3 — technically constrained execution classes:
 **UNKNOWN — CLASS ENFORCEMENT DEPENDS ON UNESTABLISHED LOWER AUTHORITY**.
 Evidence: [candidate record](evidence/post-ag1-candidate-3-constrained-execution-class.md).
-Candidates 4–5 remain pending/not performed. No overall redesign exit outcome
+Candidate 4 — ordinary-app-accessible syscall/Binder restrictions:
+**UNKNOWN — PARTIAL LOWER-BOUNDARY MECHANISMS EXIST BUT SUFFICIENCY IS UNESTABLISHED**.
+Evidence: [candidate record](evidence/post-ag1-candidate-4-syscall-binder-boundary.md).
+Candidate 5 remains pending/not performed. No overall redesign exit outcome
 has been selected; no prototype or production PR 6 is authorized by this record.
 
 ### 1. OS/process-enforced guest compartment plus brokered authority
