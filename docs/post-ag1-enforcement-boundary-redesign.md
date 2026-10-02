@@ -99,8 +99,13 @@ Evidence: [candidate record](evidence/post-ag1-candidate-3-constrained-execution
 Candidate 4 — ordinary-app-accessible syscall/Binder restrictions:
 **UNKNOWN — PARTIAL LOWER-BOUNDARY MECHANISMS EXIST BUT SUFFICIENCY IS UNESTABLISHED**.
 Evidence: [candidate record](evidence/post-ag1-candidate-4-syscall-binder-boundary.md).
-Candidate 5 remains pending/not performed. No overall redesign exit outcome
-has been selected; no prototype or production PR 6 is authorized by this record.
+Candidate 5 — hybrid architecture:
+**REJECTED — HYBRID DOES NOT CLOSE MANDATORY AUTHORITY**.
+Evidence: [candidate record](evidence/post-ag1-candidate-5-hybrid-architecture.md).
+All five candidate records are complete. Comparative synthesis remains
+pending/not performed; owner handoff remains pending/not performed. No overall
+redesign exit outcome is selected by Candidate 5 alone. No prototype is authorized
+unless separately reviewed later; production PR 6 remains unstarted and unauthorized.
 
 ### 1. OS/process-enforced guest compartment plus brokered authority
 
