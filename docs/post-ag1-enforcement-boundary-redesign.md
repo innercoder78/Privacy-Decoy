@@ -107,9 +107,11 @@ All five candidate records are complete. The
 and selects **C. NO CREDIBLE BOUNDARY** as the evidence-backed synthesis result:
 a **STOP recommendation to Tony** under this bounded phase's current constraints
 and evidence, not a universal impossibility proof or a new owner decision.
-Owner handoff remains pending/not performed: **OWNER HANDOFF REQUIRED**.
-Tony's ADR-0008 decision remains **REDESIGN**; no new owner decision has been made.
-No prototype or next implementation/research phase is authorized by this PR.
+**Owner handoff prepared; owner response pending.** The bounded research phase
+and synthesis are complete; the [owner handoff package](evidence/post-ag1-owner-handoff.md)
+is complete. Tony has not yet supplied the new owner response. ADR-0008 continues
+to record **REDESIGN** until a subsequent explicit owner decision is recorded.
+No new phase, prototype, or implementation is authorized by this PR.
 Production Roadmap PR 6 remains unstarted and unauthorized.
 
 ### 1. OS/process-enforced guest compartment plus brokered authority
