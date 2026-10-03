@@ -1,4 +1,4 @@
-# ADR-0009: Retire universal containment goal and authorize privacy-mediation redesign
+# ADR-0009: Retire prior Protected-containment contract and authorize privacy-mediation redesign
 
 **Status:** Accepted — owner accepts STOP under the prior product contract;
 product-contract architecture/design work authorized; production remains paused
@@ -24,9 +24,16 @@ tree `9b28e603c190b7cf0da99b71feba932242b32166`, after merged
 The completed [comparative synthesis](../evidence/post-ag1-comparative-synthesis.md)
 remains **C. NO CREDIBLE BOUNDARY** under the original goals, constraints and
 available evidence represented by ADR-0008 and PD-REQ-001..095. It found no
-credible permitted boundary for the original universal fail-closed containment
-goal for arbitrary imported Android applications. This is a scoped research
-conclusion, not a mathematical proof that this concept can never exist on Android.
+credible permitted boundary for the original fail-closed Protected contract in
+the intended useful imported-app scope. Each app/version/artifact set represented
+as Protected required complete mandatory privacy-sensitive path mediation or
+safe blocking/fail-closed handling within its claimed scope. Phase I did not
+promise universal APK compatibility: [PD-REQ-017](../requirements.md) explicitly
+prohibited that claim. Outcomes included Protected eligible, Experimental eligible,
+Known unsafe and Incompatible; mandatory Unknown blocked Protected execution,
+and known mandatory bypasses or incompatibility required a hard stop without
+an Experimental override. This is a scoped research conclusion, not a mathematical
+proof that this concept can never exist on Android.
 
 The previous architecture and research phases remain valid historical evidence:
 
@@ -52,10 +59,11 @@ of **an explicit change to project goals or constraints**. The old
 [enforcement-boundary charter](../post-ag1-enforcement-boundary-redesign.md) is
 CLOSED; no sixth candidate is authorized under it.
 
-The universal-containment goal and the attempt to satisfy the old Protected
-contract through ADR-0007/ADR-0008 are retired as the direction for future design.
+The prior Protected-containment contract and the attempt to satisfy it through
+ADR-0007/ADR-0008 are retired as the direction for future design.
 This decision does not authorize repairing Candidate 5, adding more hooks, or
-reviving the admission-gated runtime while retaining the original universal claim.
+reviving the admission-gated runtime while retaining the original complete
+mandatory-path coverage requirement for Protected claims.
 It authorizes redesign of the **product contract itself**. No failed prerequisite
 is declared satisfied and no old guarantee is redefined as a success.
 
@@ -177,4 +185,5 @@ and a durable design handoff. Implementation, compatibility, native coverage,
 signing/identity behavior, Play Integrity, Google login/Play Services, external
 VPN verification and clone detectability remain unresolved. Rewriting, runtime
 injection, re-signing, ByteHook/ShadowHook or seccomp do not by themselves prove
-privacy or universal containment. Production remains paused.
+privacy or complete mandatory-path coverage for a Protected claim. Production
+remains paused.

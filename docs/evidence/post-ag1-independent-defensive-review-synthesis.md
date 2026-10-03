@@ -31,7 +31,7 @@ evidence scopes. This synthesis adds no runtime result or approved dependency.
 
 | Classification system | Recorded result | Question answered |
 |---|---|---|
-| Independent defensive review | **A. NO MATERIALLY NEW BOUNDARY** | Did the additional mechanisms justify reopening the old arbitrary-APK universal-containment architecture? The review reported no. |
+| Independent defensive review | **A. NO MATERIALLY NEW BOUNDARY** | Did the additional mechanisms justify reopening the old imported-app Protected-containment architecture? The review reported no. |
 | ADR-0008 completed repository phase | **C. NO CREDIBLE BOUNDARY** | Did the five-candidate phase establish a credible permitted boundary or enforceable useful narrower class under the old mandatory contract? The synthesis found neither. |
 
 The review's A/B/C labels are different from ADR-0008's A/B/C exit labels.
@@ -39,11 +39,20 @@ Review result A does not mean charter exit A, **CREDIBLE BOUNDARY FOUND**. Both
 recorded results coexist; the review does not replace or rename the repository's
 result C, change a candidate disposition, or turn Unknown into PASS.
 
+The old contract required complete mandatory-path mediation or safe blocking/
+fail-closed handling within the claimed scope of each app/version/artifact set
+represented as Protected. It did not promise compatibility with every APK.
+Experimental/unproven, Known unsafe, Incompatible and otherwise non-Protected
+outcomes remained possible; mandatory Unknown blocked Protected execution and
+known mandatory bypasses or incompatibility received no Experimental override.
+The completed repository result concerns that contract for the intended useful
+imported-app scope under the old goals, constraints and evidence.
+
 ## Reported leads and their limits
 
 | Lead considered by the review | Reported significance and limits to preserve |
 |---|---|
-| Chromium Android isolated-process/sandbox patterns | Useful sandbox organization and defense-in-depth reference; not evidence that arbitrary Android applications receive complete PD Persona/content mediation. |
+| Chromium Android isolated-process/sandbox patterns | Useful sandbox organization and defense-in-depth reference; not evidence of complete mandatory PD Persona/content mediation within an imported app's claimed Protected scope. |
 | Current `isolated_app` restrictions | Relevant process/service/authority limits; access to genuine state and later executable content still needs separate analysis. No all-device support claim follows. |
 | Modern Android/Linux seccomp evidence | Strengthened knowledge of additional lower-level hard-denial mechanisms; syscall restrictions are not DEX content identity/admission or complete Android virtualization. |
 | TAWC / tawcroot | Lead for additional ordinary-Android seccomp-style deployment, not hostile-code containment evidence. Exact deployment context must be verified before reuse. |

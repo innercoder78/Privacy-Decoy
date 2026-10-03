@@ -19,9 +19,10 @@ unstarted and unauthorized and must not resume automatically.
 ## Historical result and controlling records
 
 The exact completed old-phase result is **C. NO CREDIBLE BOUNDARY** under the
-original Privacy Decoy goals, constraints and available evidence represented by
-ADR-0008 and PD-REQ-001..095. The owner accepts its STOP recommendation for that
-contract. This is not abandonment of Privacy Decoy or a mathematical proof that
+original Privacy Decoy goals, constraints, intended useful imported-app scope
+and available evidence represented by ADR-0008 and PD-REQ-001..095. The owner
+accepts its STOP recommendation for that contract. This is not abandonment of
+Privacy Decoy or a mathematical proof that
 Android can never support the concept. Tony chooses **an explicit change to
 project goals or constraints**, the path allowed by the original
 [owner handoff](evidence/post-ag1-owner-handoff.md).
@@ -58,8 +59,17 @@ stage. They do not override the accepted response dated 2026-10-03.
 
 ## What changes, and the required contract migration
 
-The original universal fail-closed containment goal for arbitrary imported
-Android applications is retired as the future design objective. Phase II must
+The original fail-closed Protected contract is retired as the future design
+objective. It required complete mandatory privacy-sensitive path mediation or
+safe blocking/fail-closed handling within the claimed scope of each imported
+app/version/artifact set represented as Protected. Phase I did not promise
+universal APK compatibility; PD-REQ-017 explicitly prohibited that claim.
+Protected eligible, Experimental eligible, Known unsafe and Incompatible were
+distinct possible outcomes. Mandatory Unknown blocked Protected execution;
+known mandatory bypasses or incompatibility required a hard stop without an
+Experimental override. Excluding apps did not relax the bar for Protected claims.
+The completed research found no credible permitted boundary satisfying that
+contract for the intended useful imported-app product scope. Phase II must
 design an honest privacy-mediation contract instead of trying to make Candidate
 5, more hooks or the old admission-gated architecture satisfy the original claim.
 This does not rename incomplete old protection as successful new protection.
@@ -219,7 +229,7 @@ renaming or a numerical safety score.
 | [AG-1C](evidence/ag1-runtime-executable-code.md): previously unadmitted DEX executed through direct `InMemoryDexClassLoader` without mandatory PD helper admission; run #150, API 35 Google APIs x86_64 debug | Instrumentation/rewriting can provide useful mediation but cannot be described as complete control of later executable content without separate proof. The known failure is not demoted to Unknown; other paths retain their own scope. |
 | [S1](evidence/pr8-managed-profile-boundary.md) / [PR4](evidence/pr4-containment-prototype.md): genuine Build/framework/process state remained accessible | Distinguish dynamically mediated values from genuine already-resident/cached state outside mediation. OS isolation alone does not synthesize Persona values. |
 | [Candidate 4](evidence/post-ag1-candidate-4-syscall-binder-boundary.md): additional seccomp has meaningful lower hard-denial mechanisms in inspected Android configurations | Consider defense in depth with configuration-specific evidence; do not equate syscall restriction with DEX identity/admission or complete application virtualization. Source support is not a new PD device result. |
-| [Candidate 5](evidence/post-ag1-candidate-5-hybrid-architecture.md): isolated worker + broker + syscall restriction did not close the old mandatory authority graph | Changed goals do not make that rejected universal-containment design solved. Reuse limited mechanisms only with explicit new claims and limits. |
+| [Candidate 5](evidence/post-ag1-candidate-5-hybrid-architecture.md): isolated worker + broker + syscall restriction did not close the old mandatory authority graph | Changed goals do not make that rejected Protected-contract design solved. Reuse limited mechanisms only with explicit new claims and limits. |
 | Binder/FD/capability closure remained incomplete | A Binder object, FD, socket, mapped object, provider object, callback or token can carry genuine host authority. Prefer copied/synthetic values and scoped logical capabilities where feasible; document genuine durable capabilities as Real/coverage-relevant authority, including revocation limits. |
 | [PR5](evidence/pr5-network-feasibility.md): VPN-loss physical egress and exclusion/split-route/allowBypass Known Gaps | Network identity is a separate coherence concern. Spoofed GPS does not alter public IP; external VPN presence is not all-producer routing proof. |
 | Bounded static admission analysis | Static presence can establish risk; absence of a pattern does not prove behavioral absence, including generated/downloaded/opaque code. |
