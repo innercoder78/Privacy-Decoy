@@ -1,5 +1,37 @@
 # Post-AG-1 owner handoff
 
+## Current owner response — 2026-10-03
+
+**OWNER DECISION: ACCEPT STOP UNDER PRIOR GOALS AND CONSTRAINTS; AUTHORIZE PRODUCT-CONTRACT REDESIGN**
+
+Tony has supplied the response that was pending when this handoff was published
+on 2026-10-02. He accepts the completed STOP recommendation for the **old product
+contract represented by ADR-0008 and PD-REQ-001..095**. He does **not** abandon
+Privacy Decoy. He explicitly invokes this handoff's allowed path of **an explicit
+change to project goals or constraints** and authorizes a new architecture and
+requirement design phase for the changed product contract.
+
+[ADR-0009](../decisions/ADR-0009-retire-universal-containment-and-authorize-privacy-mediation-redesign.md)
+records this later accepted decision and supersedes ADR-0008 only for future
+architecture direction. ADR-0008 remains the historical Accepted REDESIGN
+decision of 2026-09-29. The canonical next-design bridge is the
+[privacy-mediation redesign handoff](../privacy-mediation-redesign-handoff.md).
+
+The completed result remains **C. NO CREDIBLE BOUNDARY** under the old goals,
+constraints and available evidence, not universal Android impossibility.
+AG-1 remains FAILED and all five candidate dispositions remain unchanged.
+The old enforcement-boundary charter is CLOSED; no sixth candidate is authorized.
+No runtime prototype or production implementation is authorized by this response;
+canonical production Roadmap PR 6 remains unstarted and unauthorized.
+
+## Historical handoff published 2026-10-02
+
+**Historical scope of the remainder:** the original recommendation, constraints,
+pending-owner statements, requested decision and unfilled template below are
+preserved as published on 2026-10-02. They record **OWNER DECISION: PENDING at
+that time**, not current status. The dated response above and ADR-0009 govern
+future direction; the old evidence remains controlling within its original scope.
+
 **Prepared:** 2026-10-02. **Owner handoff prepared; owner response pending.**
 
 ### Evidence-backed phase result
@@ -69,7 +101,7 @@ bypass to Unknown. Denying new executable native pages does not itself deny
 DEX interpreted by existing ART code; later denial or normal teardown cannot
 retroactively authorize code that already executed.
 
-## Evidence sequence and current governance
+## Historical evidence sequence and governance — 2026-10-02
 
 | Historical stage | Preserved result and present meaning |
 |---|---|
@@ -185,7 +217,7 @@ progress state: no Android/runtime/test/workflow/dependency/binary changes,
 prototype, source integration, engine selection, or scope change. Merging this
 handoff neither accepts STOP for Tony nor authorizes further work.
 
-## Owner decision required
+## Historical owner decision request — 2026-10-02
 
 ### STOP
 
@@ -230,7 +262,7 @@ original AG-1, S1, PR4/PR5, earlier synthesis and canonical PR 5 records. Those
 records' dates, exact tested heads and source-versus-runtime limits remain
 controlling; this handoff adds no new experiment or source finding.
 
-## Owner-response template — not yet filled in
+## Historical owner-response template — unfilled at publication on 2026-10-02
 
 ```text
 OWNER DECISION: PENDING
