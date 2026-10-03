@@ -3,6 +3,16 @@
 **Authorized:** 2026-09-29 by Tony's **REDESIGN** decision in
 [ADR-0008](decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md).
 
+**Current status — 2026-10-03: CLOSED.** All five candidate records, comparative
+synthesis and owner handoff are complete. The result remains **C. NO CREDIBLE
+BOUNDARY**. Tony has accepted STOP under this charter's old product contract.
+[ADR-0009](decisions/ADR-0009-retire-universal-containment-and-authorize-privacy-mediation-redesign.md)
+separately authorizes changed product-contract architecture/requirement design
+through the [privacy-mediation redesign handoff](privacy-mediation-redesign-handoff.md).
+No sixth candidate is authorized under this charter. Production Roadmap PR 6
+remains unstarted and unauthorized. The research instructions and constraints
+below are preserved as the historical charter, not authority to resume it.
+
 **Scope:** bounded supplemental architecture research only. Production
 implementation is paused; canonical Roadmap PR 6 remains unstarted and
 unauthorized. The canonical 46-PR roadmap is unchanged. This charter defines
@@ -107,11 +117,15 @@ All five candidate records are complete. The
 and selects **C. NO CREDIBLE BOUNDARY** as the evidence-backed synthesis result:
 a **STOP recommendation to Tony** under this bounded phase's current constraints
 and evidence, not a universal impossibility proof or a new owner decision.
-**Owner handoff prepared; owner response pending.** The bounded research phase
-and synthesis are complete; the [owner handoff package](evidence/post-ag1-owner-handoff.md)
-is complete. Tony has not yet supplied the new owner response. ADR-0008 continues
-to record **REDESIGN** until a subsequent explicit owner decision is recorded.
-No new phase, prototype, or implementation is authorized by this PR.
+**Owner handoff and response complete — 2026-10-03.** The bounded research phase,
+synthesis and [owner handoff package](evidence/post-ag1-owner-handoff.md) are
+complete. Tony has now accepted STOP under this product contract; the charter
+is **CLOSED**. ADR-0008 remains the historical Accepted REDESIGN decision.
+[ADR-0009](decisions/ADR-0009-retire-universal-containment-and-authorize-privacy-mediation-redesign.md)
+records the later owner response and separately authorizes product-contract
+redesign through the [new handoff](privacy-mediation-redesign-handoff.md).
+No sixth candidate, runtime prototype or implementation is authorized under
+this charter. Future design proceeds under ADR-0009, not a continuation here.
 Production Roadmap PR 6 remains unstarted and unauthorized.
 
 ### 1. OS/process-enforced guest compartment plus brokered authority
