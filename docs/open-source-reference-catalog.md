@@ -1,16 +1,22 @@
 # Open-source architecture and implementation reference catalog
 
-> **Phase II status:** Every entry is an architecture or research reference only.
-> This catalog adopts no dependency and is not security evidence. Virtualization
-> projects are not the selected engine. Opaque security-critical binaries cannot
-> enter the Privacy Decoy TCB. The catalog is not exhaustive proof that no other
-> approach exists.
+> **Phase II forward status:**
+> [ADR-0010](decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md)
+> governs the forward architecture and selects transformation-first hybrid
+> mediation. Transformation, rebuild, re-signing, DEX/resource tooling, native
+> hooks, Binder work, and virtualization/runtime semantics are distinct reference
+> categories. Virtualization/runtime projects remain references rather than a
+> selected wholesale engine. References are not security evidence, and this PR
+> adopts no dependency. Opaque security-critical binaries cannot enter the
+> Privacy Decoy TCB. The catalog is not exhaustive proof that no other approach
+> exists.
 
-**Forward status — 2026-09-29:** [ADR-0008](decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md)
-keeps this catalog active as a selective design/source reference for the
+**Historical Phase I context:** On 2026-09-29,
+[ADR-0008](decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md) kept this
+catalog active for the
 [post-AG-1 enforcement-boundary redesign](post-ag1-enforcement-boundary-redesign.md).
-The findings, pins, and dispositions below are unchanged; reference influence
-is not security evidence, and no repository is selected wholesale.
+That redesign and status are historical. Their findings, pins, and dispositions
+remain evidence, but they do not govern Phase II forward architecture.
 
 These entries are research reference snapshots, not production dependencies.
 Repository HEADs and exact-current upstream state can change; the commit pins
@@ -24,17 +30,16 @@ top-level license.
 
 ## Reference synthesis
 
-| Desired PD layer | Strongest references |
+| Phase II reference category | Research references |
 |---|---|
-| Admission / APK analysis | Mirro + NEXTVM |
-| Controlled runtime / Android semantics | NewBlackbox + NEXTVM |
-| Split/container management | Renjana + NEXTVM |
-| Privacy coverage inventory | XPrivacyLua |
-| Persona/profile design | SpoofMyDevice |
-| Binder design | Binderceptor + NewBlackbox + NEXTVM |
-| PLT/native function mediation | ByteHook |
-| Inline/native/linker mediation | ShadowHook |
-| Negative/dead-end lessons | VirtualSpace + Mirro |
+| Artifact, split, signing, and package analysis | Mirro + NEXTVM + bundletool + AppManager |
+| APK transformation, rebuild, and re-signing | Prison + APKEditor + LSPatch + ReVanced Patcher |
+| DEX and resource transformation | smali + Redex + ARSCLib + APKEditor |
+| Persona/profile and privacy-surface inventory | SpoofMyDevice + XPrivacyLua |
+| Native-hook research | ByteHook + ShadowHook + LSPlant + Pine |
+| Binder research | Binderceptor + NewBlackbox + NEXTVM + libgbinder |
+| Virtualization/runtime semantic references | NewBlackbox + NEXTVM + Renjana + MultiApp |
+| Negative and historical lessons | VirtualSpace + Mirro |
 
 **Reference influence does not establish security evidence.** No project is
 selected wholesale, and every future use requires a separate integration
@@ -93,11 +98,13 @@ decision.
 * **Useful ideas:** Persona/profile organization, deterministic stable values,
   device/build/locale/timezone/display/identifier modeling, per-app assignment,
   and persistence.
-* **PD limitations:** enforcement uses LSPosed/root or APK patching/re-signing;
-  neither is PD's production architecture. API hooking does not contain hostile
-  native execution.
-* **Disposition:** **SELECTIVE SOURCE REUSE CANDIDATE AFTER AUDIT**, especially
-  Persona modeling, not enforcement.
+* **PD limitations:** its root/LSPosed mechanisms remain prohibited for PD
+  production. Its APK patching/re-signing approach conceptually overlaps with
+  Phase II transformation, but similarity does not establish PD security evidence
+  and API hooking does not contain hostile native execution.
+* **Disposition:** **REFERENCE / SELECTIVE SOURCE REUSE CANDIDATE AFTER LICENSE,
+  PROVENANCE, SECURITY, DEPENDENCY, AND TCB REVIEW**, especially for Persona
+  modeling. PD has not adopted SpoofMyDevice's enforcement implementation.
 
 ## VirtualSpace
 
@@ -141,8 +148,11 @@ decision.
   mapping, stub Activities, and failure reporting.
 * **PD limitations:** non-root enforcement uses Pine/ART instrumentation, which
   does not solve direct native/syscall containment. Reviewed code includes
-  `FallbackNoIsolation`; Protected Mode must invert that design so mediation
-  failure prevents execution.
+  `FallbackNoIsolation`. An unsafe/no-isolation or silent genuine-host fallback
+  is incompatible with Phase II. Where mediation is claimed, a relevant path
+  must return its configured Real/Decoy/Empty/Deny result before genuine
+  disclosure. Otherwise it receives an honest Partially mediated, Unsupported,
+  or Unknown coverage result as appropriate.
 * **Disposition:** **REFERENCE / SELECTIVE NON-ENFORCEMENT SOURCE REUSE CANDIDATE
   AFTER AUDIT**. Pine is not automatically the PD boundary.
 

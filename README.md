@@ -83,13 +83,16 @@ a baseline. The debug APK is generated under `app/build/outputs/apk/debug/`
 and must not be committed. Debug builds use ordinary development signing;
 there is no production signing configuration.
 
-PR 5 pure gate tests run as part of `testDebugUnitTest`. The dedicated
+Historical Phase I PR 5 gate tests run as part of `testDebugUnitTest`. The dedicated
 `network-feasibility` CI job runs the API 35 network suite with fixed host servers,
 a separate dropping VPN, and independent emulator packet capture. Generated
 captures are filtered to fixed headers, never uploaded, and deleted after analysis. The separate fixture can
 be generated with `./gradlew :test-apps:external-vpn-fixture:assembleDebug`; its
 APK is generated output and must not be committed or treated as a built-in VPN.
 See [PR 5 evidence](docs/evidence/pr5-network-feasibility.md).
+These harness semantics and results remain historical evidence, not active Phase
+II production gates. Forward work follows the [Phase II
+roadmap](docs/phase-ii-roadmap.md).
 
 ## Foundation defaults and limits
 
@@ -106,14 +109,14 @@ disabled; the current minimum SDK does not support Android 11 or earlier.
 These settings are conservative defaults, not proof of behavior on every device.
 Android documents that `allowBackup=false` alone can leave device transfer
 enabled on some manufacturers' devices. OEM/platform backup and transfer behavior,
-including newer transfer modes, requires later validation under the canonical
-roadmap before sensitive state or protection claims are introduced. No
+including newer transfer modes, requires later validation under the Phase II
+roadmap before sensitive state or privacy claims are introduced. No
 cross-platform transfer counterpart is configured for this Android-only app.
 
 See [Android backup semantics](https://developer.android.com/identity/data/autobackup),
 [AGP compatibility](https://developer.android.com/build/releases/agp-9-4-0-release-notes),
 [development guidance](.github/CONTRIBUTING.md), and the comprehensive
-[requirements register](docs/requirements.md), [threat model](docs/threat-model.md),
+[historical requirements register](docs/requirements.md), [Phase II threat model](docs/phase-ii-threat-model.md),
 [engine assessment](docs/engine-assessment.md), [platform investigation
-matrix](docs/platform-support.md), and [prototype-direction
-ADR](docs/decisions/ADR-0001-engine-prototype-direction.md).
+matrix](docs/platform-support.md), and [Phase II architecture
+ADR](docs/decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md).
