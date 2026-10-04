@@ -1,5 +1,13 @@
 # Roadmap reconciliation
 
+> **Phase II notice (2026-10-04):** This document reconciles historical Phase I
+> sequencing and remains evidence of that epoch. It does not authorize resuming
+> old canonical Roadmap PR 6. The active forward plan is the
+> [Phase II roadmap](phase-ii-roadmap.md), selected by
+> [ADR-0010](decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md).
+> Phase I remains **C. NO CREDIBLE BOUNDARY**, AG-1 remains failed, and no old
+> Unknown or failed gate is converted to success.
+
 **Status:** AG-1 failed; canonical Roadmap PR 5 owner decision REDESIGN; bounded enforcement-boundary research authorized; production paused
 
 **Recorded:** 2026-09-22

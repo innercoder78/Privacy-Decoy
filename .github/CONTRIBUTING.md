@@ -1,27 +1,36 @@
 # Development guidance
 
-Keep pull requests cohesive, small enough to review, and limited to their roadmap
-scope. PR 1 established the Android foundation; PR 2 established the clean-root
-layout; PR 3 records requirements and research but implements no protection.
+Phase II is the active epoch. Read [ADR-0010](../docs/decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md),
+the [product contract](../docs/phase-ii-requirements.md), [threat
+model](../docs/phase-ii-threat-model.md), and [acceptance
+criteria](../docs/phase-ii-acceptance-criteria.md) before forward work.
 
-- Never commit credentials, tokens, signing keys, keystores, passwords, or other
-  secrets. Keep local SDK configuration and environment files untracked.
-- Never commit generated APKs, AABs, build outputs, caches, or IDE state. The standard
-  binary `android/gradle/wrapper/gradle-wrapper.jar` is intentionally committed.
-- Prefer platform APIs. Justify every additional dependency and permission.
-- Avoid unrelated formatting, cleanup, and refactors. Do not modify synced
-  `sources/` material as part of unrelated development.
-- Privacy and security behavior requires reproducible evidence and traceability
-  to stable requirements. Intended behavior alone does not justify a claim.
-- Run the README build, lint, and unit-test commands. Add focused tests with
-  relevant behavior changes; do not manufacture production abstractions for tests.
-  Do not hide lint errors in a baseline.
-- Maintain stable IDs in the [requirements register](../docs/requirements.md) and
-  trace changes to the [threat model](../docs/threat-model.md), tests, and evidence.
-  The [engine assessment](../docs/engine-assessment.md), [platform
-  matrix](../docs/platform-support.md), and [ADR](../docs/decisions/ADR-0001-engine-prototype-direction.md)
-  define the research handoff. PR 4 and PR 5 produce containment and networking
-  evidence; PR 6 is the mandatory feasibility STOP decision.
+Phase I ended **C. NO CREDIBLE BOUNDARY** under its former contract and AG-1
+remains failed. Preserve historical failures, Unknowns, ADRs, and evidence. Do not
+resume old canonical Roadmap PR 6 or reinterpret a passing observational test as
+privacy evidence.
+
+Transformation and re-signing are now the selected Phase II direction, while
+ordinary production remains root-free on stock supported Android. This does not
+prove the architecture and does not authorize runtime work outside the active
+[Phase II roadmap](../docs/phase-ii-roadmap.md).
+
+* Privacy Decoy must never declare, implement, use, or depend on Android
+  `VpnService`, occupy the active VPN slot, or implement local-VPN interception.
+* Keep compatibility separate from coverage. Unknown never means success, launch
+  success never proves mediation, and no privacy claim may exceed scoped evidence.
+* Never silently expose genuine host data for compatibility. Real is explicit,
+  scoped, visible, revocable controlled disclosure.
+* Never commit credentials, tokens, signing keys, keystores, passwords, private
+  user data, production fixtures, or raw sensitive values.
+* Never commit generated APKs, AABs, native libraries, build outputs, caches, or
+  IDE state. The standard Gradle wrapper JAR is intentionally committed.
+* Add no dependency without exact source, license, provenance, binary, security,
+  and TCB review. A catalog reference is not approval.
+* Keep changes cohesive and trace them to stable requirements, threats, acceptance
+  evidence, and roadmap gates. Do not weaken tests or hide lint errors.
+* Preserve original source-app `targetSdkVersion` by default. Any retargeting is
+  structural and needs specific compatibility rationale and evidence.
 
 ## Repository layout
 

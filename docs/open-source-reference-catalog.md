@@ -1,5 +1,11 @@
 # Open-source architecture and implementation reference catalog
 
+> **Phase II status:** Every entry is an architecture or research reference only.
+> This catalog adopts no dependency and is not security evidence. Virtualization
+> projects are not the selected engine. Opaque security-critical binaries cannot
+> enter the Privacy Decoy TCB. The catalog is not exhaustive proof that no other
+> approach exists.
+
 **Forward status — 2026-09-29:** [ADR-0008](decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md)
 keeps this catalog active as a selective design/source reference for the
 [post-AG-1 enforcement-boundary redesign](post-ag1-enforcement-boundary-redesign.md).
@@ -169,6 +175,38 @@ decision.
   sandbox; raw syscalls can bypass libc/PLT paths.
 * **Disposition:** **DEPENDENCY CANDIDATE AFTER SUPPLY-CHAIN/SECURITY REVIEW**.
   This PR adds no dependency.
+
+## Additional Phase II transformation and instrumentation references
+
+The following pins are research leads. Abbreviated revisions are recorded exactly
+as supplied and require full-SHA verification before source review or reuse. No
+abbreviation is expanded by guesswork.
+
+| Project | Revision | Phase II relevance and limits |
+|---|---|---|
+| Prison3/Prison | `7cac8fcd...` | Transformation reference. Committed or prebuilt artifacts require source and provenance review. |
+| REAndroid/APKEditor | `70d2c4ba...` | APK/resource editing reference. It includes prebuilt JAR dependencies that require provenance review. |
+| REAndroid/ARSCLib | `8748668...` | Separately available source may be preferable for resource-table study. Full provenance and license review still apply. |
+| ReVanced Patcher | `c6cc64dd...` | Deterministic patching and transformation reference, not an adopted runtime. |
+| google/smali | `1a36aa...` | DEX assembly/disassembly reference. |
+| facebook/redex | `99220023...` | DEX transformation and optimization reference. |
+| google/bundletool | `586a43a...` | Split and app-bundle artifact reference; it does not grant access to unavailable private assets. |
+| JingMatrix/LSPatch | `0dc50f...` | Rootless APK patch and injected-runtime feasibility reference. License, TCB, and Xposed-style design prevent automatic adoption. |
+| LSPosed/LSPlant | `1dc6ef...` | ART instrumentation reference only; production root/Xposed dependence remains prohibited. |
+| canyie/pine | `216d910...` | ART instrumentation reference only, not a containment boundary. |
+| MuntashirAkon/AppManager | `cd9e9a...` | APK inspection, signing, install, and package-management reference. |
+| WaxMoon/MultiApp | `90bd646...` | Clone/package-management reference, not privacy evidence. |
+| mer-hybris/libgbinder | `fd67150...` | Binder protocol and native client reference; not a selected broker or boundary. |
+
+The full pins already reviewed elsewhere in this catalog remain authoritative for NewBlackbox
+`89b598...`, Binderceptor `7e09a...`, XPrivacyLua `85a1e498...`, SpoofMyDevice
+`ca78ffa...`, NEXTVM `f581a664...`, renjana `14302a...`, Mirro
+`74e6a...`, ByteHook `a8bd254...`, and ShadowHook `593f491...`.
+ByteHook and ShadowHook are selective native-hook candidates, never kernel
+sandboxes. Direct syscalls and other paths require separate evidence.
+
+App Cloner is a commercial public-information product reference only. No
+proprietary code, private implementation, or undocumented knowledge may be used.
 
 ## ShadowHook
 
