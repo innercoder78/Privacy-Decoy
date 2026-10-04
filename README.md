@@ -1,66 +1,47 @@
 # Privacy Decoy
 
-Privacy Decoy is a planned **Android-only, root-free privacy container/mediation
-project**. The intended product would mediate applications' access to sensitive
-device information. The canonical Roadmap PR 5 owner decision is **REDESIGN**;
-technical feasibility remains unproven. Privacy takes precedence over compatibility.
+Privacy Decoy is a planned Android-only, root-free privacy-mediation project.
+**Phase II is the active architecture epoch.** It selects transformation-first
+hybrid mediation for stock, non-rooted Android 17/API 37, but no Phase II runtime
+has been implemented or proven secure.
 
-## Current status
+## Current status and governing documents
 
-Privacy Decoy has **no proven production privacy boundary** and no production
-protected-app execution. The ADR-0006 architecture synthesis recommended **STOP
-UNDER CURRENT GOALS** for unrestricted arbitrary hostile-app execution under the
-families it evaluated. That recommendation remains valid historical evidence.
+Phase I ended **C. NO CREDIBLE BOUNDARY** under its former fail-closed Protected
+contract. AG-1 remains failed, candidate outcomes remain as recorded, and Unknown
+has not become success. Historical ADRs, requirements, tests, and evidence remain
+immutable evidence. The old canonical production Roadmap PR 6 is not resumed.
 
-After a ten-project source/reference review identified a narrower admission-gated
-hypothesis, the project owner explicitly chose **CONTINUE** on 2026-09-22 through
-[ADR-0007](docs/decisions/ADR-0007-admission-gated-controlled-runtime.md). The
-authorized investigation concerned a PD-owned admission engine and controlled runtime with
-fail-closed Protected Mode plus a separately labeled Experimental & Unproven
-Compatibility Mode. Read the [technical architecture handoff](docs/architecture-admission-gated-runtime.md)
-and [open-source reference catalog](docs/open-source-reference-catalog.md) before
-architecture or reuse work. No third-party engine is selected wholesale.
+[ADR-0010](docs/decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md)
+and the [Phase II requirements](docs/phase-ii-requirements.md) govern forward
+work. The selected direction collects legitimately available installed base and
+split APKs, analyzes them, deterministically rewrites package structure and known
+mediation call sites, injects a generic Persona runtime, rebuilds, signs with a
+stable per-clone identity, and installs a genuinely separate package/UID with
+fresh private state. Transformation and re-signing are authorized architecture,
+not evidence that mediation works.
 
-**AG-1 CHECKPOINT: FAILED UNDER CURRENT HYPOTHESIS.** AG-1A's bounded admission
-analysis and AG-1B's controlled pre-code bootstrap remain positive evidence.
-AG-1C demonstrated that previously unadmitted DEX executed through the tested
-direct `InMemoryDexClassLoader` path without the trusted authorization helper.
-The [AG-1 closeout](docs/evidence/ag1-feasibility-closeout.md) evaluates all nine
-checkpoint questions; successful observation CI is not a security pass.
+Persona remains central with **Real, Decoy, Empty, and Deny** modes. Real means
+explicit controlled disclosure, never silent host passthrough. A permission
+firewall should remove unnecessary direct genuine-data authority. Java, native,
+SDK, WebView, Binder, reflection, and dynamic-code paths require separately
+scoped evidence. ByteHook or ShadowHook-style interception is not a kernel
+sandbox. Compatibility and privacy coverage are separate, Unknown is never
+success, and no claim may exceed tested coverage.
 
-The [canonical Roadmap PR 5 decision package](docs/evidence/canonical-pr5-feasibility-decision.md)
-preserves the evidence recommendation **STOP UNDER CURRENT GOALS / CURRENT
-ADMISSION-GATED RUNTIME HYPOTHESIS**. On 2026-09-29 Tony selected **REDESIGN** in
-[ADR-0008](docs/decisions/ADR-0008-post-ag1-enforcement-boundary-redesign.md),
-resolving the owner response without converting AG-1 into PASS. ADR-0007 will not
-proceed unchanged. The authorized next phase is bounded
-[post-AG-1 enforcement-boundary redesign](docs/post-ag1-enforcement-boundary-redesign.md)
-research using accumulated evidence and the ten-project catalog. No new
-architecture is selected. PD-REQ-001..095 remain unchanged; production
-implementation is paused and canonical PR 6 remains unstarted and unauthorized.
-No new runtime prototype is authorized. Ordinary private user data and real
-accounts remain prohibited.
+**Privacy Decoy never uses Android `VpnService`, never occupies the active VPN
+slot, and never implements local-VPN interception.** Users remain free to run an
+independent external VPN. Network geography is External. The initial architecture
+performs no automatic public-IP lookup and does not use genuine GPS to compare a
+Persona with network location.
 
-Historical evidence is preserved: S1 is **FALSIFIED**, its follow-up is
-**BLOCKED**, Blacks-BlackBox is **STOPPED_UNRESOLVED**, and the exact reviewed
-VirtualSpace pin is **DISQUALIFIED — exact pinned candidate**. The ADR-0006 STOP
-synthesis is not retroactively rewritten. The restored [canonical 46-PR
-roadmap](docs/canonical-roadmap-1.0.md) retains mandatory STOP gates at PR 5 and
-PR 20. Requirements [PD-REQ-001 through PD-REQ-095](docs/requirements.md) govern
-future work.
-
-Privacy Decoy remains Android-only, root-free and non-privileged: no production
-Magisk/Xposed/LSPosed, custom ROM, production ADB, guest root, routine APK
-rewriting/re-signing, or built-in PD `VpnService`. An external VPN remains the
-policy model. Arbitrary hostile native containment is unresolved; ByteHook or
-ShadowHook-style function interception is not a kernel sandbox. Compatibility,
-static scan success, and Experimental execution are not Protected evidence.
-
-The existing repository contains foundation and controlled research harnesses,
-not a privacy product. The PR 4 containment and PR 5 networking fixtures remain
-research-only; the separate external-VPN fixture never forwards traffic and is
-not part of Privacy Decoy. Version `0.1.0-dev` is a development identifier, not a
-public or production release.
+The repository still contains a foundation and historical research harnesses,
+not a working privacy product. It does not advertise APK transformation,
+mediation, fresh cloning, or Persona protection as implemented. See the [Phase II
+threat model](docs/phase-ii-threat-model.md), [acceptance
+criteria](docs/phase-ii-acceptance-criteria.md), [roadmap](docs/phase-ii-roadmap.md),
+[historical migration register](docs/phase-ii-requirements-migration.md), and
+[repository triage plan](docs/phase-ii-repository-triage.md).
 
 ## Build and validate
 
@@ -102,13 +83,16 @@ a baseline. The debug APK is generated under `app/build/outputs/apk/debug/`
 and must not be committed. Debug builds use ordinary development signing;
 there is no production signing configuration.
 
-PR 5 pure gate tests run as part of `testDebugUnitTest`. The dedicated
+Historical Phase I PR 5 gate tests run as part of `testDebugUnitTest`. The dedicated
 `network-feasibility` CI job runs the API 35 network suite with fixed host servers,
 a separate dropping VPN, and independent emulator packet capture. Generated
 captures are filtered to fixed headers, never uploaded, and deleted after analysis. The separate fixture can
 be generated with `./gradlew :test-apps:external-vpn-fixture:assembleDebug`; its
 APK is generated output and must not be committed or treated as a built-in VPN.
 See [PR 5 evidence](docs/evidence/pr5-network-feasibility.md).
+These harness semantics and results remain historical evidence, not active Phase
+II production gates. Forward work follows the [Phase II
+roadmap](docs/phase-ii-roadmap.md).
 
 ## Foundation defaults and limits
 
@@ -125,14 +109,14 @@ disabled; the current minimum SDK does not support Android 11 or earlier.
 These settings are conservative defaults, not proof of behavior on every device.
 Android documents that `allowBackup=false` alone can leave device transfer
 enabled on some manufacturers' devices. OEM/platform backup and transfer behavior,
-including newer transfer modes, requires later validation under the canonical
-roadmap before sensitive state or protection claims are introduced. No
+including newer transfer modes, requires later validation under the Phase II
+roadmap before sensitive state or privacy claims are introduced. No
 cross-platform transfer counterpart is configured for this Android-only app.
 
 See [Android backup semantics](https://developer.android.com/identity/data/autobackup),
 [AGP compatibility](https://developer.android.com/build/releases/agp-9-4-0-release-notes),
 [development guidance](.github/CONTRIBUTING.md), and the comprehensive
-[requirements register](docs/requirements.md), [threat model](docs/threat-model.md),
+[historical requirements register](docs/requirements.md), [Phase II threat model](docs/phase-ii-threat-model.md),
 [engine assessment](docs/engine-assessment.md), [platform investigation
-matrix](docs/platform-support.md), and [prototype-direction
-ADR](docs/decisions/ADR-0001-engine-prototype-direction.md).
+matrix](docs/platform-support.md), and [Phase II architecture
+ADR](docs/decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md).
