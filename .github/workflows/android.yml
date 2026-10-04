@@ -1,32 +1,21 @@
-name: Android foundation
-
+name: Android Phase II foundation
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-
 permissions:
   contents: read
-
 jobs:
   changes:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       baseline: ${{ steps.classify.outputs.baseline }}
-      containment: ${{ steps.classify.outputs.containment }}
-      network: ${{ steps.classify.outputs.network }}
-      managed: ${{ steps.classify.outputs.managed }}
-      admission: ${{ steps.classify.outputs.admission }}
-      ag1runtime: ${{ steps.classify.outputs.ag1runtime }}
-      ag1dynamic: ${{ steps.classify.outputs.ag1dynamic }}
+      analyzer: ${{ steps.classify.outputs.analyzer }}
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
+        with: {fetch-depth: 0, persist-credentials: false}
       - name: Classify changed paths
         id: classify
         env:
@@ -35,298 +24,62 @@ jobs:
           EVENT_BEFORE_SHA: ${{ github.event.before }}
           TESTED_SHA: ${{ github.sha }}
         run: |
-          # Fail safe: retain these broad defaults unless detection and
-          # classification both complete successfully.
-          printf '%s\n' \
-            'baseline=true' \
-            'containment=true' \
-            'network=true' \
-            'managed=true' \
-            'admission=true' \
-            'ag1runtime=true' \
-            'ag1dynamic=true' >> "$GITHUB_OUTPUT"
-
-          case "$EVENT_NAME" in
-            pull_request) base_sha=$PR_BASE_SHA ;;
-            push) base_sha=$EVENT_BEFORE_SHA ;;
-            *)
-              echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (unexpected event)'
-              exit 0
-              ;;
-          esac
-
-          sha_pattern='^[0-9a-f]{40}$'
-          if ! [[ "$base_sha" =~ $sha_pattern && "$TESTED_SHA" =~ $sha_pattern ]] ||
-             [[ "$base_sha" == 0000000000000000000000000000000000000000 ]]; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (unresolved comparison)'
-            exit 0
-          fi
-
-          changed_files=$(mktemp)
-          if ! git diff --name-only --diff-filter=ACDMRTUXB "$base_sha" "$TESTED_SHA" > "$changed_files"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (diff failed)'
-            exit 0
-          fi
-
-          cat "$changed_files"
-          classification=$(mktemp)
-          if ! .github/scripts/classify-ci-changes.sh < "$changed_files" > "$classification"; then
-            echo 'CI_CHANGESET baseline=true containment=true network=true managed=true admission=true ag1runtime=true ag1dynamic=true (classification failed)'
-            exit 0
-          fi
-          tee -a "$GITHUB_OUTPUT" < "$classification"
-
-  validate:
+          printf 'baseline=true\nanalyzer=true\n' >> "$GITHUB_OUTPUT"
+          case "$EVENT_NAME" in pull_request) base=$PR_BASE_SHA;; push) base=$EVENT_BEFORE_SHA;; *) exit 0;; esac
+          [[ "$base" =~ ^[0-9a-f]{40}$ && "$TESTED_SHA" =~ ^[0-9a-f]{40}$ && "$base" != 0000000000000000000000000000000000000000 ]] || exit 0
+          paths=$(mktemp); git diff --name-only --diff-filter=ACDMRTUXB "$base" "$TESTED_SHA" > "$paths" || exit 0
+          result=$(mktemp); .github/scripts/classify-ci-changes.sh < "$paths" > "$result" || exit 0
+          cat "$result" >> "$GITHUB_OUTPUT"
+  baseline:
     needs: changes
     if: needs.changes.outputs.baseline == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Test dynamic-code evidence parser
-        run: python3 android/tools/test-ag1-dynamic-evidence.py
-      - name: Test independent capture analyzer
-        run: python3 android/tools/test-network-evidence.py
-      - name: Test managed-profile evidence classifier
-        run: python3 android/tools/test-managed-profile-evidence.py
-      - name: Verify wrapper JAR
-        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with: {distribution: temurin, java-version: '17'}
+      - name: Verify wrapper and executable modes
         working-directory: android
-      - name: Install Android SDK packages
+        run: |
+          echo '497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar' | sha256sum --check
+          test "$(stat -c '%a' gradlew)" = 755
+          test "$(stat -c '%a' ../.github/scripts/classify-ci-changes.sh)" = 755
+      - name: Install retained-module toolchain
         run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"'
-      - name: Lint, unit-test task, and debug build
+      - name: Test retained independent packet analyzer
+        run: python3 android/tools/test-network-evidence.py
+      - name: Lint, test, and build active modules
+        working-directory: android
         run: >-
           ./gradlew --no-daemon
-          :app:lintDebug
-          :app:testDebugUnitTest
-          :app:assembleDebug
-          :app:assembleDebugAndroidTest
-          :test-apps:ag1-precode-fixture:lintDebug
-          :test-apps:ag1-precode-fixture:testDebugUnitTest
-          :test-apps:ag1-precode-fixture:assembleDebug
-          :test-apps:ag1-precode-fixture:lintDynamic
-          :test-apps:ag1-precode-fixture:assembleDynamic
-          :test-apps:ag1-secondary-dex-fixture:lintDebug
-          :test-apps:ag1-secondary-dex-fixture:testDebugUnitTest
-          :test-apps:ag1-secondary-dex-fixture:assembleDebug
-          :probe-app:lintDebug
-          :probe-app:testDebugUnitTest
-          :probe-app:assembleDebug
-          :research-native:lintDebug
-          :research-native:testDebugUnitTest
-          :research-native:assembleDebug
-          :test-apps:external-vpn-fixture:lintDebug
-          :test-apps:external-vpn-fixture:testDebugUnitTest
-          :test-apps:external-vpn-fixture:assembleDebug
-          :test-apps:managed-profile-controller:lintDebug
-          :test-apps:managed-profile-controller:testDebugUnitTest
-          :test-apps:managed-profile-controller:assembleDebug
-          :test-apps:managed-profile-probe:lintTenantADebug
-          :test-apps:managed-profile-probe:assembleTenantADebug
-          :test-apps:managed-profile-probe:lintTenantBDebug
-          :test-apps:managed-profile-probe:assembleTenantBDebug
-          :test-apps:managed-profile-probe:testTenantADebugUnitTest
-          :test-apps:managed-profile-probe:testTenantBDebugUnitTest
-        working-directory: android
-      - name: Verify release manifest remains network-free
+          :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+          :probe-app:lintDebug :probe-app:testDebugUnitTest :probe-app:assembleDebug
+          :research-native:lintDebug :research-native:testDebugUnitTest :research-native:assembleDebug
+          :test-apps:external-vpn-fixture:lintDebug :test-apps:external-vpn-fixture:testDebugUnitTest :test-apps:external-vpn-fixture:assembleDebug
+          :test-apps:java-surface-fixture:lintDebug :test-apps:java-surface-fixture:testDebugUnitTest :test-apps:java-surface-fixture:assembleDebug
+          :test-apps:dynamic-code-surface-fixture:lintDebug :test-apps:dynamic-code-surface-fixture:testDebugUnitTest :test-apps:dynamic-code-surface-fixture:assembleDebug
+          :test-apps:early-init-loader-fixture:lintDebug :test-apps:early-init-loader-fixture:testDebugUnitTest :test-apps:early-init-loader-fixture:assembleDebug
+          :test-apps:early-init-loader-fixture:lintDynamic :test-apps:early-init-loader-fixture:assembleDynamic
+          :test-apps:secondary-dex-fixture:lintDebug :test-apps:secondary-dex-fixture:testDebugUnitTest :test-apps:secondary-dex-fixture:assembleDebug
+      - name: Verify release manifest properties
         working-directory: android
         run: |
           ./gradlew --no-daemon :app:processReleaseMainManifest
-          manifest=app/build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml
-          python3 tools/verify-release-manifest.py "$manifest"
-          test "$(stat -c '%a' gradlew)" = 755
-          echo 'Release manifest has no networking research capability'
-
-  containment-prototype:
+          python3 tools/verify-release-manifest.py app/build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml
+          ! find . -type f \( -name '*.jks' -o -name '*.keystore' -o -name '*.p12' \) -print -quit | grep -q .
+  artifact-analyzer:
     needs: changes
-    if: needs.changes.outputs.containment == 'true'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Verify wrapper JAR
-        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
-        working-directory: android
-      - name: Install pinned toolchain and API 35 x86_64 emulator
-        run: >-
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
-          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
-      - name: Free space for the disposable Android userdata image
-        # Hosted runners include a large unused .NET SDK. Android tests need its disk space.
-        run: sudo rm -rf -- /usr/share/dotnet
-      - name: Enable KVM for the runner
-        run: sudo chmod a+rw /dev/kvm
-      - name: Run controlled containment instrumentation
-        working-directory: android
-        run: bash tools/run-containment-emulator.sh
-
-  admission-feasibility:
-    needs: changes
-    if: needs.changes.outputs.admission == 'true'
+    if: needs.changes.outputs.analyzer == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Verify wrapper JAR
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with: {distribution: temurin, java-version: '17'}
+      - run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"'
+      - run: python3 android/tools/test-artifact-analyzer.py
+      - run: bash tools/run-artifact-fixtures.sh
         working-directory: android
-        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
-      - name: Install static fixture toolchain
-        run: >-
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          "platforms;android-37.0" "build-tools;36.0.0"
-          "ndk;27.2.12479018" "cmake;3.22.1"
-      - name: Test admission analyzer model
-        run: python3 android/tools/test-ag1-admission-analyzer.py
-      - name: Build and statically inspect controlled fixtures
-        working-directory: android
-        run: bash tools/run-ag1-admission-fixtures.sh
-
-  network-feasibility:
-    needs: changes
-    if: needs.changes.outputs.network == 'true'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Verify wrapper JAR
-        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
-        working-directory: android
-      - name: Install pinned toolchain and API 35 x86_64 emulator
-        run: >-
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
-          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
-      - name: Free space for the disposable Android userdata image
-        # Hosted runners include a large unused .NET SDK. Android tests need its disk space.
-        run: sudo rm -rf -- /usr/share/dotnet
-      - name: Enable KVM for the runner
-        run: sudo chmod a+rw /dev/kvm
-      - name: Run independent network feasibility experiment
-        working-directory: android
-        run: bash tools/run-network-feasibility-emulator.sh
-
-  managed-profile-feasibility:
-    needs: changes
-    if: needs.changes.outputs.managed == 'true'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Verify wrapper JAR
-        working-directory: android
-        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
-      - name: Install pinned toolchain and API 35 emulator
-        run: >-
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
-          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
-      - name: Free space and enable KVM
-        run: sudo rm -rf -- /usr/share/dotnet && sudo chmod a+rw /dev/kvm
-      - name: Run managed-profile falsification experiment
-        working-directory: android
-        run: bash tools/run-managed-profile-feasibility-emulator.sh
-
-  admission-runtime-feasibility:
-    needs: changes
-    if: needs.changes.outputs.ag1runtime == 'true'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Verify wrapper JAR
-        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
-        working-directory: android
-      - name: Install pinned toolchain and API 35 x86_64 emulator
-        run: >-
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
-          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
-      - name: Free space for the disposable Android userdata image
-        # Hosted runners include a large unused .NET SDK. Android tests need its disk space.
-        run: sudo rm -rf -- /usr/share/dotnet
-      - name: Enable KVM for the runner
-        run: sudo chmod a+rw /dev/kvm
-      - name: Run admission-bound pre-code bootstrap experiment
-        working-directory: android
-        run: bash tools/run-ag1-precode-emulator.sh
-
-  admission-dynamic-code-feasibility:
-    needs: changes
-    if: needs.changes.outputs.ag1dynamic == 'true'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Verify wrapper JAR
-        run: echo "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7  gradle/wrapper/gradle-wrapper.jar" | sha256sum --check
-        working-directory: android
-      - name: Install pinned toolchain and API 35 x86_64 emulator
-        run: >-
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          "platforms;android-37.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
-          "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
-      - name: Free space for the disposable Android userdata image
-        # Hosted runners include a large unused .NET SDK. Android tests need its disk space.
-        run: sudo rm -rf -- /usr/share/dotnet
-      - name: Enable KVM for the runner
-        run: sudo chmod a+rw /dev/kvm
-      - name: Run controlled dynamic-code compatibility experiment
-        working-directory: android
-        run: bash tools/run-ag1-dynamic-code-emulator.sh
