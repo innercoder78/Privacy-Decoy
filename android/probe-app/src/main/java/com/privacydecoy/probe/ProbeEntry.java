@@ -3,7 +3,6 @@ package com.privacydecoy.probe;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Process;
 import android.provider.Settings;
 import java.io.FileInputStream;
@@ -21,16 +20,6 @@ public final class ProbeEntry {
 
     public static Bundle run(Context hostContext, Bundle input) throws Exception {
         Bundle result = new Bundle();
-        Parcel data = Parcel.obtain(), reply = Parcel.obtain();
-        try {
-            data.writeInterfaceToken("com.privacydecoy.research.v1");
-            Bundle claim = new Bundle(); claim.putString("session", input.getString("session"));
-            claim.putLong("epoch", input.getLong("epoch")); claim.putString("op", "entered");
-            data.writeBundle(claim);
-            if (!input.getBinder("broker").transact(3, data, reply, 0)) throw new SecurityException();
-            reply.readException();
-            if (!reply.readBundle(ProbeEntry.class.getClassLoader()).getBoolean("accepted")) throw new SecurityException();
-        } finally { data.recycle(); reply.recycle(); }
         result.putInt("pid", Process.myPid()); result.putInt("uid", Process.myUid());
         result.putBoolean("applicationCreated", applicationCreated);
         result.putBoolean("providerCreated", providerCreated);
@@ -80,7 +69,7 @@ public final class ProbeEntry {
         return result;
     }
     private static boolean resolves(ClassLoader loader) {
-        try { Class.forName("com.privacydecoy.research.ResearchSession", false, loader); return true; }
+        try { Class.forName("com.privacydecoy.app.MainActivity", false, loader); return true; }
         catch (ClassNotFoundException e) { return false; }
     }
     private static String read(String path) {
