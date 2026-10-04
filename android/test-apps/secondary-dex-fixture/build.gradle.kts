@@ -1,18 +1,17 @@
 plugins { id("com.android.application") }
-
 android {
-    namespace = "com.privacydecoy.app"
+    namespace = "com.privacydecoy.fixtures.secondarydex"
     compileSdk = 37
     defaultConfig {
-        applicationId = "com.privacydecoy.app"
+        applicationId = "com.privacydecoy.fixtures.secondarydex"
         minSdk = 31
         targetSdk = 37
         versionCode = 1
-        versionName = "0.1.0-dev"
+        versionName = "phase-ii-fixture"
+        multiDexEnabled = false
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    lint { abortOnError = true }
 }

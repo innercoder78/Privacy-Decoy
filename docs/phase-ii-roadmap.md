@@ -7,7 +7,7 @@ planning stages rather than GitHub pull-request numbers.
 | Stage | Deliverable | Gate |
 |---:|---|---|
 | 1 | Architecture and governance documents | This documentation PR only; no runtime authorization. |
-| 2 | Active-tree cleanup and CI reset | Preserve evidence; migrate useful fixtures before deleting obsolete implementation. |
+| 2 | Active-tree cleanup and CI reset (**complete**) | Preserve evidence; migrate useful fixtures before deleting obsolete implementation. Completion records maintenance only, not privacy mediation. |
 | 3 | Installed base/split acquisition on physical API 37 devices | **STOP:** if exact legitimate artifact inventory and unavailable-asset reporting cannot be established, stop or narrow supported acquisition. |
 | 4 | Deterministic package transformation, rebuild, stable re-signing, and fresh multi-split installation | **STOP:** require valid structural rewrites, separate UID/state, stable clone update identity, and no source-private-state copy. |
 | 5 | Authenticated read-only Persona channel and multiprocess policy generations | Stop if prepared code can mutate Manager policy or receive unsafe stale/unauthenticated policy. |
