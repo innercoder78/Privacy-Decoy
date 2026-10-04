@@ -41,3 +41,11 @@ No historical evidence document is a deletion candidate merely because the
 experiment failed. Later deletion proposals must identify retained fixtures,
 references, dependency consumers, replacement validation, and the exact commit
 where history remains accessible.
+
+## Stage 2 active-tree disposition (implemented)
+
+Stage 2 removed the active containment, network-gate, AG-1 runtime/admission, and managed-profile feasibility implementations and their emulator runners. Their evidence documents remain unchanged, and the deleted implementations remain available through Git history.
+
+The AG-1 fixture modules were migrated without their failed policy semantics: `ag1-java-fixture` became `java-surface-fixture`, `ag1-dynamic-fixture` became `dynamic-code-surface-fixture`, `ag1-precode-fixture` became `early-init-loader-fixture` (including the direct `InMemoryDexClassLoader` adversarial behavior), and `ag1-secondary-dex-fixture` became `secondary-dex-fixture`. `ag1-admission-analyzer.py` became the neutral `artifact-analyzer.py`; it reports inventory, hashes, structural consistency, and risk-presence indicators, never eligibility or safety from absence.
+
+`probe-app`, `research-native`, the standalone `external-vpn-fixture`, and the independent packet evidence utility were retained. The external fixture is not a Privacy Decoy module dependency and does not change the permanent prohibition on PD-owned `VpnService`. The app is now a minimal buildable foundation with no Phase II acquisition, transformation, signing, Persona, mediation, or native-hook implementation.
