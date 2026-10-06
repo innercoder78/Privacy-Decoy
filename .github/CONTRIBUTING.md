@@ -6,6 +6,10 @@ Privacy Decoy must never declare, implement, start, bind to, depend on, or other
 
 ## Active validation
 
+Under the explicit owner decision in [ADR-0011](../docs/decisions/ADR-0011-adopt-emulator-first-phase-ii-development.md), Android Studio's Android 17 / API 37 emulator is the normal development and research environment for roadmap Stages 3–15. Emulator/debug evidence may support forward research and implementation when the applicable stage gate is satisfied; it remains research evidence, and Unknown never becomes success. Stage-specific STOP conditions still apply. If a surface cannot be meaningfully evaluated in an emulator, record that limitation and any earlier physical evidence needed for its research gate.
+
+Physical validation before Stage 16 is encouraged when useful, but is not required merely to continue development. Mandatory Stage 16 physical qualification revalidates applicable claims on stock non-rooted Android 17 / API 37 ARM64 across multiple supported devices/OEMs with release-equivalent Manager and transformed builds and exact scoped evidence. It must pass for the supported scope before Stage 17 independent security/supply-chain review and Stage 18 production/release consideration. No production claim may come from emulator-only testing; physical failures or material differences invalidate affected evidence/coverage and require fixing, narrowing, honest Unknown/Unsupported classification, or REDESIGN/STOP.
+
 Use JDK 17 and run the wrapper from `android/`. The `Android Phase II foundation` workflow has path-aware `baseline` and `artifact-analyzer` jobs. The baseline validates the minimal app, reusable `probe-app` and `research-native` probes, neutral controlled fixtures, isolated external VPN fixture, wrapper checksum/modes, release manifest, and absence of signing material. Analyzer validation checks deterministic inventory/hashes, positive indicator detection, Unknown-on-absence semantics, and safe malformed-input failure.
 
 ```sh
