@@ -1,5 +1,10 @@
 # Open-source architecture and implementation reference catalog
 
+> **Active development suspended:** [ADR-0012](decisions/ADR-0012-suspend-active-development-and-establish-pdva-successor.md)
+> suspends Privacy Decoy implementation. The Phase II direction and reference
+> snapshots below are preserved for historical research, not authorization for
+> continued implementation. See [project status](project-status.md).
+
 > **Phase II forward status:**
 > [ADR-0010](decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md)
 > governs the forward architecture and selects transformation-first hybrid

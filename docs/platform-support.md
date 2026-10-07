@@ -1,6 +1,11 @@
 # Platform support
 
-## Active Phase II baseline
+> **Active development suspended:** The Phase II baseline below is preserved
+> under [ADR-0012](decisions/ADR-0012-suspend-active-development-and-establish-pdva-successor.md).
+> It establishes no production support claim; resumption requires an explicit
+> owner decision/ADR and fresh Android/platform verification. See [project status](project-status.md).
+
+## Retained Phase II baseline
 
 The initial host baseline is **Android 17, API level 37, on stock non-rooted
 physical devices**. Privacy Decoy itself may target API 37. This is a selected

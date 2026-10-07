@@ -1,10 +1,16 @@
 # Development guidance
 
-Phase II is active. Read [ADR-0010](../docs/decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md), the [requirements](../docs/phase-ii-requirements.md), [threat model](../docs/phase-ii-threat-model.md), [acceptance criteria](../docs/phase-ii-acceptance-criteria.md), and [roadmap](../docs/phase-ii-roadmap.md). Phase I ended **C. NO CREDIBLE BOUNDARY** and AG-1 remains failed; preserve all historical failures, Unknowns, ADRs, and evidence.
+## Project status
+
+**Active Privacy Decoy implementation is suspended** under the explicit owner decision in [ADR-0012](../docs/decisions/ADR-0012-suspend-active-development-and-establish-pdva-successor.md). See the canonical [project status](../docs/project-status.md). Unsolicited forward architectural implementation must not infer authorization from the old roadmap. Future implementation resumes only after an explicit owner decision/ADR and reassessment of Android/platform assumptions. Historical and security documentation fixes may still be valid; historical evidence must not be rewritten.
+
+[Privacy Decoy Virtual Android (PDVA)](https://github.com/innercoder78/privacy-decoy-virtual-android) is a separate repository and product lineage and must not be modified as part of work in this repository.
+
+The retained rules below describe the historical Phase II contract and research validation; forward implementation guidance is conditional on owner reactivation. Read [ADR-0010](../docs/decisions/ADR-0010-select-transformation-first-hybrid-privacy-mediation.md), the [requirements](../docs/phase-ii-requirements.md), [threat model](../docs/phase-ii-threat-model.md), [acceptance criteria](../docs/phase-ii-acceptance-criteria.md), and [roadmap](../docs/phase-ii-roadmap.md). Phase I ended **C. NO CREDIBLE BOUNDARY** and AG-1 remains failed; preserve all historical failures, Unknowns, ADRs, and evidence.
 
 Privacy Decoy must never declare, implement, start, bind to, depend on, or otherwise use `VpnService`. The external VPN fixture is a separate test application and must never become an `:app` dependency. Do not infer safety or mediation from successful execution or absent static indicators. Do not commit secrets, signing keys, private data, APK/AAB/SO output, caches, or IDE state. Add no dependency without provenance, license, binary, security, and TCB review.
 
-## Active validation
+## Retained research validation
 
 Under the explicit owner decision in [ADR-0011](../docs/decisions/ADR-0011-adopt-emulator-first-phase-ii-development.md), Android Studio's Android 17 / API 37 emulator is the normal development and research environment for roadmap Stages 3–15. Emulator/debug evidence may support forward research and implementation when the applicable stage gate is satisfied; it remains research evidence, and Unknown never becomes success. Stage-specific STOP conditions still apply. If a surface cannot be meaningfully evaluated in an emulator, record that limitation and any earlier physical evidence needed for its research gate.
 
