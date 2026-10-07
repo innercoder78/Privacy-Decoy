@@ -1,18 +1,31 @@
 # Phase II roadmap
 
-This is the active forward sequence. It does not renumber, amend, or resume the
-historical [46-PR roadmap](canonical-roadmap-1.0.md), and its item numbers are
-planning stages rather than GitHub pull-request numbers.
+> **Active Phase II work is suspended** under
+> [ADR-0012](decisions/ADR-0012-suspend-active-development-and-establish-pdva-successor.md).
+> Stage 2 is the last canonical completed implementation-maintenance stage;
+> Stage 3 and Stages 4–18 remain unfinished on canonical `main`. The roadmap is
+> preserved as the plan that existed when work was suspended and is not currently
+> an active execution queue. Future resumption requires explicit owner
+> reactivation by decision/ADR and reassessment of Android/platform assumptions.
+> See the canonical [project status](project-status.md).
 
-Under the explicit owner decision in
-[ADR-0011](decisions/ADR-0011-adopt-emulator-first-phase-ii-development.md),
-Stages 3–15 are primarily developed and evaluated using Android Studio's Android
-17 / API 37 emulator. Successful emulator/debug evidence may satisfy an
+This is the preserved Phase II forward sequence. It does not renumber, amend,
+or resume the historical [46-PR roadmap](canonical-roadmap-1.0.md), and its item
+numbers are planning stages rather than GitHub pull-request numbers.
+
+The retained development/evidence policy below records the explicit owner
+decision in [ADR-0011](decisions/ADR-0011-adopt-emulator-first-phase-ii-development.md).
+Stages 3–15 were planned to be primarily developed and evaluated using Android
+Studio's Android 17 / API 37 emulator. Successful emulator/debug evidence may satisfy an
 applicable research-stage gate and authorize forward research/implementation;
 results remain research/development evidence pending Stage 16 physical
 qualification. Physical/OEM-specific behavior remains unqualified and production
 coverage is not established. Stage-specific STOP conditions still apply, known
 failures require STOP or narrowing, and Unknown never becomes success.
+
+ADR-0011 remains preserved as the emulator-first amendment. Its research-stage
+permissions do not authorize continued implementation while ADR-0012's
+suspension is in effect; no unfinished gate is reclassified as success.
 
 Earlier physical validation is encouraged when useful or readily available, but
 is not required merely to continue development. If a stage specifically requires

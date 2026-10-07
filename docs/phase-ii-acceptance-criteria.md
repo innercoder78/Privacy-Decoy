@@ -1,5 +1,11 @@
 # Phase II acceptance criteria
 
+> **Active development suspended:** [ADR-0012](decisions/ADR-0012-suspend-active-development-and-establish-pdva-successor.md)
+> suspends Phase II implementation. These criteria and ADR-0011's evidence policy
+> are preserved for this historical product; they do not authorize continued
+> implementation during suspension. Future resumption requires an explicit owner
+> decision/ADR and reassessment. See [project status](project-status.md).
+
 These criteria govern forward claims. The [Phase I 1.0 criteria](acceptance-criteria-1.0.md)
 remain historical and did not pass under the old contract.
 

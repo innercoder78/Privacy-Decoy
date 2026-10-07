@@ -1,5 +1,10 @@
 # Phase II repository triage record
 
+> **Active development suspended:** This Stage 2 disposition is retained under
+> [ADR-0012](decisions/ADR-0012-suspend-active-development-and-establish-pdva-successor.md).
+> Deferred roadmap work below is not an active execution queue and requires
+> explicit owner reactivation and reassessment. See [project status](project-status.md).
+
 This document records the current active-tree disposition after Phase II Roadmap
 Stage 2. The original triage plan authorized no implementation change itself;
 Stage 2 subsequently performed the reviewed migration and deletion work. Git

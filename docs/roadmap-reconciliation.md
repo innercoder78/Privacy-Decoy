@@ -1,5 +1,11 @@
 # Roadmap reconciliation
 
+> **Current status (2026-10-06):** Active development is suspended under
+> [ADR-0012](decisions/ADR-0012-suspend-active-development-and-establish-pdva-successor.md).
+> The dated notices and reconciliation below retain their historical meaning;
+> the Phase II roadmap is now a preserved plan, not an active execution queue.
+> See [project status](project-status.md).
+
 > **Phase II notice (2026-10-04):** This document reconciles historical Phase I
 > sequencing and remains evidence of that epoch. It does not authorize resuming
 > old canonical Roadmap PR 6. The active forward plan is the
